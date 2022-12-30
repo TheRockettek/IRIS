@@ -1,4 +1,4 @@
 local irisAPI = require("irisAPI")
-local iris = irisAPI.NewIRIS()
+local iris    = irisAPI.NewIRIS()
 
 iris.init()

@@ -1,4 +1,3 @@
-local logging = require("libs.logging")
 local json    = require("libs.json")
 local errors  = require("core.errors")
 

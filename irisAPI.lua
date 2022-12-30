@@ -1,8 +1,9 @@
-local errors = require "core.errors"
-local json   = require "libs.json"
-local logging= require "libs.logging"
+local errors        = require "core.errors"
+local json          = require "libs.json"
+local logging       = require "libs.logging"
 local serialization = require "core.serialization"
-local peripherals   = require "core.peripherals"
+local scanner       = require "core.scanner"
+
 local VERSION = "0.0.1"
 
 local configurationPath = "iris.config"
@@ -120,11 +121,13 @@ local function NewIRIS()
     end
 
     iris.saveData = function()
+        if not iris.isDataDirty then return false, nil end
+
         local path = iris.configuration.irisFileLocation
 
         local irisDataSerialized, err = serialization.Encode(iris.irisData)
         if err ~= nil then
-            return err
+            return false, err
         end
 
         local file = fs.open(path, "wb")
@@ -133,7 +136,7 @@ local function NewIRIS()
 
         iris.isDataDirty = false
 
-        return true
+        return true, nil
     end
 
     iris.fullScan = function()
@@ -144,14 +147,21 @@ local function NewIRIS()
             return false
         end
 
-        local chests = peripherals.FindAllChests()
+        local chests = scanner.ScanAllChests()
 
         iris.irisData.chests = chests
         iris.irisData.iris.lastScannedAt = os.epoch("utc")
 
         iris.isDataDirty = true
 
-        iris.saveData()
+        local saved, err = iris.saveData()
+        if err ~= nil then
+            logging.Logger.Warn().Err(err).Msg("failed to save IRIS data")
+        end
+
+        if saved then
+            logging.Logger.Info().Msg("IRIS data saved successfuly")
+        end
 
         return true
     end
