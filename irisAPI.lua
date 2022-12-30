@@ -87,7 +87,7 @@ local function NewIRIS()
 
         local configuration = defaultConfiguration
 
-        for key, value in ipairs(jsonDecode) do
+        for key, value in pairs(jsonDecode) do
             configuration[key] = value
         end
 
@@ -188,7 +188,7 @@ local function NewIRIS()
 
         local locations = {}
 
-        for chestName, chestData in ipairs(iris.irisData.chests) do
+        for chestName, chestData in pairs(iris.irisData.chests) do
             for slotId, item in pairs(chestData) do
                 if item.name == name then
                     table.insert(locations, {
@@ -263,7 +263,7 @@ local function NewIRIS()
             candidates = {},
         }
 
-        for chestName, chestData in ipairs(iris.irisData.chests) do
+        for chestName, chestData in pairs(iris.irisData.chests) do
             if chestData.total > #chestData.items then
                 for slotId = 1, chestData.total, 1 do
                     if chestData.items[tostring(slotId)] == nil and maxSpacesNeeded > 0 then
@@ -298,7 +298,7 @@ local function NewIRIS()
 
         local items = {}
 
-        for chestName, chestData in ipairs(iris.irisData.chests) do
+        for chestName, chestData in pairs(iris.irisData.chests) do
             for slotId, item in pairs(chestData) do
                 if items[item.name] == nil then
                     items[item.name] = {}

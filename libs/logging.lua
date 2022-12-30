@@ -24,7 +24,7 @@ local levels = {
 local defaultTimeStamp = "!%b %e %H:%M:%S"
 
 local function tableContains(table, key)
-    for i, _ in ipairs(table) do
+    for i, _ in pairs(table) do
         if i == key then
             return true
         end
@@ -96,7 +96,7 @@ local function NewLogger(timeFormat, fileName)
             end
 
             -- Display variables
-            for _, variable in ipairs(loggerMessage.variables) do
+            for _, variable in pairs(loggerMessage.variables) do
                 if willWrap(variable.name .. "=" .. variable.value) then
                     print("")
                 end
