@@ -189,7 +189,7 @@ local function NewIRIS()
         local locations = {}
 
         for chestName, chestData in pairs(iris.irisData.chests) do
-            for slotId, item in pairs(chestData) do
+            for slotId, item in pairs(chestData.items) do
                 if item.name == name then
                     table.insert(locations, {
                         peripheral = chestName,
@@ -284,7 +284,7 @@ local function NewIRIS()
         end
 
         -- If we have a number greater than 0, we do not have enough spaces available.
-        output.hasSpace = false
+        output.hasSpace = maxSpacesNeeded > 0
         output.spacesMissing = maxSpacesNeeded
 
         return output
@@ -299,7 +299,7 @@ local function NewIRIS()
         local items = {}
 
         for chestName, chestData in pairs(iris.irisData.chests) do
-            for slotId, item in pairs(chestData) do
+            for slotId, item in pairs(chestData.items) do
                 if items[item.name] == nil then
                     items[item.name] = {}
                 end
