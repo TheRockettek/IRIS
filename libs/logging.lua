@@ -114,7 +114,7 @@ local function NewLogger(timeFormat, fileName)
             if loggerMessage.error ~= "" then
                 term.setTextColour(colours.red)
 
-                text = "err=" .. loggerMessage.error
+                text = "err=" .. loggerMessage.error .. " "
                 outputText = outputText .. text
                 print(text)
             end
