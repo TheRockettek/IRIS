@@ -1,23 +1,29 @@
 local levels = {
     trace = {
         colour = colours.lightGrey,
-        label = "TRC"
+        label = "TRC",
+        level = -1,
     },
     debug = {
         colour = colours.orange,
-        label = "DBG"
+        label = "DBG",
+        level = 0,
     },
     info = {
         colour = colours.green,
-        label = "INF"
+        label = "INF",
+        level = 1,
     },
     warn = {
         colour = colours.red,
-        label = "WRN"
+        label = "WRN",
+        level = 2,
+
     },
     panic = {
         colour = colours.red,
-        label = "PNC"
+        label = "PNC",
+        level = 99,
     },
 }
 
@@ -55,11 +61,20 @@ end
 local function NewLogger(timeFormat, fileName)
     local logger = {
         timeFormat = timeFormat or defaultTimeStamp,
+        minimumLevel = -1,
         fileName = ""
     }
 
     if fileName ~= "" and fileName ~= nil then
         logger.file = fs.open(fileName, "wb")
+    end
+
+    logger.setLevel = function(logLevel)
+        if not tableContains(levels, logLevel) then
+            error("invalid log level passed: " .. tostring(logLevel))
+        end
+
+        logger.minimumLevel = levels[logLevel].level
     end
 
     logger.newMessage = function(logLevel)
@@ -76,6 +91,8 @@ local function NewLogger(timeFormat, fileName)
         }
 
         loggerMessage.Send = function()
+            if loggerMessage.level.level < logger.minimumLevel then return end
+
             local previousColour = term.getTextColour()
 
             -- Display time
@@ -125,9 +142,9 @@ local function NewLogger(timeFormat, fileName)
             outputText = outputText .. text
             print(text)
 
-            if loggerMessage.file ~= nil then
-                loggerMessage.file.write(outputText)
-                loggerMessage.file.flush()
+            if logger.file ~= nil then
+                logger.file.write(outputText .. "\n")
+                logger.file.flush()
             end
         end
 
