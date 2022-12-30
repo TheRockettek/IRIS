@@ -24,7 +24,7 @@ local levels = {
 local defaultTimeStamp = "!%b %e %H:%M:%S"
 
 local function tableContains(table, key)
-    for i, _ in pairs(table) do
+    for i, _ in ipairs(table) do
         if i == key then
             return true
         end
@@ -52,10 +52,15 @@ local function formatEpoch(epoch)
     end
 end
 
-local function NewLogger(timeFormat)
+local function NewLogger(timeFormat, fileName)
     local logger = {
-        timeFormat = timeFormat or defaultTimeStamp
+        timeFormat = timeFormat or defaultTimeStamp,
+        fileName = ""
     }
+
+    if fileName ~= "" and fileName ~= nil then
+        logger.file = fs.open(fileName, "wb")
+    end
 
     logger.newMessage = function(logLevel)
         if not tableContains(levels, logLevel) then
@@ -74,8 +79,11 @@ local function NewLogger(timeFormat)
             local previousColour = term.getTextColour()
 
             -- Display time
+            local outputText = os.date(loggerMessage.logger.timeFormat) .. " "
+            local text = ""
+
             term.setTextColour(colours.grey)
-            term.write(os.date(loggerMessage.logger.timeFormat) .. " ")
+            term.write(outputText)
 
             -- Display log level
             term.setTextColour(loggerMessage.level.colour)
@@ -88,7 +96,7 @@ local function NewLogger(timeFormat)
             end
 
             -- Display variables
-            for _, variable in pairs(loggerMessage.variables) do
+            for _, variable in ipairs(loggerMessage.variables) do
                 if willWrap(variable.name .. "=" .. variable.value) then
                     print("")
                 end
@@ -102,6 +110,11 @@ local function NewLogger(timeFormat)
             term.setTextColour(previousColour)
 
             print(loggerMessage.message)
+
+            if loggerMessage.file ~= nil then
+                loggerMessage.file.write()
+                loggerMessage.file.flush(outputText)
+            end
         end
 
         loggerMessage.Msg = function (message)

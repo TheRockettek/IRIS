@@ -2,7 +2,7 @@ local logging = require("libs.logging")
 
 local chestPeripheral = "minecraft:chest"
 
-local function FindAllChests()
+local function FindAllChests(iris)
     local chests = {}
 
     local peripherals = peripheral.getNames()
@@ -13,7 +13,7 @@ local function FindAllChests()
         end
     end
 
-    logging.Logger.Debug().Str("count", #chests).Str("total", #peripherals).Msg("Found chests")
+    iris.logger.Debug().Str("count", #chests).Str("total", #peripherals).Msg("Found chests")
 
     return chests
 end

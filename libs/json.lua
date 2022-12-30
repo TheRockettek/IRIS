@@ -4,7 +4,7 @@ local numChars = {['e']=true; ['E']=true; ['+']=true; ['-']=true; ['.']=true}
 
 local function isArray(t)
     local max = 0
-    for k,_ in pairs(t) do
+    for k,_ in ipairs(t) do
         if type(k) ~= "number" then
             return false
         elseif k > max then
@@ -79,7 +79,7 @@ local function encodeCommon(val, pretty, tabLevel, tTracking)
 end
 
 local decodeControls = {}
-for k,v in pairs(controls) do
+for k,v in ipairs(controls) do
     decodeControls[v] = k
 end
 
