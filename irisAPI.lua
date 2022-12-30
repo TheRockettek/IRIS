@@ -18,10 +18,10 @@ local defaultConfiguration = {
     scanDelay = 60000, -- Time in milliseconds to wait between a chest scan. This is only used during startup.
 }
 
-local function NewIRIS()
+local function NewIRIS(logger)
     local iris = {
         version = VERSION,
-        logger = logging.NewLogger("", nil),
+        logger = logger or logging.NewLogger(nil, nil),
 
         isDataLoaded = false,
         isDataDirty = false,

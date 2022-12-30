@@ -79,20 +79,27 @@ local function NewLogger(timeFormat, fileName)
             local previousColour = term.getTextColour()
 
             -- Display time
-            local outputText = os.date(loggerMessage.logger.timeFormat) .. " "
+            local outputText = ""
             local text = ""
 
             term.setTextColour(colours.grey)
-            term.write(outputText)
+            text = os.date(loggerMessage.logger.timeFormat) .. " "
+            outputText = outputText .. text
+            term.write(text)
 
             -- Display log level
             term.setTextColour(loggerMessage.level.colour)
-            term.write(loggerMessage.level.label .. " ")
+            text = loggerMessage.level.label .. " "
+            outputText = outputText .. text
+            term.write(text)
 
             -- Display error, if present
             if loggerMessage.error ~= "" then
                 term.setTextColour(colours.red)
-                print("err=" .. loggerMessage.error)   
+
+                text = "err=" .. loggerMessage.error
+                outputText = outputText .. text
+                print(text)
             end
 
             -- Display variables
@@ -102,14 +109,21 @@ local function NewLogger(timeFormat, fileName)
                 end
 
                 term.setTextColour(colours.blue)
-                term.write(variable.name .. "=")
+                text = variable.name .. "="
+                outputText = outputText .. text
+                term.write(text)
+
                 term.setTextColour(previousColour)
-                term.write(variable.value .. " ")
+                text = variable.value .. " "
+                outputText = outputText .. text
+                term.write(text)
             end
 
             term.setTextColour(previousColour)
 
-            print(loggerMessage.message)
+            text = loggerMessage.message
+            outputText = outputText .. text
+            print(text)
 
             if loggerMessage.file ~= nil then
                 loggerMessage.file.write()
