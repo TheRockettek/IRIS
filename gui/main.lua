@@ -42,17 +42,20 @@ local function NewGUI(iris)
 
     gui.drawBase = function()
         term.clear()
-    
+
         local w, h = term.getSize()
-    
+
+        term.setTextColour(irisColours.contrast.colour)
+
         -- Draw header
         paintutils.drawBox(1, 1, w, 1, irisColours.main.colour)
-        paintutils.drawBox(1, 2, w, 2, irisColours.accent.colour)
 
         -- Add label
         local label = "IRIS"
         term.setCursorPos(w-#label, 1)
         term.write(label)
+
+        paintutils.drawBox(1, 2, w, 2, irisColours.accent.colour)
 
         -- Add search
         term.setCursorPos(1, 2)
@@ -63,11 +66,11 @@ local function NewGUI(iris)
         local isSmallDisplay = w < 39 -- When enabled, the pagination and item count will be on seperate lines
 
         if isSmallDisplay then
-            paintutils.drawBox(1, h-1, w, h-1, irisColours.main.colour)
-            gui.drawPercentage(1, h-2, w)
+            paintutils.drawBox(1, h, w, h, irisColours.main.colour)
+            gui.drawPercentage(1, h-1, w)
         else
-            paintutils.drawBox(w - #paginationDisplay, h-1, w, h-1, irisColours.main.colour)
-            gui.drawPercentage(1, h-1, w - #paginationDisplay)
+            paintutils.drawBox(w - #paginationDisplay, h, w, h, irisColours.main.colour)
+            gui.drawPercentage(1, h, w - #paginationDisplay)
         end
     end
     
@@ -76,8 +79,12 @@ local function NewGUI(iris)
 
         if gui.iris.isScanning and gui.itemSlotsTotal == 0 then
             term.write("Scanning...")
+
+            return
         elseif not gui.iris.isInitialized then
             term.write("Getting Ready...")
+
+            return
         end
 
         local text = (" %.0f%% - (%d/%d) [%d/%d] "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount, gui.itemTotal)
