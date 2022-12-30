@@ -22,7 +22,7 @@ local function ScanChest(name)
     for i, _ in pairs(chestList) do
         local itemDetail = chest.getItemDetail(i)
         if itemDetail then
-            chestData.items[i] = {
+            chestData.items[tostring(i)] = {
                 name = itemDetail.name,
                 display = itemDetail.display,
                 count = itemDetail.count,
