@@ -6,10 +6,10 @@ local fileVersion = "1"
 local function Encode(irisData)
     local file = {
         version = fileVersion,
-        iris = {
-            lastScannedAt = irisData.lastScannedAt,
-        },
         data = {
+            iris = {
+                lastScannedAt = irisData.lastScannedAt,
+            },
             chests = irisData.chests,
         }
     }
