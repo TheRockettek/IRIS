@@ -1,7 +1,7 @@
 -- Colours to use within IRIS gui
 -- original colour to use, r, g, b
 
-local colours = {
+local irisColours = {
     main       =  { colour = colours.blue,   hex = 0x2F80ED },
     accent     =  { colour = colours.cyan,   hex = 0x2162BA },
     background =  { colour = colours.black,  hex = 0x000000 },
@@ -16,7 +16,7 @@ local function setupPalette()
         return
     end
 
-    for _, colour in pairs(colours) do
+    for _, colour in pairs(irisColours) do
         term.setPaletteColour(colour.colour, colour.hex)
     end
 end
@@ -46,8 +46,8 @@ local function NewGUI(iris)
         local w, h = term.getSize()
     
         -- Draw header
-        paintutils.drawBox(1, 1, w, 1, colours.main.colour)
-        paintutils.drawBox(1, 2, w, 2, colours.accent.colour)
+        paintutils.drawBox(1, 1, w, 1, irisColours.main.colour)
+        paintutils.drawBox(1, 2, w, 2, irisColours.accent.colour)
 
         -- Add label
         local label = "IRIS"
@@ -63,10 +63,10 @@ local function NewGUI(iris)
         local isSmallDisplay = w < 39 -- When enabled, the pagination and item count will be on seperate lines
 
         if isSmallDisplay then
-            paintutils.drawBox(1, h-1, w, h-1, colours.main.colour)
+            paintutils.drawBox(1, h-1, w, h-1, irisColours.main.colour)
             gui.drawPercentage(1, h-2, w)
         else
-            paintutils.drawBox(w - #paginationDisplay, h-1, w, h-1, colours.main.colour)
+            paintutils.drawBox(w - #paginationDisplay, h-1, w, h-1, irisColours.main.colour)
             gui.drawPercentage(1, h-1, w - #paginationDisplay)
         end
     end
@@ -94,11 +94,11 @@ local function NewGUI(iris)
         local barColour
 
         if (gui.itemSlotsTotal - gui.itemSlotsUsed) <= 3 then
-            barColour = colours.noStorage
+            barColour = irisColours.noStorage
         elseif (gui.itemSlotsTotal - gui.itemSlotsUsed) <= (9*3) then
-            barColour = colours.lowStorage
+            barColour = irisColours.lowStorage
         else
-            barColour = colours.highStorage
+            barColour = irisColours.highStorage
         end
 
         -- We use blit to draw the entire bar at once.
@@ -106,14 +106,16 @@ local function NewGUI(iris)
         -- and black when on the bar.
         term.blit(
             text,
-            colours.toBlit(colours.background.colour):rep(barCharCount) ..
-            colours.toBlit(colours.contrast.colour):rep(w - barCharCount),
-            colours.toBlit(barColour):rep(barCharCount) ..
-            colours.toBlit(colours.background.colour):rep(w - barCharCount)
+            colours.toBlit(irisColours.background.colour):rep(barCharCount) ..
+            colours.toBlit(irisColours.contrast.colour):rep(w - barCharCount),
+            colours.toBlit(barColour.colour):rep(barCharCount) ..
+            colours.toBlit(irisColours.background.colour):rep(w - barCharCount)
         )
     end
 
     gui.splashScreen = function()
+        gui.drawBase()
+
         -- Wait for init
         local sleepTimer = os.startTimer(1)
         while true do
@@ -165,6 +167,8 @@ local function NewGUI(iris)
 
 
     gui.mainScreen = function()
+        gui.drawBase()
+
         local syncTimer = os.startTimer(15)
         while true do
             local timerId = os.pullEvent("timer")

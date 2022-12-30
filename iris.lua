@@ -8,6 +8,6 @@ logger.silent = true
 local iris = irisAPI.NewIRIS(logger)
 
 parallel.waitForAll(
-    function() iris.init() end,
-    function() gui.MainLoop(iris) end
+    function() gui.NewGUI(iris).run() end,
+    function() iris.init() end
 )
