@@ -19,7 +19,7 @@ local function ScanChest(iris, name)
 
     local chestList = chest.list()
 
-    for i, _ in ipairs(chestList) do
+    for i, _ in pairs(chestList) do
         local itemDetail = chest.getItemDetail(i)
         if itemDetail then
             chestData.items[tostring(i)] = {
@@ -41,7 +41,7 @@ local function ScanAllChests(iris)
     local chests = {}
     local chestNames = peripherals.FindAllChests(iris)
 
-    for _, name in ipairs(chestNames) do
+    for _, name in pairs(chestNames) do
         local chest, err = ScanChest(name)
         if err ~= nil then
             iris.logger.Warn().Str("name", name).Err(err).Msg("Failed to scan chest")

@@ -7,7 +7,7 @@ local function FindAllChests(iris)
 
     local peripherals = peripheral.getNames()
 
-    for _, value in ipairs(peripherals) do
+    for _, value in pairs(peripherals) do
         if value:find(chestPeripheral) then
             table.insert(chests, value)
         end

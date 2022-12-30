@@ -224,7 +224,7 @@ local function NewIRIS()
 
             local toFit = totalStore
 
-            for _, value in ipairs(slots) do
+            for _, value in pairs(slots) do
                 if value.count ~= value.max then
                     table.insert(output.candidates, value)
                     output.hasSpace = true

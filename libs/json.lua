@@ -56,7 +56,7 @@ local function encodeCommon(val, pretty, tabLevel, tTracking)
         assert(not tTracking[val], "Cannot encode a table holding itself recursively")
         tTracking[val] = true
         if isArray(val) then
-            arrEncoding(val, "[", "]", ipairs, function(k,v)
+            arrEncoding(val, "[", "]", pairs, function(k,v)
             str = str .. encodeCommon(v, pretty, tabLevel, tTracking)
             end)
         else
