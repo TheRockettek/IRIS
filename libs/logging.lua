@@ -126,8 +126,8 @@ local function NewLogger(timeFormat, fileName)
             print(text)
 
             if loggerMessage.file ~= nil then
-                loggerMessage.file.write()
-                loggerMessage.file.flush(outputText)
+                loggerMessage.file.write(outputText)
+                loggerMessage.file.flush()
             end
         end
 
