@@ -125,7 +125,7 @@ local function NewIRIS()
 
         local path = iris.configuration.irisFileLocation
 
-        local irisDataSerialized, err = serialization.Encode(iris.irisData)
+        local irisDataSerialized, err = serialization.Encode(iris)
         if err ~= nil then
             return false, err
         end
@@ -151,7 +151,6 @@ local function NewIRIS()
 
         iris.irisData.chests = chests
         iris.irisData.iris.lastScannedAt = os.epoch("utc")
-
         iris.isDataDirty = true
 
         local saved, err = iris.saveData()

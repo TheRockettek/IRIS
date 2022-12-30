@@ -3,14 +3,14 @@ local errors  = require("core.errors")
 
 local fileVersion = "1"
 
-local function Encode(irisData)
+local function Encode(iris)
     local file = {
         version = fileVersion,
         data = {
             iris = {
-                lastScannedAt = irisData.lastScannedAt,
+                lastScannedAt = iris.irisData.iris.lastScannedAt,
             },
-            chests = irisData.chests,
+            chests = iris.irisData.chests,
         }
     }
 
