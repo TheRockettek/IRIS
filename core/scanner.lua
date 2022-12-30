@@ -17,7 +17,9 @@ local function ScanChest(name)
         items = {},
     }
 
-    for i = 1, chestData.total, 1 do
+    local chestList = chest.list()
+
+    for i, _ in pairs(chestList) do
         local itemDetail = chest.getItemDetail(i)
         if itemDetail then
             chestData.items[i] = {
