@@ -123,6 +123,8 @@ local function NewLogger(timeFormat)
 
         loggerMessage.Dur = function(name, epoch)
             loggerMessage.Str(name, formatEpoch(epoch))
+
+            return loggerMessage
         end
 
         return loggerMessage
