@@ -95,7 +95,7 @@ local function NewIRIS()
         local path = iris.configuration.irisFileLocation
 
         if not fs.exists(path) then
-            logging.Logger.Warn().Err(err).Msg("IRIS from fresh start")
+            logging.Logger.Warn().Msg("IRIS is loading from fresh file")
 
             return false
         end

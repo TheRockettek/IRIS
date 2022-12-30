@@ -84,7 +84,7 @@ local function NewLogger(timeFormat)
             -- Display error, if present
             if loggerMessage.error ~= "" then
                 term.setTextColour(colours.red)
-                print("err=" .. loggerMessage.error)           
+                print("err=" .. loggerMessage.error)   
             end
 
             -- Display variables
@@ -105,18 +105,18 @@ local function NewLogger(timeFormat)
         end
 
         loggerMessage.Msg = function (message)
-            loggerMessage.message = message
+            loggerMessage.message = tostring(message)
             loggerMessage.Send()
         end
 
         loggerMessage.Err = function (error)
-            loggerMessage.error = error
+            loggerMessage.error = tostring(error)
 
             return loggerMessage
         end
 
         loggerMessage.Str = function(name, value)
-            table.insert(loggerMessage.variables, { name = name, value = value})
+            table.insert(loggerMessage.variables, { name = tostring(name), value = tostring(value)})
 
             return loggerMessage
         end
