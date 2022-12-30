@@ -23,6 +23,9 @@ local function NewIRIS(logger)
         version = VERSION,
         logger = logger or logging.NewLogger(nil, nil),
 
+        isInitialized = false,
+        isScanning = false,
+
         isDataLoaded = false,
         isDataDirty = false,
         irisData = {
@@ -63,6 +66,8 @@ local function NewIRIS(logger)
         if iris.configuration.scanOnStart then
             iris.fullScan()
         end
+
+        iris.isInitialized = true
     end
 
     -- Loads configuration. Overrides existing default configuration keys,
@@ -147,6 +152,8 @@ local function NewIRIS(logger)
     -- Performs a scan of all chests, stores and saves changes.
     -- If the last scan is before the scan delay, will not run and return false.
     iris.fullScan = function()
+        iris.isScanning = true
+        
         local timeSince = os.epoch("utc") - iris.irisData.iris.lastScannedAt
         if timeSince < iris.configuration.scanDelay then
             iris.logger.Info().Str("since", timeSince).Str("delay", iris.configuration.scanDelay).Msg("Full scan called but not hit delay")
@@ -168,6 +175,8 @@ local function NewIRIS(logger)
         if saved then
             iris.logger.Info().Msg("IRIS data saved successfuly")
         end
+
+        iris.isScanning = false
 
         return true
     end
@@ -204,7 +213,7 @@ local function NewIRIS(logger)
         return locations
     end
 
-    -- Find partial stacks of empty items..
+    -- Find partial stacks of empty items.
     -- Returns list of partial stacks and empty slot candidate.
     -- Passing total store will make it only return slots that are needed.
     iris.findSpot = function(tryScan, name, totalStore, maxStack)

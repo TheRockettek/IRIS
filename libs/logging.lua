@@ -62,7 +62,8 @@ local function NewLogger(timeFormat, fileName)
     local logger = {
         timeFormat = timeFormat or defaultTimeStamp,
         minimumLevel = -1,
-        fileName = ""
+        fileName = "", -- filename to log to. If not passed, will not log to file.
+        silent = false, -- when enabled, will only log to file (if a filename is set)
     }
 
     if fileName ~= "" and fileName ~= nil then
@@ -99,48 +100,50 @@ local function NewLogger(timeFormat, fileName)
             local outputText = ""
             local text = ""
 
-            term.setTextColour(colours.grey)
+            if not logger.silent then term.setTextColour(colours.grey) end
             text = os.date(loggerMessage.logger.timeFormat) .. " "
             outputText = outputText .. text
-            term.write(text)
+            if not logger.silent then term.write(text) end
 
             -- Display log level
-            term.setTextColour(loggerMessage.level.colour)
+            if not logger.silent then term.setTextColour(loggerMessage.level.colour) end
             text = loggerMessage.level.label .. " "
             outputText = outputText .. text
-            term.write(text)
+            if not logger.silent then term.write(text) end
 
             -- Display error, if present
             if loggerMessage.error ~= "" then
-                term.setTextColour(colours.red)
+                if not logger.silent then term.setTextColour(colours.red) end
 
                 text = "err=" .. loggerMessage.error .. " "
                 outputText = outputText .. text
-                print(text)
+                if not logger.silent then print(text) end
             end
 
             -- Display variables
             for _, variable in pairs(loggerMessage.variables) do
-                if willWrap(variable.name .. "=" .. variable.value) then
-                    print("")
+                if not logger.silent then
+                    if willWrap(variable.name .. "=" .. variable.value) then
+                        print("")
+                    end
                 end
 
-                term.setTextColour(colours.blue)
+                if not logger.silent then term.setTextColour(colours.blue) end
                 text = variable.name .. "="
                 outputText = outputText .. text
-                term.write(text)
+                if not logger.silent then term.write(text) end
 
-                term.setTextColour(previousColour)
+                if not logger.silent then term.setTextColour(previousColour) end
                 text = variable.value .. " "
                 outputText = outputText .. text
-                term.write(text)
+                if not logger.silent then term.write(text) end
             end
 
-            term.setTextColour(previousColour)
+            if not logger.silent then term.setTextColour(previousColour) end
 
             text = loggerMessage.message
             outputText = outputText .. text
-            print(text)
+            if not logger.silent then print(text) end
 
             if logger.file ~= nil then
                 logger.file.write(outputText .. "\n")
