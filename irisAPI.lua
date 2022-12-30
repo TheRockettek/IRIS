@@ -46,9 +46,9 @@ local function NewIRIS()
         local configuration, err = iris.loadConfiguration(configurationPath)
         if err ~= nil then
             logging.Logger.Warn().Err(err).Msg("Failed to load configuration")
+        else
+            iris.configuration = configuration
         end
-
-        iris.configuration = configuration
 
         -- Validate input is wrappable
         tryWrapPeripheral(iris.configuration.turtleInput)
