@@ -65,17 +65,26 @@ local function NewGUI(iris)
 
         local isSmallDisplay = w < 39 -- When enabled, the pagination and item count will be on seperate lines
 
+        term.setTextColour(irisColours.contrast.colour)
+
         if isSmallDisplay then
             paintutils.drawBox(1, h, w, h, irisColours.main.colour)
+            term.setCursorPos(math.floor((w-#paginationDisplay)/2), h)
+            term.write(paginationDisplay)
+
             gui.drawPercentage(1, h-1, w)
         else
             paintutils.drawBox(w - #paginationDisplay, h, w, h, irisColours.main.colour)
+            term.setCursorPos(w - #paginationDisplay, h)
+            term.write(paginationDisplay)
+
             gui.drawPercentage(1, h, w - #paginationDisplay)
         end
     end
-    
+
     gui.drawPercentage = function(x, y, w)
         term.setCursorPos(x, y)
+        term.setBackgroundColour(irisColours.background.colour)
 
         if gui.iris.isScanning and gui.itemSlotsTotal == 0 then
             term.write("Scanning...")
