@@ -1,6 +1,6 @@
-local peripherals = require("cores.peripherals")
+local peripherals = require("core.peripherals")
 local logging = require("libs.logging")
-local errors = require("cores.errors")
+local errors = require("core.errors")
 
 local function ScanChest(name)
     assert(type(name) == "string")

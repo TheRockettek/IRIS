@@ -1,6 +1,6 @@
 local logging = require("libs.logging")
 local json    = require("libs.json")
-local errors  = require("cores.errors")
+local errors  = require("core.errors")
 
 local fileVersion = "1"
 
