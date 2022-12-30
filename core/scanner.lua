@@ -39,7 +39,7 @@ local function ScanAllChests(iris)
 
     local start = os.epoch("utc")
     local chests = {}
-    local chestNames = peripherals.FindAllChests(iris.logger)
+    local chestNames = peripherals.FindAllChests(iris)
 
     for _, name in ipairs(chestNames) do
         local chest, err = ScanChest(name)
