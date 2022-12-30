@@ -42,7 +42,7 @@ local function ScanAllChests(iris)
     local chestNames = peripherals.FindAllChests(iris)
 
     for _, name in pairs(chestNames) do
-        local chest, err = ScanChest(name)
+        local chest, err = ScanChest(iris, name)
         if err ~= nil then
             iris.logger.Warn().Str("name", name).Err(err).Msg("Failed to scan chest")
         else
