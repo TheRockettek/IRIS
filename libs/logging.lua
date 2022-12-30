@@ -1,5 +1,3 @@
-local utils = require("utils")
-
 local levels = {
     trace = {
         colour = colours.lightGrey,
@@ -25,6 +23,20 @@ local levels = {
 
 local defaultTimeStamp = "!%b %e %H:%M:%S"
 
+local function tableContains(table, key)
+    for i, _ in pairs(table) do
+        if i == key then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function willWrap(text)
+    return (({term.getCursorPos()})[1] + #text) > ({term.getSize()})[1]
+end
+
 local function formatEpoch(epoch)
     local diff = os.epoch("utc") - epoch
 
@@ -46,7 +58,7 @@ local function NewLogger(timeFormat)
     }
 
     logger.newMessage = function(logLevel)
-        if not utils.TableContains(levels, logLevel) then
+        if not tableContains(levels, logLevel) then
             error("invalid log level passed: " .. tostring(logLevel))
         end
 
@@ -77,7 +89,7 @@ local function NewLogger(timeFormat)
 
             -- Display variables
             for _, variable in pairs(loggerMessage.variables) do
-                if utils.WillWrap(variable.name .. "=" .. variable.value) then
+                if willWrap(variable.name .. "=" .. variable.value) then
                     print("")
                 end
 
