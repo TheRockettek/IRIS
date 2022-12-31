@@ -159,7 +159,7 @@ local function NewGUI(iris)
                 gui.itemSlotsTotal = paramB
                 gui.itemCount = paramC
                 gui.itemTotal = paramD
-                gui.itemPercentage = math.floor((gui.itemCount / gui.itemTotal) * 100)
+                gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
                 gui.drawBase()
             elseif type == events.EventIrisInit then
                 gui.isInitialized = true

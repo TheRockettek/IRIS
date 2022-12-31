@@ -238,7 +238,7 @@ local function NewIRIS(logger)
         end
 
         os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal,
-            itemCount, nil)
+            itemCount, 0)
 
         return true
     end
