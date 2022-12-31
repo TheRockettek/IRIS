@@ -2,7 +2,6 @@ local peripherals = require("core.peripherals")
 local errors      = require("core.errors")
 local events      = require("core.events")
 local waitgroup   = require("libs.waitgroup")
-local items       = require("core.items")
 
 local function ScanChest(iris, name)
     assert(type(name) == "string")
