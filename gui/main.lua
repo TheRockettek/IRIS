@@ -141,6 +141,7 @@ local function NewGUI(iris)
         -- Wait for init
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
+            iris.logger.Trace().Str("type", type).Str("a", paramA).Str("b", paramB).Str("c", paramC).Str("d", paramD).Send()
             if type == events.EventIrisScanStart then
                 gui.isScanning = true
                 gui.drawBase()
@@ -166,6 +167,7 @@ local function NewGUI(iris)
         local syncTimer = os.startTimer(syncTimerDuration)
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
+            iris.logger.Trace().Str("type", type).Str("a", paramA).Str("b", paramB).Str("c", paramC).Str("d", paramD).Send()
             if type == "timer" then
                 if paramA == syncTimer then
                     syncTimer = os.startTimer(syncTimerDuration)
