@@ -188,12 +188,12 @@ local function NewIRIS(logger)
 
             for _, chestData in pairs(iris.irisData.chests) do
                 itemSlotsTotal = itemSlotsTotal + chestData.total
-                itemSlotsUsed = itemSlotsUsed + #chestData.items
+                itemSlotsUsed = itemSlotsUsed + chestData.itemCount
                 for _, item in pairs(chestData.items) do
                     itemTotal = itemTotal + item.max
                     itemCount = itemCount + item.count
                 end
-                itemTotal = (chestData.total - #chestData.items) * 64 -- Add 64 for each empty slot
+                itemTotal = (chestData.total - chestData.itemCount) * 64 -- Add 64 for each empty slot
             end
 
             os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal)
@@ -292,7 +292,7 @@ local function NewIRIS(logger)
         }
 
         for chestName, chestData in pairs(iris.irisData.chests) do
-            if chestData.total > #chestData.items then
+            if chestData.total > chestData.itemCount then
                 for slotId = 1, chestData.total, 1 do
                     if chestData.items[tostring(slotId)] == nil and maxSpacesNeeded > 0 then
                         table.insert(output.candidates, {

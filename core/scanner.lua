@@ -20,8 +20,10 @@ local function ScanChest(iris, name)
     }
 
     local chestList = chest.list()
+    local itemCount = 0
 
     for i, item in pairs(chestList) do
+        itemCount = itemCount + 1
         chestData.items[tostring(i)] = {
             name = item.name,
             display = item.name,
@@ -29,6 +31,8 @@ local function ScanChest(iris, name)
             max = items.GetItemMaxStack(item.name),
         }
     end
+
+    chestData.itemCount = itemCount
 
     -- for i, _ in pairs(chestList) do
     --     local itemDetail = chest.getItemDetail(i)
