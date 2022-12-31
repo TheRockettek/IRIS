@@ -23,8 +23,6 @@ end
 
 local function NewGUI(iris)
     local gui = {
-        iris = iris,
-
         searchQuery = "",
         isSearching = "",
 
@@ -86,11 +84,11 @@ local function NewGUI(iris)
         term.setCursorPos(x, y)
         term.setBackgroundColour(irisColours.background.colour)
 
-        if gui.iris.isScanning and gui.itemSlotsTotal == 0 then
-            term.write("Scanning...")
+        if iris.isScanning and gui.itemSlotsTotal == 0 then
+            term.write("Scanning (" .. tostring(iris.scanningCurrent) .. "/" .. tostring(iris.scanningTotal) .. ")")
 
             return
-        elseif not gui.iris.isInitialized then
+        elseif not iris.isInitialized then
             term.write("Getting Ready...")
 
             return
@@ -130,14 +128,17 @@ local function NewGUI(iris)
     end
 
     gui.splashScreen = function()
+        iris.logger.Trace().Msg("start splash")
         gui.drawBase()
 
         -- Wait for init
         local sleepTimer = os.startTimer(1)
         while true do
-            local timerId = os.pullEvent("timer")
-            if timerId == sleepTimer then
-                if gui.iris.isInitialized then
+            local type, timerId = os.pullEvent("timer")
+            iris.logger.Trace().Str("type", type).Str("val", tostring(timerId)).Msg("event")
+            if type == "timer" and timerId == sleepTimer then
+                iris.logger.Trace().Str("isinit", tostring(iris.isInitialized)).Msg("is init")
+                if iris.isInitialized then
                     break
                 end
 
@@ -145,11 +146,13 @@ local function NewGUI(iris)
             end
         end
 
+        iris.logger.Trace().Msg("done")
+
         os.cancelTimer(sleepTimer)
     end
 
     gui._syncTask = function()
-        local ok = gui.iris.fullScan()
+        local ok = iris.fullScan()
         if not ok then
             return
         end
@@ -184,6 +187,8 @@ local function NewGUI(iris)
 
     gui.mainScreen = function()
         gui.drawBase()
+
+        iris.logger.Trace().Msg("main screen :)")
 
         local syncTimer = os.startTimer(15)
         while true do

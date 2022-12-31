@@ -24,7 +24,10 @@ local function NewIRIS(logger)
         logger = logger or logging.NewLogger(nil, nil),
 
         isInitialized = false,
+
         isScanning = false,
+        scanningCurrent = 0,
+        scanningTotal = 0,
 
         isDataLoaded = false,
         isDataDirty = false,
@@ -153,7 +156,9 @@ local function NewIRIS(logger)
     -- If the last scan is before the scan delay, will not run and return false.
     iris.fullScan = function()
         iris.isScanning = true
-        
+        iris.scanningCurrent = 0
+        iris.scanningTotal = 0
+
         local timeSince = os.epoch("utc") - iris.irisData.iris.lastScannedAt
         if timeSince < iris.configuration.scanDelay then
             iris.logger.Info().Str("since", timeSince).Str("delay", iris.configuration.scanDelay).Msg("Full scan called but not hit delay")
