@@ -12,8 +12,11 @@ local function ScanChest(iris, name)
 
     local chest = peripheral.wrap(name)
     if chest == nil then
+        iris.logger.Trace().Msg("errored")
         return nil, errors.ErrCouldNotWrapPeripheral
     end
+
+    iris.logger.Trace().Msg("wrapped")
 
     local chestData = {
         total = chest.size(),
@@ -22,7 +25,10 @@ local function ScanChest(iris, name)
 
     local chestList = chest.list()
 
+    iris.logger.Trace().Msg("list")
+
     for i, _ in pairs(chestList) do
+        iris.logger.Trace().Msg("get " .. tostring(i))
         local itemDetail = chest.getItemDetail(i)
         if itemDetail then
             chestData.items[tostring(i)] = {
@@ -32,6 +38,7 @@ local function ScanChest(iris, name)
                 max = itemDetail.maxCount,
             }
         end
+        iris.logger.Trace().Msg("got")
     end
 
     iris.logger.Trace().Msg("scanchest done")
