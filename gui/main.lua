@@ -140,6 +140,13 @@ local function NewGUI(iris)
     gui.mainScreen = function()
         gui.drawBase()
 
+        local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
+        gui.itemSlotsUsed = itemSlotsUsed
+        gui.itemSlotsTotal = itemSlotsTotal
+        gui.itemCount = itemCount
+        gui.itemTotal = itemTotal
+        gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
+
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
             iris.logger.Trace().Str("type", type).Str("a", paramA).Str("b", paramB).Str("c", paramC).Str("d", paramD).Send()

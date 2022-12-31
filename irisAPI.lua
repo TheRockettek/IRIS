@@ -227,6 +227,13 @@ local function NewIRIS(logger)
             iris.logger.Info().Msg("IRIS data saved successfuly")
         end
 
+        local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
+        os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal)
+
+        return true
+    end
+
+    iris.calculateUsage = function()
         local itemSlotsUsed = 0
         local itemSlotsTotal = 0
         local itemCount = 0
@@ -237,10 +244,7 @@ local function NewIRIS(logger)
             itemCount = itemCount + chestData.totalItems
         end
 
-        os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal,
-            itemCount, 0)
-
-        return true
+        return itemSlotsUsed, itemSlotsTotal, itemCount, 0
     end
 
     iris.tryWrapPeripheral = function(name)
