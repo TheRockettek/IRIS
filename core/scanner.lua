@@ -37,6 +37,10 @@ end
 local function ScanAllChests(iris)
     iris.logger.Debug().Msg("Scanning all chests")
 
+    iris.isScanning = true
+    iris.scanningCurrent = 0
+    iris.scanningTotal = 0
+
     local start = os.epoch("utc")
     local chests = {}
     local chestNames = peripherals.FindAllChests(iris)
@@ -55,6 +59,7 @@ local function ScanAllChests(iris)
     end
 
     iris.logger.Debug().Dur("duration", start).Msg("Finished scanning chests")
+    iris.isScanning = false
 
     return chests
 end

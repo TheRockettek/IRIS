@@ -155,10 +155,6 @@ local function NewIRIS(logger)
     -- Performs a scan of all chests, stores and saves changes.
     -- If the last scan is before the scan delay, will not run and return false.
     iris.fullScan = function()
-        iris.isScanning = true
-        iris.scanningCurrent = 0
-        iris.scanningTotal = 0
-
         local timeSince = os.epoch("utc") - iris.irisData.iris.lastScannedAt
         if timeSince < iris.configuration.scanDelay then
             iris.logger.Info().Str("since", timeSince).Str("delay", iris.configuration.scanDelay).Msg("Full scan called but not hit delay")
@@ -180,8 +176,6 @@ local function NewIRIS(logger)
         if saved then
             iris.logger.Info().Msg("IRIS data saved successfuly")
         end
-
-        iris.isScanning = false
 
         return true
     end
