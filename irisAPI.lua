@@ -62,7 +62,7 @@ local function NewIRIS(logger)
         iris.loadData()
 
         if iris.configuration.scanOnStart then
-            iris.fullScan()
+            coroutine.resume(iris.fullScanTask)
         end
 
         os.queueEvent(events.EventIrisInit)

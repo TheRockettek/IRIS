@@ -135,30 +135,6 @@ local function NewGUI(iris)
         )
     end
 
-    gui.splashScreen = function()
-        gui.drawBase()
-
-        -- Wait for init
-        while true do
-            local type, paramA, paramB, paramC, paramD = os.pullEvent()
-            iris.logger.Trace().Str("type", type).Str("a", paramA).Str("b", paramB).Str("c", paramC).Str("d", paramD).Send()
-            if type == events.EventIrisScanStart then
-                gui.isScanning = true
-                gui.drawBase()
-            elseif type == events.EventIrisScanUpdate then
-                gui.isScanning = true
-                gui.scanningCurrent = paramA
-                gui.scanningTotal = paramB
-                gui.drawBase()
-            elseif type == events.EventIrisScanComplete then
-                gui.isScanning = false
-                gui.drawBase()
-            elseif type == events.EventIrisInit then
-                gui.isInitialized = true
-                break
-            end
-        end
-    end
     gui.mainScreen = function()
         gui.drawBase()
 
@@ -191,14 +167,15 @@ local function NewGUI(iris)
                 gui.itemTotal = paramD
                 gui.itemPercentage = math.floor((gui.itemCount/gui.itemTotal)*100)
                 gui.drawBase()
+            elseif type == events.EventIrisInit then
+                gui.isInitialized = true
+                break
             end
         end
     end
 
     gui.run = function ()
         setupPalette()
-
-        gui.splashScreen()
         gui.mainScreen()
     end
 
