@@ -24,7 +24,7 @@ local function ScanChest(iris, name)
     }
 
     for i, item in pairs(chestList) do
-        i[tostring(i)] = {
+        chestData.items[tostring(i)] = {
             name = item.name,
             count = item.count,
         }
