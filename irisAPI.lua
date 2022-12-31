@@ -193,12 +193,12 @@ local function NewIRIS(logger)
                     itemTotal = itemTotal + item.max
                     itemCount = itemCount + item.count
                 end
+                itemTotal = (chestData.total - #chestData.items) * 64 -- Add 64 for each empty slot
             end
 
             os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal)
         end
     end
-    -- iris.fullScanTask = coroutine.create(iris._fullScanTask)
 
     iris.tryWrapPeripheral = function(name)
         if peripheral.wrap(name) == nil then
