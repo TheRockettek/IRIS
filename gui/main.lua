@@ -92,7 +92,6 @@ local function NewGUI(iris)
         term.setBackgroundColour(irisColours.background.colour)
 
         if gui.isScanning then
-            iris.logger.Trace().Msg(tostring(gui.isScanning) .. " " .. tostring(gui.scanningCurrent) .. " " .. tostring(gui.scanningTotal))
             term.write("Scanning... (" .. tostring(gui.scanningCurrent) .. "/" .. tostring(gui.scanningTotal) .. ")")
 
             return

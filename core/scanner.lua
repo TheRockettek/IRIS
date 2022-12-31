@@ -34,6 +34,8 @@ local function ScanChest(iris, name)
         end
     end
 
+    iris.logger.Trace().Msg("scanchest done")
+
     return chestData, nil
 end
 
@@ -57,6 +59,8 @@ local function ScanAllChests(iris)
         else
             chests[name] = chest
         end
+
+        iris.logger.Trace().Msg("end loop")
     end
 
     iris.logger.Debug().Dur("duration", start).Msg("Finished scanning chests")
