@@ -1,7 +1,8 @@
 local peripherals = require("core.peripherals")
-local logging     = require("libs.logging")
 local errors      = require("core.errors")
 local events      = require("core.events")
+local waitgroup   = require("libs.waitgroup")
+local items       = require("core.items")
 
 local function ScanChest(iris, name)
     assert(type(name) == "string")
@@ -20,18 +21,26 @@ local function ScanChest(iris, name)
 
     local chestList = chest.list()
 
-    for i, _ in pairs(chestList) do
-        iris.logger.Trace().Msg("get " .. tostring(i))
-        local itemDetail = chest.getItemDetail(i)
-        if itemDetail then
-            chestData.items[tostring(i)] = {
-                name = itemDetail.name,
-                display = itemDetail.display,
-                count = itemDetail.count,
-                max = itemDetail.maxCount,
-            }
-        end
+    for i, item in pairs(chestList) do
+        chestData.items[tostring(i)] = {
+            name = item.name,
+            display = item.name,
+            count = item.count,
+            max = items.GetItemMaxStack(item.name),
+        }
     end
+
+    -- for i, _ in pairs(chestList) do
+    --     local itemDetail = chest.getItemDetail(i)
+    --     if itemDetail then
+    --         chestData.items[tostring(i)] = {
+    --             name = itemDetail.name,
+    --             display = itemDetail.display,
+    --             count = itemDetail.count,
+    --             max = itemDetail.maxCount,
+    --         }
+    --     end
+    -- end
 
     return chestData, nil
 end
@@ -45,16 +54,20 @@ local function ScanAllChests(iris)
     local chests = {}
     local chestNames = peripherals.FindAllChests(iris)
 
-    for index, name in pairs(chestNames) do
-        os.queueEvent(events.EventIrisScanUpdate, index, #chestNames)
+    local wg = waitgroup.NewWaitGroup()
 
-        local chest, err = ScanChest(iris, name)
-        if err ~= nil then
-            iris.logger.Warn().Str("name", name).Err(err).Msg("Failed to scan chest")
-        else
-            chests[name] = chest
-        end
+    for _, name in pairs(chestNames) do
+        wg.Add(function()
+            local chest, err = ScanChest(iris, name)
+            if err ~= nil then
+                iris.logger.Warn().Str("name", name).Err(err).Msg("Failed to scan chest")
+            else
+                chests[name] = chest
+            end
+        end)
     end
+
+    wg.Wait()
 
     iris.logger.Debug().Dur("duration", start).Msg("Finished scanning chests")
 
