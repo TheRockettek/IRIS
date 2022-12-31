@@ -29,7 +29,7 @@ local function ScanChest(iris, name)
             count = item.count,
         }
         chestData.usedSlots = chestData.usedSlots + 1
-        chestData.itemCount = chestData.itemCount + item.count
+        chestData.totalItems = chestData.totalItems + item.count
     end
 
     return chestData, nil
