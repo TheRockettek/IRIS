@@ -4,19 +4,14 @@ local errors      = require("core.errors")
 local events      = require("core.events")
 
 local function ScanChest(iris, name)
-    iris.logger.Trace().Msg("scanchest init")
-
     assert(type(name) == "string")
 
     iris.logger.Debug().Str("name", name).Msg("Scanning chest")
 
     local chest = peripheral.wrap(name)
     if chest == nil then
-        iris.logger.Trace().Msg("errored")
         return nil, errors.ErrCouldNotWrapPeripheral
     end
-
-    iris.logger.Trace().Msg("wrapped")
 
     local chestData = {
         total = chest.size(),
@@ -24,8 +19,6 @@ local function ScanChest(iris, name)
     }
 
     local chestList = chest.list()
-
-    iris.logger.Trace().Msg("list")
 
     for i, _ in pairs(chestList) do
         iris.logger.Trace().Msg("get " .. tostring(i))
@@ -38,10 +31,7 @@ local function ScanChest(iris, name)
                 max = itemDetail.maxCount,
             }
         end
-        iris.logger.Trace().Msg("got")
     end
-
-    iris.logger.Trace().Msg("scanchest done")
 
     return chestData, nil
 end
@@ -56,9 +46,8 @@ local function ScanAllChests(iris)
     local chestNames = peripherals.FindAllChests(iris)
 
     for index, name in pairs(chestNames) do
-        iris.logger.Trace().Msg("preevent")
         os.queueEvent(events.EventIrisScanUpdate, index, #chestNames)
-        iris.logger.Trace().Msg("postevent")
+        coroutine.yield()
 
         local chest, err = ScanChest(iris, name)
         if err ~= nil then
@@ -66,8 +55,6 @@ local function ScanAllChests(iris)
         else
             chests[name] = chest
         end
-
-        iris.logger.Trace().Msg("end loop")
     end
 
     iris.logger.Debug().Dur("duration", start).Msg("Finished scanning chests")
