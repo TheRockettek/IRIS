@@ -169,7 +169,7 @@ local function NewGUI(iris)
                 gui.drawBase()
             elseif type == events.EventIrisInit then
                 gui.isInitialized = true
-                break
+                gui.drawBase()
             end
         end
     end
