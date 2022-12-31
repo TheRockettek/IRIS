@@ -69,16 +69,16 @@ local function NewGUI(iris)
 
         if isSmallDisplay then
             paintutils.drawBox(1, h, w, h, irisColours.main.colour)
-            term.setCursorPos(math.floor((w-#paginationDisplay)/2), h)
+            term.setCursorPos(math.floor((w-(#paginationDisplay - 1))/2), h)
             term.write(paginationDisplay)
 
             gui.drawPercentage(1, h-1, w)
         else
-            paintutils.drawBox(w - #paginationDisplay, h, w, h, irisColours.main.colour)
-            term.setCursorPos(w - #paginationDisplay, h)
+            paintutils.drawBox((w - (#paginationDisplay - 1)), h, w, h, irisColours.main.colour)
+            term.setCursorPos(w - (#paginationDisplay - 1), h)
             term.write(paginationDisplay)
 
-            gui.drawPercentage(1, h, w - #paginationDisplay)
+            gui.drawPercentage(1, h, w - (#paginationDisplay - 1))
         end
     end
 
