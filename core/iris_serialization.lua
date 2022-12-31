@@ -1,5 +1,5 @@
-local json    = require("libs.json")
-local errors  = require("core.errors")
+local json = require("libs.json")
+local errors = require("core.errors")
 
 local fileVersion = "1"
 
@@ -8,9 +8,9 @@ local function Encode(iris)
         version = fileVersion,
         data = {
             iris = {
-                lastScannedAt = iris.irisData.iris.lastScannedAt,
+                lastScannedAt = iris.irisData.iris.lastScannedAt
             },
-            chests = iris.irisData.chests,
+            chests = iris.irisData.chests
         }
     }
 

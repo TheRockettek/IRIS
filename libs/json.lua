@@ -1,10 +1,11 @@
-local controls = {["\n"]="\\n", ["\r"]="\\r", ["\t"]="\\t", ["\b"]="\\b", ["\f"]="\\f", ["\""]="\\\"", ["\\"]="\\\\"}
-local whites = {['\n']=true; ['\r']=true; ['\t']=true; [' ']=true; [',']=true; [':']=true}
-local numChars = {['e']=true; ['E']=true; ['+']=true; ['-']=true; ['.']=true}
+local controls = { ["\n"] = "\\n", ["\r"] = "\\r", ["\t"] = "\\t", ["\b"] = "\\b", ["\f"] = "\\f", ["\""] = "\\\"",
+    ["\\"] = "\\\\" }
+local whites = { ['\n'] = true; ['\r'] = true; ['\t'] = true; [' '] = true; [','] = true; [':'] = true }
+local numChars = { ['e'] = true; ['E'] = true; ['+'] = true; ['-'] = true; ['.'] = true }
 
 local function isArray(t)
     local max = 0
-    for k,_ in pairs(t) do
+    for k, _ in pairs(t) do
         if type(k) ~= "number" then
             return false
         elseif k > max then
@@ -34,9 +35,9 @@ local function encodeCommon(val, pretty, tabLevel, tTracking)
             str = str .. "\n"
             tabLevel = tabLevel + 1
         end
-        for k,v in iterator(val) do
+        for k, v in iterator(val) do
             tab("")
-            loopFunc(k,v)
+            loopFunc(k, v)
             str = str .. ","
             if pretty then str = str .. "\n" end
         end
@@ -51,25 +52,22 @@ local function encodeCommon(val, pretty, tabLevel, tTracking)
         tab(closeBracket)
     end
 
-    -- Table encoding
     if type(val) == "table" then
         assert(not tTracking[val], "Cannot encode a table holding itself recursively")
         tTracking[val] = true
         if isArray(val) then
-            arrEncoding(val, "[", "]", pairs, function(k,v)
-            str = str .. encodeCommon(v, pretty, tabLevel, tTracking)
+            arrEncoding(val, "[", "]", pairs, function(k, v)
+                str = str .. encodeCommon(v, pretty, tabLevel, tTracking)
             end)
         else
-            arrEncoding(val, "{", "}", pairs, function(k,v)
-            assert(type(k) == "string")
-            str = str .. encodeCommon(k, pretty, tabLevel, tTracking)
-            str = str .. (pretty and ": " or ":") .. encodeCommon(v, pretty, tabLevel, tTracking)
+            arrEncoding(val, "{", "}", pairs, function(k, v)
+                assert(type(k) == "string")
+                str = str .. encodeCommon(k, pretty, tabLevel, tTracking)
+                str = str .. (pretty and ": " or ":") .. encodeCommon(v, pretty, tabLevel, tTracking)
             end)
         end
-        -- String encoding
     elseif type(val) == "string" then
         str = '"' .. val:gsub("[%c\"\\]", controls) .. '"'
-        -- Number encoding
     elseif type(val) == "number" or type(val) == "boolean" then
         str = tostring(val)
     else
@@ -79,7 +77,7 @@ local function encodeCommon(val, pretty, tabLevel, tTracking)
 end
 
 local decodeControls = {}
-for k,v in pairs(controls) do
+for k, v in pairs(controls) do
     decodeControls[v] = k
 end
 
@@ -108,16 +106,16 @@ end
 function parseString(str)
     str = str:sub(2)
     local s = ""
-    while str:sub(1,1) ~= "\"" do
-        local next = str:sub(1,1)
+    while str:sub(1, 1) ~= "\"" do
+        local next = str:sub(1, 1)
         str = str:sub(2)
         assert(next ~= "\n", "Unclosed string")
 
         if next == "\\" then
-            local escape = str:sub(1,1)
+            local escape = str:sub(1, 1)
             str = str:sub(2)
 
-            next = assert(decodeControls[next..escape], "Invalid escape character")
+            next = assert(decodeControls[next .. escape], "Invalid escape character")
         end
 
         s = s .. next

@@ -3,13 +3,13 @@ local events = require "core.events"
 -- original colour to use, r, g, b
 
 local irisColours = {
-    main       =  { colour = colours.blue,   hex = 0x2F80ED },
-    accent     =  { colour = colours.cyan,   hex = 0x2162BA },
-    background =  { colour = colours.black,  hex = 0x000000 },
-    contrast   =  { colour = colours.white,  hex = 0xFFFFFF },
-    highStorage = { colour = colours.green,  hex = 0x5CB764 },
+    main        = { colour = colours.blue, hex = 0x2F80ED },
+    accent      = { colour = colours.cyan, hex = 0x2162BA },
+    background  = { colour = colours.black, hex = 0x000000 },
+    contrast    = { colour = colours.white, hex = 0xFFFFFF },
+    highStorage = { colour = colours.green, hex = 0x5CB764 },
     lowStorage  = { colour = colours.orange, hex = 0xF19E37 },
-    noStorage   = { colour = colours.red,    hex = 0xE85550 },
+    noStorage   = { colour = colours.red, hex = 0xE85550 },
 }
 
 local function setupPalette()
@@ -57,7 +57,7 @@ local function NewGUI(iris)
 
         -- Add label
         local label = "IRIS"
-        term.setCursorPos(w-#label, 1)
+        term.setCursorPos(w - #label, 1)
         term.write(label)
 
         paintutils.drawBox(1, 2, w, 2, irisColours.accent.colour)
@@ -74,10 +74,10 @@ local function NewGUI(iris)
 
         if isSmallDisplay then
             paintutils.drawBox(1, h, w, h, irisColours.main.colour)
-            term.setCursorPos(math.floor((w-#paginationDisplay)/2), h)
+            term.setCursorPos(math.floor((w - #paginationDisplay) / 2), h)
             term.write(paginationDisplay)
 
-            gui.drawPercentage(1, h-1, w)
+            gui.drawPercentage(1, h - 1, w)
         else
             paintutils.drawBox(w - #paginationDisplay + 1, h, w, h, irisColours.main.colour)
             term.setCursorPos(w - #paginationDisplay + 1, h)
@@ -101,22 +101,25 @@ local function NewGUI(iris)
             return
         end
 
-        local text = (" %.0f%% - (%d/%d) [%d/%d] "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount, gui.itemTotal)
+        local text = (" %.0f%% - (%d/%d) [%d/%d] "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal,
+            gui.itemCount, gui.itemTotal)
         if #text > w then
-            text = (" %.0f%% - (%d/%d) "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount, gui.itemTotal)
+            text = (" %.0f%% - (%d/%d) "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount
+                , gui.itemTotal)
             if #text > w then
-                text = (" %.0f%% "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount, gui.itemTotal)
+                text = (" %.0f%% "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount,
+                    gui.itemTotal)
             end
         end
 
         text = text .. (" "):rep(w - #text) -- Add any missing padding
 
-        local barCharCount = math.floor((gui.itemPercentage/100) * w)
+        local barCharCount = math.floor((gui.itemPercentage / 100) * w)
         local barColour
 
         if (gui.itemSlotsTotal - gui.itemSlotsUsed) <= 3 then
             barColour = irisColours.noStorage
-        elseif (gui.itemSlotsTotal - gui.itemSlotsUsed) <= (9*3) then
+        elseif (gui.itemSlotsTotal - gui.itemSlotsUsed) <= (9 * 3) then
             barColour = irisColours.lowStorage
         else
             barColour = irisColours.highStorage
@@ -156,7 +159,7 @@ local function NewGUI(iris)
                 gui.itemSlotsTotal = paramB
                 gui.itemCount = paramC
                 gui.itemTotal = paramD
-                gui.itemPercentage = math.floor((gui.itemCount/gui.itemTotal)*100)
+                gui.itemPercentage = math.floor((gui.itemCount / gui.itemTotal) * 100)
                 gui.drawBase()
             elseif type == events.EventIrisInit then
                 gui.isInitialized = true
@@ -165,7 +168,7 @@ local function NewGUI(iris)
         end
     end
 
-    gui.run = function ()
+    gui.run = function()
         setupPalette()
         gui.mainScreen()
     end

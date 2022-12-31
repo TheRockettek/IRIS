@@ -40,7 +40,7 @@ local function tableContains(table, key)
 end
 
 local function willWrap(text)
-    return (({term.getCursorPos()})[1] + #text) > ({term.getSize()})[1]
+    return (({ term.getCursorPos() })[1] + #text) > ({ term.getSize() })[1]
 end
 
 local function formatEpoch(epoch)
@@ -49,12 +49,12 @@ local function formatEpoch(epoch)
     if diff < 1000 then
         return tostring(diff) .. "ms"
     elseif diff < 10000 then
-        return tostring(math.floor(diff/10)/100) .. "s"
+        return tostring(math.floor(diff / 10) / 100) .. "s"
     elseif diff < 60000 then
-        return tostring(math.floor(diff/1000) .. "s")
+        return tostring(math.floor(diff / 1000) .. "s")
     else
-        local mins = math.floor(diff/60000)
-        return tostring(mins) .. "m" .. (math.floor(diff/1000) - mins*60) .. "s"
+        local mins = math.floor(diff / 60000)
+        return tostring(mins) .. "m" .. (math.floor(diff / 1000) - mins * 60) .. "s"
     end
 end
 
@@ -151,19 +151,19 @@ local function NewLogger(timeFormat, fileName)
             end
         end
 
-        loggerMessage.Msg = function (message)
+        loggerMessage.Msg = function(message)
             loggerMessage.message = tostring(message)
             loggerMessage.Send()
         end
 
-        loggerMessage.Err = function (error)
+        loggerMessage.Err = function(error)
             loggerMessage.error = tostring(error)
 
             return loggerMessage
         end
 
         loggerMessage.Str = function(name, value)
-            table.insert(loggerMessage.variables, { name = tostring(name), value = tostring(value)})
+            table.insert(loggerMessage.variables, { name = tostring(name), value = tostring(value) })
 
             return loggerMessage
         end

@@ -1,10 +1,10 @@
-local errors             = require "core.errors"
-local json               = require "libs.json"
-local logging            = require "libs.logging"
-local irisSerialization  = require "core.iris_serialization"
+local errors = require "core.errors"
+local json = require "libs.json"
+local logging = require "libs.logging"
+local irisSerialization = require "core.iris_serialization"
 local atlasSerialization = require "core.atlas_serialization"
-local scanner            = require "core.scanner"
-local events             = require "core.events"
+local scanner = require "core.scanner"
+local events = require "core.events"
 
 local VERSION = "0.0.1"
 
@@ -18,15 +18,11 @@ local defaultConfiguration = {
     atlasFileLocation = "atlas.data",
 
     scanOnStart = true,
-    scanDelay = 60000, -- Time in milliseconds to wait between a chest scan. This is only used during startup.
+    scanDelay = 60000 -- Time in milliseconds to wait between a chest scan. This is only used during startup.
 }
 
 local function tableContains(table, key)
-    for i, _ in pairs(table) do
-        if i == key then
-            return true
-        end
-    end
+    for i, _ in pairs(table) do if i == key then return true end end
 
     return false
 end
@@ -38,26 +34,18 @@ local function NewIRIS(logger)
 
         isIRISDataLoaded = false,
         isIRISDataDirty = false,
-        irisData = {
-            iris = {
-                lastScannedAt = 0,
-            },
-            chests = {}
-        },
+        irisData = { iris = { lastScannedAt = 0 }, chests = {} },
 
         isAtlasDataLoaded = false,
         isAtlasDataDirty = false,
-        atlasData = {
-        },
+        atlasData = {},
 
-        configuration = defaultConfiguration,
+        configuration = defaultConfiguration
     }
 
     -- Initializes IRIS
     iris.init = function(logger)
-        if logger ~= nil then
-            iris.logger = logger
-        end
+        if logger ~= nil then iris.logger = logger end
 
         iris.logger.Info().Msg("IRIS Version " .. VERSION)
 
@@ -81,9 +69,7 @@ local function NewIRIS(logger)
         -- Load iris atlas data
         iris.loadIRISData()
 
-        if iris.configuration.scanOnStart then
-            iris.fullScan()
-        end
+        if iris.configuration.scanOnStart then iris.fullScan() end
 
         os.queueEvent(events.EventIrisInit)
     end
@@ -110,9 +96,7 @@ local function NewIRIS(logger)
 
         local configuration = defaultConfiguration
 
-        for key, value in pairs(jsonDecode) do
-            configuration[key] = value
-        end
+        for key, value in pairs(jsonDecode) do configuration[key] = value end
 
         return configuration, nil
     end
@@ -126,7 +110,7 @@ local function NewIRIS(logger)
 
             return false
         end
-    
+
         local file = fs.open(path, "rb")
         local contents = file.readAll()
         file.close()
@@ -154,9 +138,7 @@ local function NewIRIS(logger)
         local path = iris.configuration.irisFileLocation
 
         local irisDataSerialized, err = irisSerialization.Encode(iris)
-        if err ~= nil then
-            return false, err
-        end
+        if err ~= nil then return false, err end
 
         local file = fs.open(path, "wb")
         file.write(irisDataSerialized)
@@ -176,7 +158,7 @@ local function NewIRIS(logger)
 
             return false
         end
-    
+
         local file = fs.open(path, "rb")
         local contents = file.readAll()
         file.close()
@@ -204,9 +186,7 @@ local function NewIRIS(logger)
         local path = iris.configuration.atlasFileLocation
 
         local atlasDataSerialized, err = atlasSerialization.Encode(iris)
-        if err ~= nil then
-            return false, err
-        end
+        if err ~= nil then return false, err end
 
         local file = fs.open(path, "wb")
         file.write(atlasDataSerialized)
@@ -219,10 +199,15 @@ local function NewIRIS(logger)
 
     -- Performs a scan of all chests, stores and saves changes.
     -- If the last scan is before the scan delay, will not run and return false.
-    iris._fullScan = function()
+    iris.fullScan = function()
         local timeSince = os.epoch("utc") - iris.irisData.iris.lastScannedAt
         if timeSince < iris.configuration.scanDelay then
-            iris.logger.Info().Str("since", timeSince).Str("delay", iris.configuration.scanDelay).Msg("Full scan called but not hit delay")
+            iris.logger.Info().Str("since", timeSince).Str("delay",
+                iris.configuration
+                .scanDelay).Msg(
+                "Full scan called but not hit delay")
+
+            os.queueEvent(events.EventIrisFullScanFailed)
 
             return false
         end
@@ -242,33 +227,26 @@ local function NewIRIS(logger)
             iris.logger.Info().Msg("IRIS data saved successfuly")
         end
 
-        return true
-    end
+        local itemSlotsUsed = 0
+        local itemSlotsTotal = 0
+        local itemCount = 0
 
-    iris.fullScan = function()
-        local ok = iris.fullScan()
-        if not ok then
-            os.queueEvent(events.EventIrisFullScanFailed)
-        else
-            local itemSlotsUsed = 0
-            local itemSlotsTotal = 0
-            local itemCount = 0
-
-            for _, chestData in pairs(iris.irisData.chests) do
-                itemSlotsTotal = itemSlotsTotal + chestData.totalSlots
-                itemSlotsUsed = itemSlotsUsed + chestData.usedSlots
-                itemCount = itemCount + chestData.totalItems
-            end
-
-            os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal, itemCount, nil)
+        for _, chestData in pairs(iris.irisData.chests) do
+            itemSlotsTotal = itemSlotsTotal + chestData.totalSlots
+            itemSlotsUsed = itemSlotsUsed + chestData.usedSlots
+            itemCount = itemCount + chestData.totalItems
         end
 
-        return ok
+        os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal,
+            itemCount, nil)
+
+        return true
     end
 
     iris.tryWrapPeripheral = function(name)
         if peripheral.wrap(name) == nil then
-            iris.logger.Panic().Err(errors.ErrCouldNotWrapPeripheral).Str("name", name).Msg("Failed to wrap to peripheral")
+            iris.logger.Panic().Err(errors.ErrCouldNotWrapPeripheral).Str(
+                "name", name).Msg("Failed to wrap to peripheral")
 
             error("failed to wrap to peripheral " .. name)
         end
@@ -276,9 +254,7 @@ local function NewIRIS(logger)
 
     -- Returns all chests that contain a specific item. Returns slot and count.
     iris.locate = function(tryScan, name)
-        if tryScan then
-            iris.fullScan()
-        end
+        if tryScan then iris.fullScan() end
 
         local locations = {}
 
@@ -289,7 +265,7 @@ local function NewIRIS(logger)
                         peripheral = chestName,
                         slot = slotId,
                         count = item.count,
-                        max = item.max,
+                        max = item.max
                     })
                 end
             end
@@ -310,11 +286,13 @@ local function NewIRIS(logger)
             hasSpace = false,
             spacesMissing = 0,
             candidates = {},
-            emptySlots = {},
+            emptySlots = {}
         }
 
         if tryFindOptimalSlots then
-            table.sort(slots, function(a, b) return (a.max - a.count) < (b.max - b.count) end)
+            table.sort(slots, function(a, b)
+                return (a.max - a.count) < (b.max - b.count)
+            end)
 
             local toFit = totalStore
 
@@ -329,14 +307,16 @@ local function NewIRIS(logger)
 
             -- We have filled up all slots we have in storage, find more empty space.
             if toFit > 0 then
-                local emptySlots = iris.findEmptySpaces(tryScan, math.ceil(toFit / maxStack))
+                local emptySlots = iris.findEmptySpaces(tryScan, math.ceil(
+                    toFit / maxStack))
 
                 output.hasSpace = emptySlots.hasSpace
                 output.spacesMissing = emptySlots.spacesMissing
                 output.emptySlots = emptySlots.candidates
             end
         else
-            local emptySlots = iris.findEmptySpaces(tryScan, math.ceil(totalStore / maxStack))
+            local emptySlots = iris.findEmptySpaces(tryScan, math.ceil(
+                totalStore / maxStack))
 
             output.hasSpace = emptySlots.hasSpace
             output.spacesMissing = emptySlots.spacesMissing
@@ -348,31 +328,26 @@ local function NewIRIS(logger)
 
     iris.findEmptySpaces = function(tryScan, maxSpacesNeeded, ignoreList)
         if type(ignoreList) == "string" then
-            ignoreList = {ignoreList}
+            ignoreList = { ignoreList }
         elseif ignoreList == nil then
             ignoreList = {}
         end
 
         assert(type(ignoreList) == "table")
 
-        if tryScan then
-            iris.fullScan()
-        end
+        if tryScan then iris.fullScan() end
 
-        local output = {
-            hasSpace = false,
-            spacesMissing = 0,
-            candidates = {},
-        }
+        local output = { hasSpace = false, spacesMissing = 0, candidates = {} }
 
         for chestName, chestData in pairs(iris.irisData.chests) do
             if not tableContains(ignoreList, chestName) then
                 if chestData.total > chestData.itemCount then
                     for slotId = 1, chestData.total, 1 do
-                        if chestData.items[tostring(slotId)] == nil and maxSpacesNeeded > 0 then
+                        if chestData.items[tostring(slotId)] == nil and
+                            maxSpacesNeeded > 0 then
                             table.insert(output.candidates, {
                                 peripheral = chestName,
-                                slot = slotId,
+                                slot = slotId
                             })
 
                             maxSpacesNeeded = maxSpacesNeeded - 1
@@ -380,9 +355,7 @@ local function NewIRIS(logger)
                         end
                     end
 
-                    if maxSpacesNeeded <= 0 then
-                        break
-                    end
+                    if maxSpacesNeeded <= 0 then break end
                 end
             end
         end
@@ -396,9 +369,7 @@ local function NewIRIS(logger)
 
     -- Returns all items based on locations.
     iris.flatten = function(tryScan)
-        if tryScan then
-            iris.fullScan()
-        end
+        if tryScan then iris.fullScan() end
 
         local items = {}
 
@@ -412,7 +383,7 @@ local function NewIRIS(logger)
                     peripheral = chestName,
                     slot = slotId,
                     count = item.count,
-                    max = item.max,
+                    max = item.max
                 })
             end
         end
@@ -431,9 +402,7 @@ local function NewIRIS(logger)
     -- will try fetch data.
     iris.fetchFromAtlas = function(name)
         local data = iris.getFromAtlas(name)
-        if data ~= nil then
-            return data, nil
-        end
+        if data ~= nil then return data, nil end
 
         -- Try fetch from local storage
 
@@ -448,10 +417,7 @@ local function NewIRIS(logger)
     iris.updateAtlasEntry = function(name, maxCount, tags)
         local orig = iris.atlasData[name]
 
-        iris.atlasData[name] = {
-            max = maxCount,
-            tags = tags
-        }
+        iris.atlasData[name] = { max = maxCount, tags = tags }
 
         if orig ~= iris.atlasData[name] then
             iris.isAtlasDataDirty = true
@@ -472,9 +438,7 @@ local function NewIRIS(logger)
         for slotId = 1, 16, 1 do
             if turtle.getItemCount() > 0 then
                 local pitems, perr = iris.pushLocal(slotId)
-                if perr ~= nil then
-                    err = perr
-                end
+                if perr ~= nil then err = perr end
                 items = items + pitems
             end
         end
@@ -505,18 +469,15 @@ local function NewIRIS(logger)
         -- Identify max items in a stack
         local maxItems = 64
         local atlasEntry = iris.getFromAtlas(name)
-        if atlasEntry then
-            maxItems = atlasEntry.max
-        end
+        if atlasEntry then maxItems = atlasEntry.max end
 
         local locations = iris.locate(false, name)
         for _, location in pairs(locations) do
             local transferCount = math.min(maxItems, fillTo)
 
-            local transferred, err = iris._pull(location.peripheral, slotId, location.slot, transferCount)
-            if err == nil then
-                fillTo = fillTo - transferred
-            end
+            local transferred, err = iris._pull(location.peripheral, slotId,
+                location.slot, transferCount)
+            if err == nil then fillTo = fillTo - transferred end
         end
 
         if saveData then
@@ -531,9 +492,7 @@ local function NewIRIS(logger)
     iris.pushLocal = function(slotId, saveData)
         turtle.select(slotId)
         local item = turtle.getItemDetail()
-        if item == nil then
-            return 0, nil
-        end
+        if item == nil then return 0, nil end
 
         local itemCount = turtle.getItemCount()
         local originalItemCount = itemCount
@@ -543,22 +502,17 @@ local function NewIRIS(logger)
         iris.updateAtlasEntry(item.name, itemMax, nil)
 
         local result = iris.findSpot(false, item.name, itemCount, itemMax)
-        if not result.hasSpace then
-            return 0, errors.ErrIRISMissingSpace
-        end
+        if not result.hasSpace then return 0, errors.ErrIRISMissingSpace end
 
         -- Use existing slots.
         for _, candidate in pairs(result.candidates) do
-            local transferCount = math.max(itemCount, itemMax-candidate.count)
+            local transferCount = math.max(itemCount, itemMax - candidate.count)
 
-            local transferred, err = iris._push(candidate.peripheral, slotId, candidate.slot, transferCount)
-            if err == nil then
-                itemCount = itemCount - transferred
-            end
+            local transferred, err = iris._push(candidate.peripheral, slotId,
+                candidate.slot, transferCount)
+            if err == nil then itemCount = itemCount - transferred end
 
-            if itemCount <= 0 then
-                break
-            end
+            if itemCount <= 0 then break end
         end
 
         -- Use empty space if necessary.
@@ -568,14 +522,14 @@ local function NewIRIS(logger)
                 if chest then
                     local transferCount = math.max(itemCount, itemMax)
 
-                    local transferred, err = iris._push(emptySlot.peripheral, slotId, emptySlot.slot, transferCount)
+                    local transferred, err =
+                    iris._push(emptySlot.peripheral, slotId, emptySlot.slot,
+                        transferCount)
                     if err == nil then
                         itemCount = itemCount - transferred
                     end
 
-                    if itemCount <= 0 then
-                        break
-                    end
+                    if itemCount <= 0 then break end
                 end
             end
         end
@@ -585,39 +539,31 @@ local function NewIRIS(logger)
             iris.saveAtlasData()
         end
 
-        return originalItemCount-itemCount, nil
+        return originalItemCount - itemCount, nil
     end
 
     -- Pulls an item from IRIS. Inserts into turtleOutput.
     iris.pull = function(name, count, saveData)
         iris.flushLocal()
-        
+
         -- Identify max items in a stack
         local maxItems = 64
         local atlasEntry = iris.getFromAtlas(name)
-        if atlasEntry then
-            maxItems = atlasEntry.max
-        end
+        if atlasEntry then maxItems = atlasEntry.max end
 
         for i = 1, 16, 1 do
-            local transferred, err = iris.pullLocal(name, i, math.min(count, maxItems), false)
-            if err == nil then
-                count = count - transferred
-            end
+            local transferred, err = iris.pullLocal(name, i,
+                math.min(count, maxItems),
+                false)
+            if err == nil then count = count - transferred end
 
-            if count <= 0 then
-                break
-            end
+            if count <= 0 then break end
         end
 
         local err = iris._pushOutput()
-        if err ~= nil then
-            return err
-        end
+        if err ~= nil then return err end
 
-        if count > 0 then
-            iris.pull(name, count, false)
-        end
+        if count > 0 then iris.pull(name, count, false) end
 
         if saveData then
             iris.saveIRISData()
@@ -634,9 +580,7 @@ local function NewIRIS(logger)
         -- Try up to 10 times.
         for _ = 1, 10, 1 do
             local items, err = iris._pullInput()
-            if err then
-                return err
-            end
+            if err then return err end
 
             if items > 0 then
                 iris.flushLocal()
@@ -653,13 +597,11 @@ local function NewIRIS(logger)
         return nil
     end
 
-    iris._pullInput = function ()
+    iris._pullInput = function()
         local totalItems = 0
 
         local inventory = peripheral.wrap(iris.configuration.turtleInput)
-        if not inventory then
-            return 0, errors.ErrCouldNotWrapPeripheral
-        end
+        if not inventory then return 0, errors.ErrCouldNotWrapPeripheral end
 
         local items = inventory.items()
 
@@ -669,7 +611,9 @@ local function NewIRIS(logger)
             for i = 1, 16, 1 do
                 turtle.select(i)
                 if turtle.getItemCount() == 0 then
-                    local count = inventory.pullItem(iris.configuration.turtleInput, i, item.count, periphalSlot)
+                    local count = inventory.pullItem(iris.configuration
+                        .turtleInput, i,
+                        item.count, periphalSlot)
                     if count > 0 then
                         totalItems = totalItems + count
                         hasSpace = true
@@ -677,30 +621,25 @@ local function NewIRIS(logger)
                 end
             end
 
-            if not hasSpace then
-                break
-            end
+            if not hasSpace then break end
         end
 
         return items, nil
     end
 
-    iris._pushOutput = function ()
+    iris._pushOutput = function()
         local totalItems = 0
 
         local inventory = peripheral.wrap(iris.configuration.turtleOutput)
-        if not inventory then
-            return 0, errors.ErrCouldNotWrapPeripheral
-        end
+        if not inventory then return 0, errors.ErrCouldNotWrapPeripheral end
 
         for i = 1, 16, 1 do
             turtle.select(i)
             local count = turtle.getItemCount()
             if count > 0 then
-                count = inventory.pushItem(iris.configuration.turtleOutput, i, count)
-                if count > 0 then
-                    totalItems = totalItems + count
-                end
+                count = inventory.pushItem(iris.configuration.turtleOutput, i,
+                    count)
+                if count > 0 then totalItems = totalItems + count end
             end
         end
 
@@ -709,11 +648,10 @@ local function NewIRIS(logger)
 
     iris._pull = function(peripheral, localSlot, peripheralSlot, count)
         local inventory = peripheral.wrap(peripheral)
-        if not inventory then
-            return 0, errors.ErrCouldNotWrapPeripheral
-        end
+        if not inventory then return 0, errors.ErrCouldNotWrapPeripheral end
 
-        local transferred = inventory.pullItem(peripheral, localSlot, count, peripheralSlot)
+        local transferred = inventory.pullItem(peripheral, localSlot, count,
+            peripheralSlot)
 
         -- ScanChest if not stored
         if iris.irisData.chests[peripheral] == nil then
@@ -723,14 +661,18 @@ local function NewIRIS(logger)
             iris.isIRISDataDirty = true
         else
             -- ScanChest if we don't store an item here or what we store does not make sense.
-            if iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)] == nil or
-               iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)].count == nil then
+            if iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)] ==
+                nil or
+                iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)]
+                .count == nil then
                 local chest = scanner.ScanChest(iris, peripheral)
 
                 iris.irisData.chests[peripheral] = chest
                 iris.isIRISDataDirty = true
             else
-                iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)].count = iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)].count - transferred
+                iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)]
+                    .count = iris.irisData.chests[peripheral].slots[tostring(
+                    peripheralSlot)].count - transferred
                 iris.isIRISDataDirty = true
             end
         end
@@ -738,11 +680,10 @@ local function NewIRIS(logger)
 
     iris._push = function(peripheral, localSlot, peripheralSlot, count)
         local inventory = peripheral.wrap(peripheral)
-        if not inventory then
-            return 0, errors.ErrCouldNotWrapPeripheral
-        end
+        if not inventory then return 0, errors.ErrCouldNotWrapPeripheral end
 
-        local transferred = inventory.pushItem(peripheral, localSlot, count, peripheralSlot)
+        local transferred = inventory.pushItem(peripheral, localSlot, count,
+            peripheralSlot)
 
         -- ScanChest if not stored
         if iris.irisData.chests[peripheral] == nil then
@@ -752,14 +693,18 @@ local function NewIRIS(logger)
             iris.isIRISDataDirty = true
         else
             -- ScanChest if we don't store an item here or what we store does not make sense.
-            if iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)] == nil or
-               iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)].count == nil then
+            if iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)] ==
+                nil or
+                iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)]
+                .count == nil then
                 local chest = scanner.ScanChest(iris, peripheral)
 
                 iris.irisData.chests[peripheral] = chest
                 iris.isIRISDataDirty = true
             else
-                iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)].count = iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)].count + transferred
+                iris.irisData.chests[peripheral].slots[tostring(peripheralSlot)]
+                    .count = iris.irisData.chests[peripheral].slots[tostring(
+                    peripheralSlot)].count + transferred
                 iris.isIRISDataDirty = true
             end
         end
@@ -770,6 +715,4 @@ local function NewIRIS(logger)
     return iris
 end
 
-return {
-    NewIRIS = NewIRIS
-}
+return { NewIRIS = NewIRIS }

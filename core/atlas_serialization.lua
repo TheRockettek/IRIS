@@ -1,5 +1,5 @@
-local json    = require("libs.json")
-local errors  = require("core.errors")
+local json   = require("libs.json")
+local errors = require("core.errors")
 
 local fileVersion = "1"
 

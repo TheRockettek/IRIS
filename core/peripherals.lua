@@ -1,5 +1,3 @@
-local logging = require("libs.logging")
-
 local chestPeripheral = "minecraft:chest"
 
 local function FindAllChests(iris)
