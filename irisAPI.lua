@@ -62,7 +62,8 @@ local function NewIRIS(logger)
         iris.loadData()
 
         if iris.configuration.scanOnStart then
-            coroutine.resume(iris.fullScanTask)
+            iris._fullScanTask()
+            -- coroutine.resume(iris.fullScanTask)
         end
 
         os.queueEvent(events.EventIrisInit)
@@ -196,10 +197,8 @@ local function NewIRIS(logger)
 
             os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal)
         end
-
-        coroutine.yield()
     end
-    iris.fullScanTask = coroutine.create(iris._fullScanTask)
+    -- iris.fullScanTask = coroutine.create(iris._fullScanTask)
 
     iris.tryWrapPeripheral = function(name)
         if peripheral.wrap(name) == nil then

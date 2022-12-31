@@ -47,7 +47,6 @@ local function ScanAllChests(iris)
 
     for index, name in pairs(chestNames) do
         os.queueEvent(events.EventIrisScanUpdate, index, #chestNames)
-        coroutine.yield()
 
         local chest, err = ScanChest(iris, name)
         if err ~= nil then

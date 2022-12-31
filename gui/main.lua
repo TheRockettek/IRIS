@@ -146,7 +146,10 @@ local function NewGUI(iris)
             if type == "timer" then
                 if paramA == syncTimer then
                     syncTimer = os.startTimer(syncTimerDuration)
-                    coroutine.resume(iris.fullScanTask)
+                    -- coroutine.resume(iris.fullScanTask)
+                    gui.isScanning = true
+                    gui.drawBase()
+                    iris._fullScanTask()
                 end
             elseif type == events.EventIrisScanStart then
                 gui.isScanning = true
