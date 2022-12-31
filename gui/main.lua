@@ -1,3 +1,4 @@
+local events = require "core.events"
 -- Colours to use within IRIS gui
 -- original colour to use, r, g, b
 
@@ -30,6 +31,12 @@ local function NewGUI(iris)
         pageCount = 0,
 
         results = {},
+
+        isInitialized = false,
+
+        isScanning = false,
+        scanningCurrent = 0,
+        scanningTotal = 0,
 
         itemPercentage = 0,
         itemSlotsUsed = 0,
@@ -84,11 +91,11 @@ local function NewGUI(iris)
         term.setCursorPos(x, y)
         term.setBackgroundColour(irisColours.background.colour)
 
-        if iris.isScanning then
-            term.write("Scanning (" .. tostring(iris.scanningCurrent) .. "/" .. tostring(iris.scanningTotal) .. ")")
+        if gui.isScanning then
+            term.write("Scanning... (" .. tostring(gui.scanningCurrent) .. "/" .. tostring(gui.scanningTotal) .. ")")
 
             return
-        elseif not iris.isInitialized then
+        elseif not gui.isInitialized then
             term.write("Getting Ready...")
 
             return
@@ -130,58 +137,26 @@ local function NewGUI(iris)
     gui.splashScreen = function()
         gui.drawBase()
 
-        local sleepTimerDuration = 1
-
         -- Wait for init
-        local sleepTimer = os.startTimer(sleepTimerDuration)
         while true do
-            local type, timerId = os.pullEvent("timer")
-            if type == "timer" and timerId == sleepTimer then
-                sleepTimer = os.startTimer(sleepTimerDuration)
-
-                if iris.isInitialized then
-                    break
-                end
-
+            local type, paramA, paramB, paramC, paramD = os.pullEvent()
+            if type == events.EventIrisScanStart then
+                gui.isScanning = true
                 gui.drawBase()
+            elseif type == events.EventIrisScanUpdate then
+                gui.isScanning = true
+                gui.scanningCurrent = paramA
+                gui.scanningTotal = paramB
+                gui.drawBase()
+            elseif type == events.EventIrisScanComplete then
+                gui.isScanning = false
+                gui.drawBase()
+            elseif type == events.EventIrisInit then
+                gui.isInitialized = true
+                break
             end
         end
     end
-
-    gui._syncTask = function()
-        local ok = iris.fullScan()
-        if not ok then
-            return
-        end
-
-        local itemPercentage = 0
-        local itemSlotsUsed = 0
-        local itemSlotsTotal = 0
-        local itemCount = 0
-        local itemTotal = 0
-
-        for _, chestData in pairs(iris.irisData.chests) do
-            itemSlotsTotal = itemSlotsTotal + chestData.total
-            itemSlotsUsed = itemSlotsUsed + #chestData.items
-            for _, item in pairs(chestData.items) do
-                itemTotal = itemTotal + item.max
-                itemCount = itemCount + item.count
-            end
-        end
-
-        gui.itemPercentage = itemPercentage
-        gui.itemSlotsUsed = itemSlotsUsed
-        gui.itemSlotsTotal = itemSlotsTotal
-        gui.itemCount = itemCount
-        gui.itemTotal = itemTotal
-
-        gui.drawBase()
-
-        coroutine.yield()
-    end
-    gui.syncTask = coroutine.create(gui._syncTask)
-
-
     gui.mainScreen = function()
         gui.drawBase()
 
@@ -189,10 +164,30 @@ local function NewGUI(iris)
 
         local syncTimer = os.startTimer(syncTimerDuration)
         while true do
-            local timerId = os.pullEvent("timer")
-            if timerId == syncTimer then
-                syncTimer = os.startTimer(syncTimerDuration)
-                coroutine.resume(gui.syncTask)
+            local type, paramA, paramB, paramC, paramD = os.pullEvent()
+            if type == "timer" then
+                if paramA == syncTimer then
+                    syncTimer = os.startTimer(syncTimerDuration)
+                    coroutine.resume(iris.fullScanTask)
+                end
+            elseif type == events.EventIrisScanStart then
+                gui.isScanning = true
+                gui.drawBase()
+            elseif type == events.EventIrisScanUpdate then
+                gui.isScanning = true
+                gui.scanningCurrent = paramA
+                gui.scanningTotal = paramB
+                gui.drawBase()
+            elseif type == events.EventIrisScanComplete then
+                gui.isScanning = false
+                gui.drawBase()
+            elseif type == events.EventIrisFullScan then
+                gui.itemSlotsUsed = paramA
+                gui.itemSlotsTotal = paramB
+                gui.itemCount = paramC
+                gui.itemTotal = paramD
+                gui.itemPercentage = math.floor((gui.itemCount/gui.itemTotal)*100)
+                gui.drawBase()
             end
         end
     end

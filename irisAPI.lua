@@ -3,6 +3,7 @@ local json          = require "libs.json"
 local logging       = require "libs.logging"
 local serialization = require "core.serialization"
 local scanner       = require "core.scanner"
+local events        = require "core.events"
 
 local VERSION = "0.0.1"
 
@@ -70,7 +71,7 @@ local function NewIRIS(logger)
             iris.fullScan()
         end
 
-        iris.isInitialized = true
+        os.queueEvent(events.EventIrisInit)
     end
 
     -- Loads configuration. Overrides existing default configuration keys,
@@ -179,6 +180,32 @@ local function NewIRIS(logger)
 
         return true
     end
+
+    iris._fullScanTask = function()
+        local ok = iris.fullScan()
+        if not ok then
+            os.queueEvent(events.EventIrisFullScanFailed)
+        else
+            local itemSlotsUsed = 0
+            local itemSlotsTotal = 0
+            local itemCount = 0
+            local itemTotal = 0
+
+            for _, chestData in pairs(iris.irisData.chests) do
+                itemSlotsTotal = itemSlotsTotal + chestData.total
+                itemSlotsUsed = itemSlotsUsed + #chestData.items
+                for _, item in pairs(chestData.items) do
+                    itemTotal = itemTotal + item.max
+                    itemCount = itemCount + item.count
+                end
+            end
+
+            os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal)
+        end
+
+        coroutine.yield()
+    end
+    iris.fullScanTask = coroutine.create(iris._fullScanTask)
 
     iris.tryWrapPeripheral = function(name)
         if peripheral.wrap(name) == nil then

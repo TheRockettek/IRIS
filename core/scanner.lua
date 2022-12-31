@@ -1,6 +1,7 @@
 local peripherals = require("core.peripherals")
 local logging     = require("libs.logging")
 local errors      = require("core.errors")
+local events      = require("core.events")
 
 local function ScanChest(iris, name)
     assert(type(name) == "string")
@@ -37,18 +38,14 @@ end
 local function ScanAllChests(iris)
     iris.logger.Debug().Msg("Scanning all chests")
 
-    iris.isScanning = true
-    iris.scanningCurrent = 0
-    iris.scanningTotal = 0
+    os.queueEvent(events.EventIrisScanStart)
 
     local start = os.epoch("utc")
     local chests = {}
     local chestNames = peripherals.FindAllChests(iris)
 
-    iris.scanningTotal = #chestNames
-
     for index, name in pairs(chestNames) do
-        iris.scanningCurrent = index
+        os.queueEvent(events.EventIrisScanUpdate, index, #chestNames)
 
         local chest, err = ScanChest(iris, name)
         if err ~= nil then
@@ -59,7 +56,8 @@ local function ScanAllChests(iris)
     end
 
     iris.logger.Debug().Dur("duration", start).Msg("Finished scanning chests")
-    iris.isScanning = false
+
+    os.queueEvent(events.EventIrisScanComplete)
 
     return chests
 end
