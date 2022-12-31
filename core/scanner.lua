@@ -14,37 +14,24 @@ local function ScanChest(iris, name)
         return nil, errors.ErrCouldNotWrapPeripheral
     end
 
+    local chestSize = chest.size()
+    local chestList = chest.list()
+
     local chestData = {
-        total = chest.size(),
+        totalSlots = chestSize,
+        usedSlots = 0,
+        totalItems = 0,
         items = {},
     }
 
-    local chestList = chest.list()
-    local itemCount = 0
-
     for i, item in pairs(chestList) do
-        itemCount = itemCount + 1
-        chestData.items[tostring(i)] = {
+        i[tostring(i)] = {
             name = item.name,
-            display = item.name,
             count = item.count,
-            max = items.GetItemMaxStack(item.name),
         }
+        chestData.usedSlots = chestData.usedSlots + 1
+        chestData.itemCount = chestData.itemCount + item.count
     end
-
-    chestData.itemCount = itemCount
-
-    -- for i, _ in pairs(chestList) do
-    --     local itemDetail = chest.getItemDetail(i)
-    --     if itemDetail then
-    --         chestData.items[tostring(i)] = {
-    --             name = itemDetail.name,
-    --             display = itemDetail.display,
-    --             count = itemDetail.count,
-    --             max = itemDetail.maxCount,
-    --         }
-    --     end
-    -- end
 
     return chestData, nil
 end
@@ -55,6 +42,7 @@ local function ScanAllChests(iris)
     os.queueEvent(events.EventIrisScanStart)
 
     local start = os.epoch("utc")
+
     local chests = {}
     local chestNames = peripherals.FindAllChests(iris)
 
