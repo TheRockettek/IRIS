@@ -79,8 +79,8 @@ local function NewGUI(iris)
 
             gui.drawPercentage(1, h-1, w)
         else
-            paintutils.drawBox((w - (#paginationDisplay + 1)), h, w, h, irisColours.main.colour)
-            term.setCursorPos(w - (#paginationDisplay + 1), h)
+            paintutils.drawBox(w - #paginationDisplay + 1, h, w, h, irisColours.main.colour)
+            term.setCursorPos(w - #paginationDisplay + 1, h)
             term.write(paginationDisplay)
 
             gui.drawPercentage(1, h, w - #paginationDisplay)
@@ -92,6 +92,7 @@ local function NewGUI(iris)
         term.setBackgroundColour(irisColours.background.colour)
 
         if gui.isScanning then
+            iris.logger.Trace().Msg(tostring(gui.isScanning) .. " " .. tostring(gui.scanningCurrent) .. " " .. tostring(gui.scanningTotal))
             term.write("Scanning... (" .. tostring(gui.scanningCurrent) .. "/" .. tostring(gui.scanningTotal) .. ")")
 
             return
