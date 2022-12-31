@@ -24,12 +24,6 @@ local function NewIRIS(logger)
         version = VERSION,
         logger = logger or logging.NewLogger(nil, nil),
 
-        isInitialized = false,
-
-        isScanning = false,
-        scanningCurrent = 0,
-        scanningTotal = 0,
-
         isDataLoaded = false,
         isDataDirty = false,
         irisData = {
