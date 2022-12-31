@@ -4,6 +4,8 @@ local errors      = require("core.errors")
 local events      = require("core.events")
 
 local function ScanChest(iris, name)
+    iris.logger.Trace().Msg("scanchest init")
+
     assert(type(name) == "string")
 
     iris.logger.Debug().Str("name", name).Msg("Scanning chest")
@@ -45,7 +47,9 @@ local function ScanAllChests(iris)
     local chestNames = peripherals.FindAllChests(iris)
 
     for index, name in pairs(chestNames) do
+        iris.logger.Trace().Msg("preevent")
         os.queueEvent(events.EventIrisScanUpdate, index, #chestNames)
+        iris.logger.Trace().Msg("postevent")
 
         local chest, err = ScanChest(iris, name)
         if err ~= nil then
