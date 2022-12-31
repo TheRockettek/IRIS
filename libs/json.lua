@@ -61,7 +61,7 @@ local function encodeCommon(val, pretty, tabLevel, tTracking)
             end)
         else
             arrEncoding(val, "{", "}", pairs, function(k,v)
-            assert(type(k) == "string", "JSON object keys must be strings", 2)
+            assert(type(k) == "string")
             str = str .. encodeCommon(k, pretty, tabLevel, tTracking)
             str = str .. (pretty and ": " or ":") .. encodeCommon(v, pretty, tabLevel, tTracking)
             end)

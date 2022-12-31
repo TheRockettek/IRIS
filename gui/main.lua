@@ -84,7 +84,7 @@ local function NewGUI(iris)
         term.setCursorPos(x, y)
         term.setBackgroundColour(irisColours.background.colour)
 
-        if iris.isScanning and gui.itemSlotsTotal == 0 then
+        if iris.isScanning then
             term.write("Scanning (" .. tostring(iris.scanningCurrent) .. "/" .. tostring(iris.scanningTotal) .. ")")
 
             return
@@ -128,16 +128,17 @@ local function NewGUI(iris)
     end
 
     gui.splashScreen = function()
-        iris.logger.Trace().Msg("start splash")
         gui.drawBase()
 
+        local sleepTimerDuration = 1
+
         -- Wait for init
-        local sleepTimer = os.startTimer(1)
+        local sleepTimer = os.startTimer(sleepTimerDuration)
         while true do
             local type, timerId = os.pullEvent("timer")
-            iris.logger.Trace().Str("type", type).Str("val", tostring(timerId)).Msg("event")
             if type == "timer" and timerId == sleepTimer then
-                iris.logger.Trace().Str("isinit", tostring(iris.isInitialized)).Msg("is init")
+                sleepTimer = os.startTimer(sleepTimerDuration)
+
                 if iris.isInitialized then
                     break
                 end
@@ -145,10 +146,6 @@ local function NewGUI(iris)
                 gui.drawBase()
             end
         end
-
-        iris.logger.Trace().Msg("done")
-
-        os.cancelTimer(sleepTimer)
     end
 
     gui._syncTask = function()
@@ -188,12 +185,13 @@ local function NewGUI(iris)
     gui.mainScreen = function()
         gui.drawBase()
 
-        iris.logger.Trace().Msg("main screen :)")
+        local syncTimerDuration = 15
 
-        local syncTimer = os.startTimer(15)
+        local syncTimer = os.startTimer(syncTimerDuration)
         while true do
             local timerId = os.pullEvent("timer")
             if timerId == syncTimer then
+                syncTimer = os.startTimer(syncTimerDuration)
                 coroutine.resume(gui.syncTask)
             end
         end
