@@ -267,17 +267,18 @@ local function manager(listener)
 end
 
 local function NewWaitGroup()
-    local raisin = manager(os.pullEvent)
     local waitGroup = {
-        group = raisin(raisin.onDeath.waitForAll(), 1)
+        raisin = manager(os.pullEvent),
     }
+
+    waitGroup.group = waitGroup.raisin(waitGroup.raisin.onDeath.waitForAll(), 1)
 
     waitGroup.Add = function(func, ...)
         waitGroup.group.thread(func, ...)
     end
 
     waitGroup.Wait = function()
-        raisin.run(raisin.onDeath.waitForAll())
+        waitGroup.raisin.run(waitGroup.raisin.onDeath.waitForAll())
     end
 
     return waitGroup
