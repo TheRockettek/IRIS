@@ -239,7 +239,11 @@ local function NewGUI(iris)
         gui.itemSlotsTotal = itemSlotsTotal
         gui.itemCount = itemCount
         gui.itemTotal = itemTotal
-        gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
+        if gui.itemSlotsTotal == 0 then
+            gui.itemPercentage = 0
+        else
+            gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
+        end
 
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
