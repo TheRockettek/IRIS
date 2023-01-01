@@ -493,7 +493,8 @@ local function NewIRIS(logger)
         for _, location in pairs(locations) do
             local inventory = peripheral.wrap(location.peripheral)
             if inventory ~= nil then
-                iris.logger.Debug().Str("_name", "fetchFromAtlas.getItemDetails").Str("peripheral", location.peripheral).Str("slot", location.slot).Msg("[TINTER]")
+                iris.logger.Debug().Str("_name", "fetchFromAtlas.getItemDetails").Str("peripheral", location.peripheral)
+                    .Str("slot", location.slot).Msg("[TINTER]")
                 local itemDetail = inventory.getItemDetail(location.slot)
                 if itemDetail ~= nil and itemDetail.name == name then
                     local atlasEntry = iris.updateAtlasEntry(name, itemDetail.displayName, itemDetail.maxCount,
@@ -696,6 +697,7 @@ local function NewIRIS(logger)
 
         -- ScanInventory if not stored
         if iris.irisData.inventories[inventoryName] == nil then
+            iris.logger.Debug().Str("inventoryName", inventoryName).Str("Inventory is not stored, scanning")
             local inventory = scanner.ScanInventory(iris, inventoryName)
 
             iris.irisData.inventories[inventoryName] = inventory
@@ -706,6 +708,7 @@ local function NewIRIS(logger)
                 nil or
                 iris.irisData.inventories[inventoryName].items[tostring(slot)]
                 .count == nil then
+                iris.logger.Debug().Str("inventoryName", inventoryName).Str("slot", slot).Str("Item was not stored in our data, scanning chest")
                 local inventory = scanner.ScanInventory(iris, inventoryName)
 
                 iris.irisData.inventories[inventoryName] = inventory
@@ -726,6 +729,7 @@ local function NewIRIS(logger)
 
         -- ScanInventory if not stored
         if iris.irisData.inventories[inventoryName] == nil then
+            iris.logger.Debug().Str("inventoryName", inventoryName).Str("Inventory is not stored, scanning")
             local inventory = scanner.ScanInventory(iris, inventoryName)
 
             iris.irisData.inventories[inventoryName] = inventory
@@ -736,6 +740,7 @@ local function NewIRIS(logger)
                 nil or
                 iris.irisData.inventories[inventoryName].items[tostring(slot)]
                 .count == nil then
+                iris.logger.Debug().Str("inventoryName", inventoryName).Str("slot", slot).Str("Item was not stored in our data, scanning chest")
                 local inventory = scanner.ScanInventory(iris, inventoryName)
 
                 iris.irisData.inventories[inventoryName] = inventory
