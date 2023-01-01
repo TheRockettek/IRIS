@@ -265,6 +265,9 @@ local function NewGUI(iris)
         local pullSpeed = 5
         local pullTimer = nil
 
+        local syncSpeed = 15
+        local syncTimer = nil
+
         local blinkSpeed = 0.5
 
         while true do
@@ -302,6 +305,10 @@ local function NewGUI(iris)
                     iris.push(true)
 
                     pullTimer = os.startTimer(pullSpeed)
+                elseif paramA == syncTimer then
+                    gui.changePagination(gui.pageNumber, false)
+
+                    syncTimer = os.startTimer(syncSpeed)
                 end
             elseif type == "char" and gui.isSearching then
                 gui.searchQuery = gui.searchQuery .. paramA
@@ -359,16 +366,14 @@ local function NewGUI(iris)
     end
 
     gui.changePagination = function(pageNumber, resetQuery)
+        local start = os.epoch("utc")
+
         if resetQuery then
             gui.searchQuery = ""
-            gui.results = gui.queryItems()
-            gui.resultQuery = gui.searchQuery
-        elseif gui.resultQuery ~= gui.searchQuery then
-            gui.results = gui.queryItems()
-            gui.resultQuery = gui.searchQuery
         end
 
-        iris.logger.Debug().Str("page", pageNumber).Str("resetQuery", resetQuery).Msg("Changed page")
+        gui.results = gui.queryItems()
+        gui.resultQuery = gui.searchQuery
 
         local limit = gui.getResultCount()
 
@@ -379,6 +384,8 @@ local function NewGUI(iris)
         local w, h = term.getSize()
         gui.drawResults(w, h)
         gui.drawBottomBar(w, h)
+
+        iris.logger.Trace().Dur("duration", start).Str("page", pageNumber).Str("resetQuery", resetQuery).Msg("Completed page transition")
     end
 
     gui.paginateResults = function(results, pageNumber, limit)
