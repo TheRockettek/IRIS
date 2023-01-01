@@ -521,7 +521,11 @@ local function NewIRIS(logger)
         iris.atlasData[name] = { displayName = displayName, max = maxCount, tags = tags }
 
         if orig ~= iris.atlasData[name] then
+            iris.logger.Trace().Str("displayName", displayName).Str("maxCount", maxCount).Json("tags", tags).Msg("Atlas entry has changed, marked dirty")
             iris.isAtlasDataDirty = true
+        else
+            iris.logger.Trace().Str("displayName", displayName).Json("before", orig).Json("after", iris.atlasData[name])
+                .Msg("Atlas entry has not changed")
         end
 
         return iris.atlasData[name]
