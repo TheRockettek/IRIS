@@ -606,7 +606,7 @@ local function NewIRIS(logger)
         local inventory = peripheral.wrap(iris.configuration.turtleInput)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
-        local items = inventory.items()
+        local items = inventory.list()
 
         for periphalSlot, item in pairs(items) do
             local hasSpace = false
