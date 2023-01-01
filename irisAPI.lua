@@ -306,6 +306,12 @@ local function NewIRIS(logger)
 
         local locations = {}
 
+        local maxStack = 1
+        local atlasEntry = iris.getFromAtlas(name)
+        if atlasEntry then
+            maxStack = atlasEntry.max
+        end
+
         for chestName, chestData in pairs(iris.irisData.chests) do
             for slotId, item in pairs(chestData.items) do
                 if item.name == name then
@@ -313,7 +319,7 @@ local function NewIRIS(logger)
                         peripheral = chestName,
                         slot = slotId,
                         count = item.count,
-                        max = item.max
+                        max = maxStack,
                     })
                 end
             end
@@ -431,10 +437,17 @@ local function NewIRIS(logger)
                     items[item.name] = {}
                 end
 
+                local maxStack = 1
+                local atlasEntry = iris.getFromAtlas(item.name)
+                if atlasEntry then
+                    maxStack = atlasEntry.max
+                end
+
                 table.insert(items[item.name], {
                     peripheral = chestName,
                     slot = slotId,
                     count = item.count,
+                    max = maxStack,
                 })
             end
         end
@@ -582,7 +595,11 @@ local function NewIRIS(logger)
         assert(type(chest.items) == "table")
 
         for slot, item in pairs(chest.items) do
-            local maxStack = iris.fetchFromAtlas(item.name)
+            local maxStack = 1
+            local atlasEntry = iris.fetchFromAtlas(item.name)
+            if atlasEntry then
+                maxStack = atlasEntry.max
+            end
 
             local result = iris.findSpot(item.name, item.count, maxStack)
             if result.hasSpace then
