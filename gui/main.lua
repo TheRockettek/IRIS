@@ -27,6 +27,7 @@ local function NewGUI(iris)
         pageNumber = 1,
         pageCount = 1,
 
+        resultQuery = "",
         results = {},
         displayedResults = {},
 
@@ -123,16 +124,17 @@ local function NewGUI(iris)
             return
         end
 
-        local text = (" %.0f%% - (%d/%d) [%d/%d] "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal,
-            gui.itemCount, gui.itemTotal)
+        local text
+        -- text = (" %.0f%% - (%d/%d) [%d/%d] "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal,
+        --     gui.itemCount, gui.itemTotal)
+        -- if #text > w then
+        text = (" %.0f%% - (%d/%d) "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount
+            , gui.itemTotal)
         if #text > w then
-            text = (" %.0f%% - (%d/%d) "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount
-                , gui.itemTotal)
-            if #text > w then
-                text = (" %.0f%% "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount,
-                    gui.itemTotal)
-            end
+            text = (" %.0f%% "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount,
+                gui.itemTotal)
         end
+        -- end
 
         text = text .. (" "):rep(w - #text) -- Add any missing padding
 
@@ -262,6 +264,8 @@ local function NewGUI(iris)
             gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
         end
 
+        gui.changePagination(1, true)
+
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
             iris.logger.Trace().Str("type", type).Str("a", paramA).Str("b", paramB).Str("c", paramC).Str("d", paramD).Send()
@@ -342,6 +346,10 @@ local function NewGUI(iris)
         if resetQuery then
             gui.searchQuery = ""
             gui.results = gui.queryItems()
+            gui.resultQuery = gui.searchQuery
+        elseif gui.resultQuery ~= gui.searchQuery then
+            gui.results = gui.queryItems()
+            gui.resultQuery = gui.searchQuery
         end
 
         local limit = gui.getResultCount()
