@@ -23,14 +23,41 @@ local function ScanInventory(iris, name)
         items = {},
     }
 
-    for i, item in pairs(inventoryList) do
-        inventoryData.items[tostring(i)] = {
-            name = item.name,
-            count = item.count,
-        }
-        inventoryData.usedSlots = inventoryData.usedSlots + 1
-        inventoryData.totalItems = inventoryData.totalItems + item.count
+    local wg = waitgroup.NewWaitGroup()
+
+    for i = 1, inventorySize, 1 do
+        wg.Add(function()
+            local item = inventoryData.getItemDetail(i)
+            if item then
+                inventoryData.items[tostring(i)] = {
+                    name = item.name,
+                    count = item.count,
+        
+                    display = item.displayName,
+                    max = item.maxCount,
+                    nbt = item.nbt,
+                    tags = item.tags,
+                }
+                inventoryData.usedSlots = inventoryData.usedSlots + 1
+                inventoryData.totalItems = inventoryData.totalItems + item.count
+            end
+        end)
     end
+
+    wg.Wait()
+
+    -- for i, item in pairs(inventoryList) do
+    --     inventoryData.items[tostring(i)] = {
+    --         name = item.name,
+    --         count = item.count,
+
+    --         display = "",
+    --         max = 0,
+    --         nbt = "",
+    --     }
+    --     inventoryData.usedSlots = inventoryData.usedSlots + 1
+    --     inventoryData.totalItems = inventoryData.totalItems + item.count
+    -- end
 
     return inventoryData, nil
 end
