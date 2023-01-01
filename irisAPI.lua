@@ -364,7 +364,9 @@ local function NewIRIS(logger)
             local toFit = totalStore
 
             for _, value in pairs(slots) do
+                iris.logger.Trace().Str("p", value.peripheral).Json("ignoreList", ignoreList).Msg("Can add?")
                 if not tableContains(ignoreList, value.peripheral) then
+                    iris.logger.Trace().Str("p", value.peripheral).Json("ignoreList", ignoreList).Msg("Can add.")
                     if value.count ~= value.max then
                         table.insert(output.candidates, value)
                         output.hasSpace = true
