@@ -399,8 +399,8 @@ local function NewIRIS(logger)
 
         for chestName, chestData in pairs(iris.irisData.chests) do
             if not tableContains(ignoreList, chestName) then
-                if chestData.total > chestData.totalItems then
-                    for slotId = 1, chestData.total, 1 do
+                if chestData.usedSlots < chestData.totalSlots then
+                    for slotId = 1, chestData.totalSlots, 1 do
                         if chestData.items[tostring(slotId)] == nil and
                             maxSpacesNeeded > 0 then
                             table.insert(output.candidates, {
