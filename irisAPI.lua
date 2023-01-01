@@ -472,26 +472,20 @@ local function NewIRIS(logger)
         local data = iris.getFromAtlas(name)
         if data ~= nil then return data, nil end
 
-        local err
+        local slots = iris.locate(name)
+        for _, item in pairs(slots) do
+            local inventory = peripheral.wrap(peripheralName)
+            if inventory ~= nil then
+                local itemDetail = inventory.getItemDetail(item.slot)
+                if itemDetail ~= nil and itemDetail.name == name then
+                    iris.updateAtlasEntry(name, itemDetail.displayName, itemDetail.maxCount, itemDetail.tags)
 
-        local inventory = peripheral.wrap(turtleBuffer)
-        if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
-
-        _, err = iris.pushBufferIntoIRIS()
-
-        _, err = iris.pullItemIntoBuffer(name, 1)
-        if err == nil then
-            local itemDetails = inventory.getItemDetail(1)
-            if itemDetails then
-                iris.updateAtlasEntry(name, itemDetails.displayName, itemDetails.maxCount, itemDetails.tags)
+                    return iris.getFromAtlas(name), nil
+                end
             end
-        else
-            iris.logger.Warn().Err(err).Msg("Failed to fetch item from IRIS")
         end
 
-        _, err = iris.pushBufferIntoIRIS()
-
-        return data, err
+        return nil, errors.ErrIRISMissingItems
     end
 
     -- Updates atlas entry.
