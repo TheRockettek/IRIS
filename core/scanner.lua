@@ -6,7 +6,9 @@ local waitgroup   = require("libs.waitgroup")
 local function ScanInventory(iris, name)
     assert(type(name) == "string")
 
-    iris.logger.Debug().Str("name", name).Msg("[TINTER] Scanning inventory")
+    iris.logger.Trace().Str("name", name).Msg("[TINTER] Scanning inventory")
+
+    local start = os.epoch("utc")
 
     local inventory = peripheral.wrap(name)
     if inventory == nil then
@@ -27,9 +29,9 @@ local function ScanInventory(iris, name)
 
     for i = 1, inventorySize, 1 do
         wg.Add(function()
-            iris.logger.Debug().Str("name", name).Str("slot", i).Msg("[TINTER] Scanning slot")
+            iris.logger.Trace().Str("name", name).Str("slot", i).Str("size", inventorySize).Msg("[TINTER] Scanning slot")
             local item = inventory.getItemDetail(i)
-            iris.logger.Debug().Str("name", name).Str("slot", i).Msg("[TINTER] Scanned slot")
+            iris.logger.Trace().Str("name", name).Str("slot", i).Str("size", inventorySize).Msg("[TINTER] Scanned slot")
 
             if item then
                 inventoryData.items[tostring(i)] = {
@@ -49,18 +51,7 @@ local function ScanInventory(iris, name)
 
     wg.Wait()
 
-    -- for i, item in pairs(inventoryList) do
-    --     inventoryData.items[tostring(i)] = {
-    --         name = item.name,
-    --         count = item.count,
-
-    --         display = "",
-    --         max = 0,
-    --         nbt = "",
-    --     }
-    --     inventoryData.usedSlots = inventoryData.usedSlots + 1
-    --     inventoryData.totalItems = inventoryData.totalItems + item.count
-    -- end
+    iris.logger.Info().Str("name", name).Dur("duration", start).Msg("[TINTER] Scanned inventory")
 
     return inventoryData, nil
 end
@@ -90,7 +81,7 @@ local function ScanAllInventories(iris)
 
     wg.Wait()
 
-    iris.logger.Debug().Dur("duration", start).Msg("Finished scanning inventories")
+    iris.logger.Debug().Dur("duration", start).Msg("Finished scanning inventorys")
 
     os.queueEvent(events.EventIrisScanComplete)
 
