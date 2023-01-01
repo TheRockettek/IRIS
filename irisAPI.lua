@@ -184,8 +184,6 @@ local function NewIRIS(logger)
                 .scanDelay).Msg(
                 "Full scan called but not hit delay")
 
-            os.queueEvent(events.EventIrisFullScanFailed)
-
             return false
         end
 
@@ -200,8 +198,7 @@ local function NewIRIS(logger)
             iris.logger.Warn().Err(err).Msg("Failed to save data")
         end
 
-        local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
-        os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal)
+        os.queueEvent(events.EventIrisFullScan)
 
         return true
     end

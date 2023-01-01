@@ -4,6 +4,5 @@ return {
     EventIrisScanStart = "iris:scan_start",
     EventIrisScanComplete = "iris:scan_complete",
 
-    EventIrisFullScanFailed = "iris:fullscan_failed",
     EventIrisFullScan = "iris:fullscan",
 }
