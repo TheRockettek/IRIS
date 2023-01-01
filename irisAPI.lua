@@ -24,8 +24,8 @@ local defaultConfiguration = {
     scanDelay = 60000 -- Time in milliseconds to wait between an inventory scan. This is only used during startup.
 }
 
-local function tableContains(table, key)
-    for i, _ in pairs(table) do if i == key then return true end end
+local function tableContainsValue(table, value)
+    for _, k in pairs(table) do if k == value then return true end end
 
     return false
 end
@@ -365,7 +365,7 @@ local function NewIRIS(logger)
 
             for _, value in pairs(slots) do
                 iris.logger.Trace().Str("p", value.peripheral).Json("ignoreList", ignoreList).Msg("Can add?")
-                if not tableContains(ignoreList, value.peripheral) then
+                if not tableContainsValue(ignoreList, value.peripheral) then
                     iris.logger.Trace().Str("p", value.peripheral).Json("ignoreList", ignoreList).Msg("Can add.")
                     if value.count ~= value.max then
                         table.insert(output.candidates, value)
@@ -418,7 +418,7 @@ local function NewIRIS(logger)
 
         for inventoryName, inventoryData in pairs(iris.irisData.inventories) do
             if maxSpacesNeeded > 0 then
-                if not tableContains(ignoreList, inventoryName) then
+                if not tableContainsValue(ignoreList, inventoryName) then
                     if inventoryData.usedSlots < inventoryData.totalSlots then
                         for slotId = 1, inventoryData.totalSlots, 1 do
                             if inventoryData.items[tostring(slotId)] == nil then

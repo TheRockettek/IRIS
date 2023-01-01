@@ -29,12 +29,8 @@ local levels = {
 
 local defaultTimeStamp = "!%b %e %H:%M:%S"
 
-local function tableContains(table, key)
-    for i, _ in pairs(table) do
-        if i == key then
-            return true
-        end
-    end
+local function tableContainsKey(table, key)
+    for i, _ in pairs(table) do if i == key then return true end end
 
     return false
 end
@@ -71,7 +67,7 @@ local function NewLogger(timeFormat, fileName)
     end
 
     logger.setLevel = function(logLevel)
-        if not tableContains(levels, logLevel) then
+        if not tableContainsKey(levels, logLevel) then
             error("invalid log level passed: " .. tostring(logLevel))
         end
 
@@ -79,7 +75,7 @@ local function NewLogger(timeFormat, fileName)
     end
 
     logger.newMessage = function(logLevel)
-        if not tableContains(levels, logLevel) then
+        if not tableContainsKey(levels, logLevel) then
             error("invalid log level passed: " .. tostring(logLevel))
         end
 
