@@ -614,7 +614,7 @@ local function NewIRIS(logger)
             for i = 1, 16, 1 do
                 turtle.select(i)
                 if turtle.getItemCount() == 0 then
-                    local count = inventory.pullItem(iris.configuration
+                    local count = inventory.pullItems(iris.configuration
                         .turtleInput, i,
                         item.count, periphalSlot)
                     if count > 0 then
@@ -640,7 +640,7 @@ local function NewIRIS(logger)
             turtle.select(i)
             local count = turtle.getItemCount()
             if count > 0 then
-                count = inventory.pushItem(iris.configuration.turtleOutput, i,
+                count = inventory.pushItems(iris.configuration.turtleOutput, i,
                     count)
                 if count > 0 then totalItems = totalItems + count end
             end
@@ -653,7 +653,7 @@ local function NewIRIS(logger)
         local inventory = peripheral.wrap(peripheral)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
-        local transferred = inventory.pullItem(peripheral, localSlot, count,
+        local transferred = inventory.pullItems(peripheral, localSlot, count,
             peripheralSlot)
 
         -- ScanChest if not stored
@@ -685,7 +685,7 @@ local function NewIRIS(logger)
         local inventory = peripheral.wrap(peripheral)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
-        local transferred = inventory.pushItem(peripheral, localSlot, count,
+        local transferred = inventory.pushItems(peripheral, localSlot, count,
             peripheralSlot)
 
         -- ScanChest if not stored
