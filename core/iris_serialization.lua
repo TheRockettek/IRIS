@@ -14,7 +14,7 @@ local function Encode(iris)
         }
     }
 
-    local jsonEncode = json.Encode(file)
+    local jsonEncode = textutils.serializeJson(file)
 
     assert(type(jsonEncode) == "string")
 
@@ -26,7 +26,7 @@ local function Decode(file)
         return nil, errors.ErrFailedToDecode
     end
 
-    local jsonDecode = json.Decode(file)
+    local jsonDecode = textutils.unserializeJson(file)
     if jsonDecode == nil then
         return nil, errors.ErrFailedToJSONDecode
     end

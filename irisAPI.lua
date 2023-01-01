@@ -97,7 +97,7 @@ local function NewIRIS(logger)
 
         assert(type(contents) == "string")
 
-        local jsonDecode = json.Decode(contents)
+        local jsonDecode = textutils.unserializeJson(contents)
         if jsonDecode == nil then
             return defaultConfiguration, errors.ErrFailedToJSONDecode
         end
