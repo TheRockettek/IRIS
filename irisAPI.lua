@@ -11,13 +11,11 @@ local VERSION = "0.0.1"
 local configurationPath = "iris.config"
 
 -- We need the turtle to be able to interact directly with this inventory
-local turtleBuffer = "bottom"
-local bufferPush = turtle.dropDown
-local bufferPull = turtle.suckDown
+local turtleInventory = "bottom"
 
 local defaultConfiguration = {
-    turtleInput = "top",
-    turtleOutput = "left",
+    inputInventory = "top",
+    outputInventory = "left",
 
     irisFileLocation = "iris.data",
     atlasFileLocation = "atlas.data",
@@ -63,13 +61,13 @@ local function NewIRIS(logger)
         end
 
         -- Validate input is wrappable
-        iris.tryWrapPeripheral(iris.configuration.turtleInput)
+        iris.tryWrapPeripheral(iris.configuration.inputInventory)
 
         -- Validate output is wrappable
-        iris.tryWrapPeripheral(iris.configuration.turtleOutput)
+        iris.tryWrapPeripheral(iris.configuration.outputInventory)
 
         -- Validate buffer is wrappable
-        iris.tryWrapPeripheral(turtleBuffer)
+        iris.tryWrapPeripheral(turtleInventory)
 
         -- Load iris data
         iris.loadIRISData()
@@ -331,9 +329,16 @@ local function NewIRIS(logger)
     -- Find partial stacks of empty items.
     -- Returns list of partial stacks and empty slot candidate.
     -- Passing total store will make it only return slots that are needed.
-    iris.findSpot = function(name, totalStore, maxStack)
+    iris.findSpot = function(name, totalStore, maxStack, ignoreList)
         iris.logger.Trace().Str("_name", "findSpot").Str("name", name).Str("totalStore", totalStore).Str("maxStack",
-            maxStack).Send()
+            maxStack).Json("ignoreList",
+            ignoreList).Send()
+
+        if type(ignoreList) == "string" then
+            ignoreList = { ignoreList }
+        elseif ignoreList == nil then
+            ignoreList = {}
+        end
 
         local tryFindOptimalSlots = totalStore > 0
 
@@ -354,26 +359,28 @@ local function NewIRIS(logger)
             local toFit = totalStore
 
             for _, value in pairs(slots) do
-                if value.count ~= value.max then
-                    table.insert(output.candidates, value)
-                    output.hasSpace = true
+                if not tableContains(ignoreList, value.peripheral) then
+                    if value.count ~= value.max then
+                        table.insert(output.candidates, value)
+                        output.hasSpace = true
 
-                    toFit = toFit - (value.max - value.count)
+                        toFit = toFit - (value.max - value.count)
+                    end
                 end
             end
 
             -- We have filled up all slots we have in storage, find more empty space.
             if toFit > 0 then
                 local emptySlots = iris.findEmptySpaces(math.ceil(
-                    toFit / maxStack))
+                    toFit / maxStack), ignoreList)
 
                 output.hasSpace = emptySlots.hasSpace
                 output.spacesMissing = emptySlots.spacesMissing
-                output.emptySlots = emptySlots.candidates
+                output.emptySlots = emptySlots.candidatesbut
             end
         else
             local emptySlots = iris.findEmptySpaces(math.ceil(
-                totalStore / maxStack))
+                totalStore / maxStack), ignoreList)
 
             output.hasSpace = emptySlots.hasSpace
             output.spacesMissing = emptySlots.spacesMissing
@@ -511,25 +518,25 @@ local function NewIRIS(logger)
     iris.pullItemFromIRIS = function(name, count)
         iris.logger.Trace().Str("_name", "pullItemFromIRIS").Str("name", name).Str("count", count).Send()
 
-        return iris._pullItemIntoInventory(iris.configuration.turtleOutput, name, count)
+        return iris._pullItemIntoInventory(iris.configuration.outputInventory, name, count)
     end
 
     iris.pushInputIntoIRIS = function()
         iris.logger.Trace().Str("_name", "pushInputIntoIRIS").Send()
 
-        return iris._pushInventoryIntoIRIS(iris.configuration.turtleInput)
+        return iris._pushInventoryIntoIRIS(iris.configuration.inputInventory)
     end
 
     iris.pullItemIntoBuffer = function(name, count)
         iris.logger.Trace().Str("_name", "pullItemIntoBuffer").Str("name", name).Str("count", count).Send()
 
-        return iris._pullItemIntoInventory(turtleBuffer, name, count)
+        return iris._pullItemIntoInventory(turtleInventory, name, count)
     end
 
     iris.pushBufferIntoIRIS = function()
         iris.logger.Trace().Str("_name", "pushBufferIntoIRIS").Send()
 
-        return iris._pushInventoryIntoIRIS(turtleBuffer)
+        return iris._pushInventoryIntoIRIS(turtleInventory)
     end
 
     iris._pullItemIntoInventory = function(peripheralName, name, count)
@@ -595,7 +602,13 @@ local function NewIRIS(logger)
                 maxStack = atlasEntry.max
             end
 
-            local result = iris.findSpot(item.name, item.count, maxStack)
+            local result = iris.findSpot(item.name, item.count, maxStack,
+                {
+                    peripheralName,
+                    iris.configuration.inputInventory,
+                    iris.configuration.outputInventory,
+                    turtleInventory,
+                })
             if result.hasSpace then
                 for _, candidate in pairs(result.candidates) do
                     if item.count > 0 then
@@ -656,7 +669,8 @@ local function NewIRIS(logger)
     end
 
     iris._markAddSlot = function(inventoryName, slot, count)
-        iris.logger.Trace().Str("_name", "_markAddSlot").Str("inventory", inventoryName).Str("slot", slot).Str("count", count)
+        iris.logger.Trace().Str("_name", "_markAddSlot").Str("inventory", inventoryName).Str("slot", slot).Str("count",
+            count)
             .Send()
         iris.logger.Debug().Str("inventory", inventoryName).Str("slot", slot).Str("count", count).Msg("Updating data to add items to slot")
 
@@ -686,8 +700,8 @@ local function NewIRIS(logger)
     end
 
     iris._markRemoveSlot = function(inventoryName, slot, count)
-        iris.logger.Trace().Str("_name", "_markRemoveSlot").Str("inventoryName", inventoryName).Str("slot", slot).Str("count",
-            count).Send()
+        iris.logger.Trace().Str("_name", "_markRemoveSlot").Str("inventoryName", inventoryName).Str("slot", slot).Str("count"
+            , count).Send()
         iris.logger.Debug().Str("inventoryName", inventoryName).Str("slot", slot).Str("count", count).Msg("Updating data to remove items from slot")
 
         -- ScanInventory if not stored
