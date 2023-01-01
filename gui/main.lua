@@ -213,37 +213,48 @@ local function NewGUI(iris)
             end
         end
 
-        for i, result in pairs(gui.displayedResults) do
-            if alignNameLeft then
-                term.setCursorPos(1, startY + (i - 1))
-                term.setTextColour(irisColours.contrast.colour)
-                term.write(result.name:sub(1, w - maxSizeLength - padding))
+        term.setBackgroundColour(irisColours.background.colour)
 
-                local x
-                if alignCountLeft then
-                    x = w - maxSizeLength
+        local limit = gui.getResultCount()
+
+        for i = 1, limit, 1 do
+            local result = gui.displayedResults[i]
+
+            term.setCursorPos(1, startY + (i - 1))
+            term.clearLine()
+
+            if result then
+                if alignNameLeft then
+                    term.setCursorPos(1, startY + (i - 1))
+                    term.setTextColour(irisColours.contrast.colour)
+                    term.write(result.name:sub(1, w - maxSizeLength - padding))
+
+                    local x
+                    if alignCountLeft then
+                        x = w - maxSizeLength
+                    else
+                        x = w - #(tostring(result.count))
+                    end
+
+                    term.setCursorPos(x, startY + (i - 1))
+                    term.setTextColour(colours.grey)
+                    term.write(result.count)
                 else
-                    x = w - #(tostring(result.count))
+                    local x
+                    if alignCountLeft then
+                        x = 1
+                    else
+                        x = maxSizeLength - #(tostring(result.count))
+                    end
+
+                    term.setCursorPos(x, startY + (i - 1))
+                    term.setTextColour(colours.grey)
+                    term.write(result.count)
+
+                    term.setCursorPos(maxSizeLength + padding, startY + (i - 1))
+                    term.setTextColour(irisColours.contrast.colour)
+                    term.write(result.name)
                 end
-
-                term.setCursorPos(x, startY + (i - 1))
-                term.setTextColour(colours.grey)
-                term.write(result.count)
-            else
-                local x
-                if alignCountLeft then
-                    x = 1
-                else
-                    x = maxSizeLength - #(tostring(result.count))
-                end
-
-                term.setCursorPos(1, startY + (i - 1))
-                term.setTextColour(colours.grey)
-                term.write(result.count)
-
-                term.setCursorPos(maxSizeLength + padding, startY + (i - 1))
-                term.setTextColour(irisColours.contrast.colour)
-                term.write(result.name)
             end
         end
     end
@@ -327,13 +338,9 @@ local function NewGUI(iris)
     end
 
     gui.nextPage = function()
-        local page = gui.pageNumber + 1
-        if page <= gui.pageCount then
-            gui.pageNumber = page
+        if gui.pageNumber < gui.pageCount then
+            gui.changePagination(gui.pageNumber + 1, false)
         end
-
-        local w, h = term.getSize()
-        gui.drawResults(w, h)
     end
 
     gui.prevPage = function()
