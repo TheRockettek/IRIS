@@ -234,14 +234,14 @@ local function NewIRIS(logger)
     end
 
     -- Returns all inventories that contain a specific item. Returns slot and count.
-    iris.locate = function(name)
+    iris.locate = function(name, nbt)
         iris.logger.Trace().Str("_name", "locate").Str("name", name).Send()
 
         local locations = {}
 
         for inventoryName, inventoryData in pairs(iris.irisData.inventories) do
             for slotId, item in pairs(inventoryData.items) do
-                if item.name == name then
+                if item.name == name and ((nbt == "" or nbt == nil) or item.nbt == nbt) then
                     table.insert(locations, {
                         peripheral = inventoryName,
                         slot = tonumber(slotId),
@@ -262,7 +262,7 @@ local function NewIRIS(logger)
     -- Find partial stacks of empty items.
     -- Returns list of partial stacks and empty slot candidate.
     -- Passing total store will make it only return slots that are needed.
-    iris.findSpot = function(name, totalStore, maxStack, ignoreList)
+    iris.findSpot = function(name, nbt, totalStore, maxStack, ignoreList)
         iris.logger.Trace().Str("_name", "findSpot").Str("name", name).Str("totalStore", totalStore).Str("maxStack",
             maxStack).Json("ignoreList",
             ignoreList).Send()
@@ -277,7 +277,7 @@ local function NewIRIS(logger)
 
         local tryFindOptimalSlots = totalStore > 0
 
-        local slots = iris.locate(name)
+        local slots = iris.locate(name, nbt)
 
         local output = {
             hasSpace = false,
@@ -402,10 +402,10 @@ local function NewIRIS(logger)
 
     -- IRIS operations
 
-    iris.pullItemFromIRIS = function(name, count)
+    iris.pullItemFromIRIS = function(name, nbt, count)
         iris.logger.Trace().Str("_name", "pullItemFromIRIS").Str("name", name).Str("count", count).Send()
 
-        return iris._pullItemIntoInventory(iris.configuration.outputInventory, name, count)
+        return iris._pullItemIntoInventory(iris.configuration.outputInventory, name, nbt, count)
     end
 
     iris.pushInputIntoIRIS = function()
@@ -414,10 +414,10 @@ local function NewIRIS(logger)
         return iris._pushInventoryIntoIRIS(iris.configuration.inputInventory)
     end
 
-    iris.pullItemIntoBuffer = function(name, count)
+    iris.pullItemIntoBuffer = function(name, nbt, count)
         iris.logger.Trace().Str("_name", "pullItemIntoBuffer").Str("name", name).Str("count", count).Send()
 
-        return iris._pullItemIntoInventory(iris.configuration.turtleInventory, name, count)
+        return iris._pullItemIntoInventory(iris.configuration.turtleInventory, name, nbt, count)
     end
 
     iris.pushBufferIntoIRIS = function()
@@ -426,7 +426,7 @@ local function NewIRIS(logger)
         return iris._pushInventoryIntoIRIS(iris.configuration.turtleInventory)
     end
 
-    iris._pullItemIntoInventory = function(peripheralName, name, count)
+    iris._pullItemIntoInventory = function(peripheralName, name, nbt, count)
         iris.logger.Trace().Str("_name", "_pullItemIntoInventory").Str("peripheralName", peripheralName).Str("name", name)
             .Str("count", count).Send()
 
@@ -436,7 +436,7 @@ local function NewIRIS(logger)
         local start = os.epoch("utc")
         iris.logger.Debug().Str("name", name).Str("count", count).Str("peripheral", peripheralName).Msg("Pulling from IRIS into inventory")
 
-        local locations, err = iris.locate(name)
+        local locations, err = iris.locate(name, nbt)
         if err ~= nil then
             return 0, err
         end
@@ -485,7 +485,7 @@ local function NewIRIS(logger)
         assert(type(inventory.items) == "table")
 
         for slot, item in pairs(inventory.items) do
-            local result = iris.findSpot(item.name, item.count, item.max,
+            local result = iris.findSpot(item.name, item.nbt, item.count, item.max,
                 {
                     peripheralName,
                     iris.configuration.inputInventory,
