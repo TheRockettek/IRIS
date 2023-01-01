@@ -27,12 +27,12 @@ local function ScanInventory(iris, name)
 
     for i = 1, inventorySize, 1 do
         wg.Add(function()
-            local item = inventoryData.getItemDetail(i)
+            local item = inventory.getItemDetail(i)
             if item then
                 inventoryData.items[tostring(i)] = {
                     name = item.name,
                     count = item.count,
-        
+
                     display = item.displayName,
                     max = item.maxCount,
                     nbt = item.nbt,
