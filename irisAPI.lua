@@ -1,7 +1,6 @@
 local errors = require "core.errors"
 local logging = require "libs.logging"
 local irisSerialization = require "core.iris_serialization"
-local atlasSerialization = require "core.atlas_serialization"
 local scanner = require "core.scanner"
 local events = require "core.events"
 
@@ -18,7 +17,6 @@ local defaultConfiguration = {
     turtleInventory = "bottom",
 
     irisFileLocation = "iris.data",
-    atlasFileLocation = "atlas.data",
 
     scanOnStart = true,
     scanDelay = 60000 -- Time in milliseconds to wait between an inventory scan. This is only used during startup.
@@ -38,10 +36,6 @@ local function NewIRIS(logger)
         isIRISDataLoaded = false,
         isIRISDataDirty = false,
         irisData = { iris = { lastScannedAt = 0 }, inventories = {} },
-
-        isAtlasDataLoaded = false,
-        isAtlasDataDirty = false,
-        atlasData = {},
 
         configuration = defaultConfiguration
     }
@@ -72,9 +66,6 @@ local function NewIRIS(logger)
 
         -- Load iris data
         iris.loadIRISData()
-
-        -- Load iris atlas data
-        iris.loadAtlasData()
 
         if iris.configuration.scanOnStart then iris.fullScan() end
 
@@ -116,7 +107,6 @@ local function NewIRIS(logger)
         iris.logger.Trace().Str("_name", "save").Send()
 
         local _, ierr = iris.saveIRISData()
-        local _, aerr = iris.saveAtlasData()
 
         return ierr or aerr
     end
@@ -178,66 +168,6 @@ local function NewIRIS(logger)
         iris.isIRISDataDirty = false
 
         iris.logger.Info().Dur("duration", start).Msg("Saved IRIS data")
-
-        return true, nil
-    end
-
-    -- Loads data from an IRIS file
-    iris.loadAtlasData = function()
-        iris.logger.Trace().Str("_name", "loadAtlasData").Send()
-
-        local path = iris.configuration.atlasFileLocation
-
-        if not fs.exists(path) then
-            iris.logger.Warn().Msg("IRIS Atlas is loading from fresh file")
-
-            return false
-        end
-
-        local file = fs.open(path, "rb")
-        local contents = file.readAll()
-        file.close()
-
-        assert(type(contents) == "string")
-
-        local atlasData, err = atlasSerialization.Decode(contents)
-        if err ~= nil then
-            iris.logger.Warn().Err(err).Msg("Failed to load IRIS Atlas data")
-        else
-            assert(type(atlasData) == "table")
-
-            iris.atlasData = atlasData.data
-            iris.isAtlasDataLoaded = true
-        end
-
-        return true
-    end
-
-    -- Saves data from memory to file. If not changes
-    -- have been made indicated by isIRISDataDirty, returns false.
-    iris.saveAtlasData = function()
-        iris.logger.Trace().Str("_name", "saveAtlasData").Send()
-
-        if not iris.isAtlasDataDirty then
-            iris.logger.Info().Msg("Skipped saving IRIS Atlas")
-            return false, nil
-        end
-
-        local start = os.epoch("utc")
-        iris.logger.Debug().Msg("Saving IRIS Atlas")
-
-        local path = iris.configuration.atlasFileLocation
-
-        local atlasDataSerialized, err = atlasSerialization.Encode(iris)
-        if err ~= nil then return false, err end
-
-        local file = fs.open(path, "wb")
-        file.write(atlasDataSerialized)
-        file.close()
-
-        iris.isAtlasDataDirty = false
-
-        iris.logger.Info().Dur("duration", start).Msg("Saved IRIS Atlas")
 
         return true, nil
     end
@@ -308,12 +238,6 @@ local function NewIRIS(logger)
         iris.logger.Trace().Str("_name", "locate").Str("name", name).Send()
 
         local locations = {}
-
-        -- local maxStack = 1
-        -- local atlasEntry = iris.getFromAtlas(name)
-        -- if atlasEntry then
-        --     maxStack = atlasEntry.max
-        -- end
 
         for inventoryName, inventoryData in pairs(iris.irisData.inventories) do
             for slotId, item in pairs(inventoryData.items) do
@@ -476,67 +400,6 @@ local function NewIRIS(logger)
         return items
     end
 
-    -- Returns data from atlas.
-    iris.getFromAtlas = function(name)
-        iris.logger.Trace().Str("_name", "getFromAtlas").Str("name", name).Send()
-
-        local data = iris.atlasData[name]
-
-        return data
-    end
-
-    -- Returns data from atlas. If it does not exist,
-    -- will try fetch data.
-    -- iris.fetchFromAtlas = function(name)
-    --     iris.logger.Trace().Str("_name", "fetchFromAtlas").Str("name", name).Send()
-
-    --     local data = iris.getFromAtlas(name)
-    --     if data ~= nil then return data, nil end
-
-    --     local locations = iris.locate(name)
-    --     iris.logger.Trace().Str("_name", "fetchFromAtlas").Json("locations", locations).Msg("Found locations for item")
-    --     for _, location in pairs(locations) do
-    --         local inventory = peripheral.wrap(location.peripheral)
-    --         iris.logger.Trace().Str("location", location.peripheral).Str("inventory", inventory).Msg("Wrapped")
-    --         if inventory ~= nil then
-    --             iris.logger.Debug().Str("_name", "fetchFromAtlas.getItemDetail").Str("peripheral", location.peripheral)
-    --                 .Str("slot", location.slot).Msg("[TINTER]")
-    --             local itemDetail = inventory.getItemDetail(location.slot)
-    --             if itemDetail ~= nil and itemDetail.name == name then
-    --                 local atlasEntry = iris.updateAtlasEntry(name, itemDetail.displayName, itemDetail.maxCount,
-    --                     itemDetail.tags)
-
-    --                 return atlasEntry, nil
-    --             else
-    --                 iris.logger.Warn().Str("name", name).Str("peripheral", location.peripheral).Str("slot", location.slot)
-    --                     .Json("itemDetail", itemDetail).Msg("getItemDetail did not match expected item")
-    --             end
-    --         end
-    --     end
-
-    --     return nil, errors.ErrIRISMissingItems
-    -- end
-
-    -- Updates atlas entry.
-    -- iris.updateAtlasEntry = function(name, displayName, maxCount, tags)
-    --     iris.logger.Trace().Str("_name", "updateAtlasEntry").Str("displayName", displayName).Str("maxCount", maxCount).Json("tags"
-    --         , tags).Send()
-
-    --     local orig = iris.atlasData[name]
-
-    --     iris.atlasData[name] = { displayName = displayName, max = maxCount, tags = tags }
-
-    --     if orig ~= iris.atlasData[name] then
-    --         iris.logger.Trace().Str("displayName", displayName).Str("maxCount", maxCount).Json("tags", tags).Msg("Atlas entry has changed, marked dirty")
-    --         iris.isAtlasDataDirty = true
-    --     else
-    --         iris.logger.Trace().Str("displayName", displayName).Json("before", orig).Json("after", iris.atlasData[name])
-    --             .Msg("Atlas entry has not changed")
-    --     end
-
-    --     return iris.atlasData[name]
-    -- end
-
     -- IRIS operations
 
     iris.pullItemFromIRIS = function(name, count)
@@ -622,13 +485,7 @@ local function NewIRIS(logger)
         assert(type(inventory.items) == "table")
 
         for slot, item in pairs(inventory.items) do
-            local maxStack = 1
-            local atlasEntry = iris.fetchFromAtlas(item.name + item.nbt)
-            if atlasEntry then
-                maxStack = atlasEntry.max
-            end
-
-            local result = iris.findSpot(item.name, item.count, maxStack,
+            local result = iris.findSpot(item.name, item.count, item.max,
                 {
                     peripheralName,
                     iris.configuration.inputInventory,
