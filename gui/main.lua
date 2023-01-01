@@ -2,10 +2,14 @@ local events = require "core.events"
 -- Colours to use within IRIS gui
 -- original colour to use, r, g, b
 
+-- You can touch these
 local alignNameLeft = false
 local alignCountLeft = false
 local countGap = 2
 local padding = 1
+
+local blinkSpeed = 0.5
+local pullSpeed = 5
 
 local irisColours = {
     main        = { colour = colours.blue, hex = 0x2F80ED },
@@ -16,6 +20,9 @@ local irisColours = {
     lowStorage  = { colour = colours.orange, hex = 0xF19E37 },
     noStorage   = { colour = colours.red, hex = 0xE85550 },
 }
+
+-- Dont touch these
+local startY = 3
 
 local function setupPalette()
     if term.setPaletteColour == nil then
@@ -35,18 +42,20 @@ local function NewGUI(iris)
         resultQuery = "",
         results = {},
         displayedResults = {},
+        pageLimit = 0,
+
+        selectedResult = nil,
+        isShowingPopup = false,
 
         showBlink = false,
         blinkTimer = nil,
 
+        pullTimer = nil,
+
         isSearching = false,
         searchQuery = "",
 
-        isInitialized = false,
-
-        isScanning = false,
-        scanningCurrent = 0,
-        scanningTotal = 0,
+        isBusy = false,
 
         itemPercentage = 0,
         itemSlotsUsed = 0,
@@ -120,12 +129,8 @@ local function NewGUI(iris)
         term.setCursorPos(x, y)
         term.setBackgroundColour(irisColours.background.colour)
 
-        if gui.isScanning then
-            term.write("Scanning... (" .. tostring(gui.scanningCurrent) .. "/" .. tostring(gui.scanningTotal) .. ")")
-
-            return
-        elseif not gui.isInitialized then
-            term.write("Getting Ready...")
+        if gui.isBusy then
+            term.write("BUSY")
 
             return
         end
@@ -205,8 +210,6 @@ local function NewGUI(iris)
     end
 
     gui.drawResults = function(w, h)
-        local startY = 3
-
         local maxSizeLength = 0
         for _, result in pairs(gui.displayedResults) do
             local sizeLength = #(tostring(result.count))
@@ -261,97 +264,6 @@ local function NewGUI(iris)
         end
     end
 
-    gui.mainScreen = function()
-        gui.drawBase()
-
-        local blinkSpeed = 0.5
-
-        os.pullEvent(events.EventIrisInit)
-        gui.isInitialized = true
-
-        local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
-        gui.itemSlotsUsed = itemSlotsUsed
-        gui.itemSlotsTotal = itemSlotsTotal
-        gui.itemCount = itemCount
-        gui.itemTotal = itemTotal
-        if gui.itemSlotsTotal == 0 then
-            gui.itemPercentage = 0
-        else
-            gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
-        end
-
-        gui.changePagination(1, true)
-        gui.drawBase()
-
-        local pullSpeed = 5
-        local pullTimer = os.startTimer(0)
-
-        while true do
-            local type, paramA, paramB, paramC, paramD = os.pullEvent()
-            if type == "key" then
-                if paramA == keys.backspace and gui.isSearching then
-                    gui.searchQuery = gui.searchQuery:sub(1, -2)
-                    gui.changePagination(1, false)
-                elseif paramA == keys.enter then
-                    gui.isSearching = false
-                    if gui.blinkTimer ~= nil then
-                        os.cancelTimer(gui.blinkTimer)
-                        gui.blinkTimer = nil
-                    end
-                elseif paramA == keys.down or paramA == keys.pageDown then
-                    gui.nextPage()
-                elseif paramA == keys.up or paramA == keys.pageUp then
-                    gui.prevPage()
-                elseif paramA == keys.home then
-                    gui.changePagination(1, false)
-                end
-            elseif type == "mouse_click" then
-                -- if clicking search
-                gui.isSearching = true
-                gui.blinkTimer = os.startTimer(blinkSpeed)
-            elseif type == "timer" then
-                if paramA == gui.blinkTimer then
-                    gui.showBlink = not gui.showBlink
-                    gui.blinkTimer = os.startTimer(blinkSpeed)
-
-                    local w, h = term.getSize()
-                    gui.drawSearch(w, h)
-                elseif paramA == pullTimer then
-                    iris.pushInputIntoIRIS(true)
-
-                    local err = iris.save()
-                    if err ~= nil then
-                        iris.logger.Warn().Err(err).Msg("Failed to save IRIS data")
-                    end
-
-                    gui.changePagination(gui.pageNumber, false)
-
-                    pullTimer = os.startTimer(pullSpeed)
-
-                    if gui.blinkTimer ~= nil then
-                        os.cancelTimer(gui.blinkTimer)
-                        gui.blinkTimer = os.startTimer(blinkSpeed)
-                    end
-                end
-            elseif type == "char" and gui.isSearching then
-                gui.searchQuery = gui.searchQuery .. paramA
-                gui.changePagination(1, false)
-            elseif type == events.EventIrisScanStart then
-                gui.isScanning = true
-                gui.drawBase()
-            elseif type == events.EventIrisScanComplete then
-                gui.isScanning = false
-                gui.drawBase()
-            elseif type == events.EventIrisFullScan then
-                gui.itemSlotsUsed = paramA
-                gui.itemSlotsTotal = paramB
-                gui.itemCount = paramC
-                gui.itemTotal = paramD
-                gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
-                gui.drawBase()
-            end
-        end
-    end
 
     gui.nextPage = function()
         if gui.pageNumber < gui.pageCount then
@@ -372,6 +284,9 @@ local function NewGUI(iris)
             gui.searchQuery = ""
         end
 
+        local w, h = term.getSize()
+        gui.drawSearch(w, h)
+
         gui.results = gui.queryItems()
         gui.resultQuery = gui.searchQuery
 
@@ -380,8 +295,8 @@ local function NewGUI(iris)
         gui.pageNumber = pageNumber
         gui.pageCount = math.ceil(#gui.results / limit)
         gui.displayedResults = gui.paginateResults(gui.results, pageNumber, limit)
+        gui.pageLimit = limit
 
-        local w, h = term.getSize()
         gui.drawResults(w, h)
         gui.drawBottomBar(w, h)
 
@@ -429,6 +344,162 @@ local function NewGUI(iris)
         iris.logger.Debug().Str("results", #results).Str("query", gui.searchQuery).Dur("duration", start).Msg("Queried items")
 
         return results
+    end
+
+    gui.pullTask = function()
+        local w, h = term.getSize()
+        gui.isBusy = true
+        gui.drawBottomBar(w, h)
+
+        iris.pushInputIntoIRIS(true)
+
+        local err = iris.save()
+        if err ~= nil then
+            iris.logger.Warn().Err(err).Msg("Failed to save IRIS data")
+        end
+
+        gui.isBusy = false
+        gui.drawBottomBar(w, h)
+
+        gui.changePagination(gui.pageNumber, false)
+
+        gui.pullTimer = os.startTimer(pullSpeed)
+
+        if gui.blinkTimer ~= nil then
+            os.cancelTimer(gui.blinkTimer)
+            gui.blinkTimer = os.startTimer(blinkSpeed)
+        end
+    end
+
+    gui.mainScreen = function()
+        gui.drawBase()
+
+        os.pullEvent(events.EventIrisInit)
+
+        local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
+        gui.itemSlotsUsed = itemSlotsUsed
+        gui.itemSlotsTotal = itemSlotsTotal
+        gui.itemCount = itemCount
+        gui.itemTotal = itemTotal
+        if gui.itemSlotsTotal == 0 then
+            gui.itemPercentage = 0
+        else
+            gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
+        end
+
+        gui.changePagination(1, true)
+        gui.drawBase()
+
+        gui.pullTimer = os.startTimer(0)
+
+        while true do
+            local type, paramA, paramB, paramC, paramD = os.pullEvent()
+            if type == "key" then
+                if paramA == keys.backspace and gui.isSearching then
+                    gui.searchQuery = gui.searchQuery:sub(1, -2)
+                    gui.changePagination(1, false)
+                elseif paramA == keys.enter then
+                    gui.isSearching = false
+                    if gui.blinkTimer ~= nil then
+                        os.cancelTimer(gui.blinkTimer)
+                        gui.blinkTimer = nil
+                    end
+                elseif paramA == keys.down or paramA == keys.pageDown then
+                    gui.nextPage()
+                elseif paramA == keys.up or paramA == keys.pageUp then
+                    gui.prevPage()
+                elseif paramA == keys.home then
+                    gui.changePagination(1, false)
+                end
+            elseif type == "mouse_click" then
+                gui.onClick(paramB, paramC)
+            elseif type == "timer" then
+                if paramA == gui.blinkTimer then
+                    gui.showBlink = not gui.showBlink
+                    gui.blinkTimer = os.startTimer(blinkSpeed)
+
+                    local w, h = term.getSize()
+                    gui.drawSearch(w, h)
+                elseif paramA == gui.pullTimer then
+                    gui.pullTask()
+                end
+            elseif type == "char" and gui.isSearching then
+                gui.searchQuery = gui.searchQuery .. paramA
+                gui.changePagination(1, false)
+            elseif type == "mouse_scroll" then
+                if paramA == -1 then
+                    gui.prevPage()
+                elseif paramA == 1 then
+                    gui.nextPage()
+                end
+            elseif type == events.EventIrisFullScan then
+                gui.itemSlotsUsed = paramA
+                gui.itemSlotsTotal = paramB
+                gui.itemCount = paramC
+                gui.itemTotal = paramD
+                gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
+                gui.drawBase()
+            elseif type == "term_resize" then
+                gui.changePagination(gui.pageNumber, true)
+                gui.drawBase()
+            end
+        end
+    end
+
+    gui.onClick = function(x, y)
+        if y == 2 then
+            -- if clicking search
+            gui.isSearching = true
+            gui.blinkTimer = os.startTimer(blinkSpeed)
+        elseif y >= startY and y <= startY + gui.pageLimit then
+            local selectedResult = gui.displayedResults[y - startY + 1]
+            if selectedResult == gui.selectedResult then
+                gui.popup()
+                gui.drawBase()
+            else
+                gui.selectedResult = selectedResult
+
+                local w, h = term.getSize()
+                gui.drawResults(w, h)
+            end
+        end
+    end
+
+    gui.drawPopup = function()
+        term.clear()
+
+        local w, h = term.getSize()
+
+        term.setBackgroundColour(irisColours.background.colour)
+        paintutils.drawBox(2, 2, w - 1, h - 1, irisColours.main.colour)
+
+        term.setCursorPos(4, 4)
+        term.write(gui.selectedResult.display)
+        term.setCursorPos(4, 5)
+        term.write(gui.selectedResult.name)
+        term.setCursorPos(4, 7)
+        term.write("Count " .. tostring(gui.selectedResult.count))
+        term.setCursorPos(4, 9)
+        if gui.selectedResult.nbt then
+            term.write("@" .. gui.selectedResult.nbt)
+        end
+    end
+
+    gui.popup = function()
+        gui.drawPopup()
+
+        while true do
+            local type, paramA, paramB, paramC, paramD = os.pullEvent()
+            if type == "timer" then
+                if paramA == gui.blinkTimer then
+                    gui.blinkTimer = os.startTimer(blinkSpeed)
+                elseif type == "mouse_click" then
+                    break
+                elseif paramA == gui.pullTimer then
+                    gui.pullTask()
+                end
+            end
+        end
     end
 
     gui.matchQuery = function(itemName, query)

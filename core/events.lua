@@ -6,6 +6,4 @@ return {
 
     EventIrisFullScanFailed = "iris:fullscan_failed",
     EventIrisFullScan = "iris:fullscan",
-
-    QueryComplete = "iris:query_complete",
 }

@@ -56,8 +56,6 @@ end
 local function ScanAllInventories(iris)
     iris.logger.Info().Msg("Scanning all inventories")
 
-    os.queueEvent(events.EventIrisScanStart)
-
     local start = os.epoch("utc")
 
     local inventories = {}
@@ -73,8 +71,6 @@ local function ScanAllInventories(iris)
     end
 
     iris.logger.Info().Dur("duration", start).Msg("Finished scanning inventories")
-
-    os.queueEvent(events.EventIrisScanComplete)
 
     return inventories
 end
