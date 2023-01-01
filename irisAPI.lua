@@ -12,7 +12,7 @@ local configurationPath = "iris.config"
 
 local defaultConfiguration = {
     turtleInput = "top",
-    turtleOutput = "right",
+    turtleOutput = "left",
 
     irisFileLocation = "iris.data",
     atlasFileLocation = "atlas.data",
@@ -604,7 +604,7 @@ local function NewIRIS(logger)
         local totalItems = 0
 
         local inventory = peripheral.wrap(iris.configuration.turtleInput)
-        if not inventory then return 0, errors.ErrCouldNotWrapPeripheral end
+        if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
         local items = inventory.items()
 
@@ -634,7 +634,7 @@ local function NewIRIS(logger)
         local totalItems = 0
 
         local inventory = peripheral.wrap(iris.configuration.turtleOutput)
-        if not inventory then return 0, errors.ErrCouldNotWrapPeripheral end
+        if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
         for i = 1, 16, 1 do
             turtle.select(i)
@@ -651,7 +651,7 @@ local function NewIRIS(logger)
 
     iris._pull = function(peripheral, localSlot, peripheralSlot, count)
         local inventory = peripheral.wrap(peripheral)
-        if not inventory then return 0, errors.ErrCouldNotWrapPeripheral end
+        if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
         local transferred = inventory.pullItem(peripheral, localSlot, count,
             peripheralSlot)
@@ -683,7 +683,7 @@ local function NewIRIS(logger)
 
     iris._push = function(peripheral, localSlot, peripheralSlot, count)
         local inventory = peripheral.wrap(peripheral)
-        if not inventory then return 0, errors.ErrCouldNotWrapPeripheral end
+        if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
         local transferred = inventory.pushItem(peripheral, localSlot, count,
             peripheralSlot)
