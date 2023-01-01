@@ -264,19 +264,6 @@ local function NewGUI(iris)
 
         local blinkSpeed = 0.5
 
-        local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
-        gui.itemSlotsUsed = itemSlotsUsed
-        gui.itemSlotsTotal = itemSlotsTotal
-        gui.itemCount = itemCount
-        gui.itemTotal = itemTotal
-        if gui.itemSlotsTotal == 0 then
-            gui.itemPercentage = 0
-        else
-            gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
-        end
-
-        gui.changePagination(1, true)
-
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
             iris.logger.Trace().Str("type", type).Str("a", paramA).Str("b", paramB).Str("c", paramC).Str("d", paramD).Send()
@@ -332,6 +319,19 @@ local function NewGUI(iris)
                 gui.drawBase()
             elseif type == events.EventIrisInit then
                 gui.isInitialized = true
+
+                local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
+                gui.itemSlotsUsed = itemSlotsUsed
+                gui.itemSlotsTotal = itemSlotsTotal
+                gui.itemCount = itemCount
+                gui.itemTotal = itemTotal
+                if gui.itemSlotsTotal == 0 then
+                    gui.itemPercentage = 0
+                else
+                    gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
+                end
+
+                gui.changePagination(1, true)
                 gui.drawBase()
             end
         end
