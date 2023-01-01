@@ -628,6 +628,7 @@ local function NewIRIS(logger)
                     iris.configuration.outputInventory,
                     iris.configuration.turtleInventory,
                     turtleInventoryRelative,
+                    "top", "left", "right", "back", "front", "bottom",
                 })
             if result.hasSpace then
                 if item.count > 0 then
