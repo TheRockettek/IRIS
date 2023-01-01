@@ -244,8 +244,7 @@ local function NewGUI(iris)
                     bCol = colours.toBlit(irisColours.accent.colour):rep(w)
                 else
                     tCol = colours.toBlit(irisColours.background.colour):rep(padding) ..
-                        colours.toBlit(irisColours.contrast.colour):sub(1, w - maxSizeLength - countGap - (padding * 2))
-                        ..
+                        colours.toBlit(irisColours.contrast.colour):rep(w - maxSizeLength - countGap - (padding * 2)) ..
                         colours.toBlit(irisColours.background.colour):rep(countGap) ..
                         colours.toBlit(colours.grey):rep(#tostring(result.count)) ..
                         colours.toBlit(irisColours.background.colour):rep(padding +
