@@ -472,6 +472,8 @@ local function NewIRIS(logger)
             if itemDetails then
                 iris.updateAtlasEntry(name, itemDetails.displayName, itemDetails.maxCount, itemDetails.tags)
             end
+        else
+            iris.logger.Warn().Err(err).Msg("Failed to fetch item from IRIS")
         end
 
         _, err = iris.pushBufferIntoIRIS()

@@ -1,21 +1,19 @@
-local chestPeripheral = "minecraft:chest"
-
-local function FindAllChests(iris)
-    local chests = {}
-
+local function FindAllInventories(iris)
+    local inventories = {}
     local peripherals = peripheral.getNames()
 
     for _, value in pairs(peripherals) do
-        if value:find(chestPeripheral) then
-            table.insert(chests, value)
+        local _, peripheralType = peripheral.getType(value)
+        if peripheralType == "inventory" then
+            table.insert(inventories, value)
         end
     end
 
-    iris.logger.Debug().Str("count", #chests).Str("total", #peripherals).Msg("Found chests")
+    iris.logger.Debug().Str("count", #inventories).Str("total", #peripherals).Msg("Found inventories")
 
-    return chests
+    return inventories
 end
 
 return {
-    FindAllChests = FindAllChests
+    FindAllInventories = FindAllInventories
 }
