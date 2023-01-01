@@ -415,29 +415,25 @@ local function NewIRIS(logger)
         local output = { hasSpace = false, spacesMissing = 0, candidates = {} }
 
         for inventoryName, inventoryData in pairs(iris.irisData.inventories) do
-            iris.logger.Trace().Str("name", inventoryName).Msg("Looking for spaces")
-            if not tableContains(ignoreList, inventoryName) then
-                iris.logger.Trace().Str("used", inventoryData.usedSlots).Str("total", inventoryData.totalSlots).Msg("Inventory is not ignored")
-                if inventoryData.usedSlots < inventoryData.totalSlots then
-                    iris.logger.Trace().Msg("Inventory has space")
-                    for slotId = 1, inventoryData.totalSlots, 1 do
-                        iris.logger.Trace().Str("slotId", slotId).Json("slot", inventoryData.items[tostring(slotId)]).Str("maxspace"
-                            , maxSpacesNeeded).Msg("Scanning slot")
-                        if inventoryData.items[tostring(slotId)] == nil and
-                            maxSpacesNeeded > 0 then
-                            table.insert(output.candidates, {
-                                peripheral = inventoryName,
-                                slot = tonumber(slotId)
-                            })
+            if maxSpacesNeeded > 0 then
+                if not tableContains(ignoreList, inventoryName) then
+                    if inventoryData.usedSlots < inventoryData.totalSlots then
+                        for slotId = 1, inventoryData.totalSlots, 1 do
+                            if inventoryData.items[tostring(slotId)] == nil then
+                                table.insert(output.candidates, {
+                                    peripheral = inventoryName,
+                                    slot = tonumber(slotId)
+                                })
 
-                            maxSpacesNeeded = maxSpacesNeeded - 1
-                            output.hasSpace = true
+                                maxSpacesNeeded = maxSpacesNeeded - 1
+                                output.hasSpace = true
 
-                            iris.logger.Trace().Str("newSpacesNeeded", maxSpacesNeeded).Msg("Added slot")
+                                if maxSpacesNeeded <= 0 then break end
+                            end
                         end
-                    end
 
-                    if maxSpacesNeeded <= 0 then break end
+                        if maxSpacesNeeded <= 0 then break end
+                    end
                 end
             end
         end
@@ -577,12 +573,14 @@ local function NewIRIS(logger)
 
         local itemsTransferred = 0
 
-        for _, location in pairs(locations) do
-            if count > 0 then
+        if count > 0 then
+            for _, location in pairs(locations) do
                 local transferred = iris._push(location.peripheral, location.slot, peripheralName, nil,
                     math.min(count, location.max - location.count))
                 count = count - transferred
                 itemsTransferred = itemsTransferred + transferred
+
+                if count <= 0 then break end
             end
         end
 
@@ -632,23 +630,27 @@ local function NewIRIS(logger)
                     turtleInventoryRelative,
                 })
             if result.hasSpace then
-                for _, candidate in pairs(result.candidates) do
-                    if item.count > 0 then
-                        local transferred = iris._push(candidate.peripheral, candidate.slot, peripheralName,
-                            tonumber(slot),
+                if item.count > 0 then
+                    for _, candidate in pairs(result.candidates) do
+                        local transferred = iris._push(peripheralName, tonumber(slot), candidate.peripheral,
+                            candidate.slot,
                             math.min(item.count, candidate.max - candidate.count))
                         item.count = item.count - transferred
                         itemsTransferred = itemsTransferred + transferred
+
+                        if item.count <= 0 then break end
                     end
                 end
 
-                for _, emptySlot in pairs(result.emptySlots) do
-                    if item.count > 0 then
-                        local transferred = iris._push(emptySlot.peripheral, emptySlot.slot, peripheralName,
-                            tonumber(slot),
-                            math.min(item.count, maxStack))
+                if item.count > 0 then
+                    for _, candidate in pairs(result.emptySlots) do
+                        local transferred = iris._push(peripheralName, tonumber(slot), candidate.peripheral,
+                            candidate.slot,
+                            math.min(item.count, candidate.max - candidate.count))
                         item.count = item.count - transferred
                         itemsTransferred = itemsTransferred + transferred
+
+                        if item.count <= 0 then break end
                     end
                 end
             else
