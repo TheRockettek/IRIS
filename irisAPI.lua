@@ -173,7 +173,7 @@ local function NewIRIS(logger)
         file.write(irisDataSerialized)
         file.close()
 
-        iris.isAtlasDataDirty = false
+        iris.isIRISDataDirty = false
 
         iris.logger.Info().Dur("duration", start).Msg("Saved IRIS data")
 
