@@ -1,5 +1,4 @@
 local errors = require "core.errors"
-local json = require "libs.json"
 local logging = require "libs.logging"
 local irisSerialization = require "core.iris_serialization"
 local atlasSerialization = require "core.atlas_serialization"
