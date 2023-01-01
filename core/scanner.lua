@@ -13,26 +13,26 @@ local function ScanInventory(iris, name)
         return nil, errors.ErrCouldNotWrapPeripheral
     end
 
-    local chestSize = inventory.size()
-    local chestList = inventory.list()
+    local inventorySize = inventory.size()
+    local inventoryList = inventory.list()
 
-    local chestData = {
-        totalSlots = chestSize,
+    local inventoryData = {
+        totalSlots = inventorySize,
         usedSlots = 0,
         totalItems = 0,
         items = {},
     }
 
-    for i, item in pairs(chestList) do
-        chestData.items[tostring(i)] = {
+    for i, item in pairs(inventoryList) do
+        inventoryData.items[tostring(i)] = {
             name = item.name,
             count = item.count,
         }
-        chestData.usedSlots = chestData.usedSlots + 1
-        chestData.totalItems = chestData.totalItems + item.count
+        inventoryData.usedSlots = inventoryData.usedSlots + 1
+        inventoryData.totalItems = inventoryData.totalItems + item.count
     end
 
-    return chestData, nil
+    return inventoryData, nil
 end
 
 local function ScanAllInventories(iris)
@@ -42,32 +42,32 @@ local function ScanAllInventories(iris)
 
     local start = os.epoch("utc")
 
-    local chests = {}
-    local chestNames = peripherals.FindAllInventories(iris)
+    local inventories = {}
+    local inventoryNames = peripherals.FindAllInventories(iris)
 
     local wg = waitgroup.NewWaitGroup()
 
-    for _, name in pairs(chestNames) do
+    for _, name in pairs(inventoryNames) do
         wg.Add(function()
-            local chest, err = ScanInventory(iris, name)
+            local inventory, err = ScanInventory(iris, name)
             if err ~= nil then
                 iris.logger.Warn().Str("name", name).Err(err).Msg("Failed to scan inventory")
             else
-                chests[name] = chest
+                inventories[name] = inventory
             end
         end)
     end
 
     wg.Wait()
 
-    iris.logger.Debug().Dur("duration", start).Msg("Finished scanning chests")
+    iris.logger.Debug().Dur("duration", start).Msg("Finished scanning inventories")
 
     os.queueEvent(events.EventIrisScanComplete)
 
-    return chests
+    return inventories
 end
 
 return {
-    ScanChest = ScanInventory,
-    ScanAllChests = ScanAllInventories
+    ScanInventory = ScanInventory,
+    ScanAllInventories = ScanAllInventories
 }

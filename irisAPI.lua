@@ -10,7 +10,7 @@ local VERSION = "0.0.1"
 
 local configurationPath = "iris.config"
 
--- We need the turtle to be able to interact directly with this chest
+-- We need the turtle to be able to interact directly with this inventory
 local turtleBuffer = "bottom"
 local bufferPush = turtle.dropDown
 local bufferPull = turtle.suckDown
@@ -23,7 +23,7 @@ local defaultConfiguration = {
     atlasFileLocation = "atlas.data",
 
     scanOnStart = true,
-    scanDelay = 60000 -- Time in milliseconds to wait between a chest scan. This is only used during startup.
+    scanDelay = 60000 -- Time in milliseconds to wait between an inventory scan. This is only used during startup.
 }
 
 local function tableContains(table, key)
@@ -39,7 +39,7 @@ local function NewIRIS(logger)
 
         isIRISDataLoaded = false,
         isIRISDataDirty = false,
-        irisData = { iris = { lastScannedAt = 0 }, chests = {} },
+        irisData = { iris = { lastScannedAt = 0 }, inventories = {} },
 
         isAtlasDataLoaded = false,
         isAtlasDataDirty = false,
@@ -239,7 +239,7 @@ local function NewIRIS(logger)
         return true, nil
     end
 
-    -- Performs a scan of all chests, stores and saves changes.
+    -- Performs a scan of all inventories, stores and saves changes.
     -- If the last scan is before the scan delay, will not run and return false.
     iris.fullScan = function()
         iris.logger.Trace().Str("_name", "fullScan").Send()
@@ -256,9 +256,9 @@ local function NewIRIS(logger)
             return false
         end
 
-        local chests = scanner.ScanAllChests(iris)
+        local inventories = scanner.ScanAllInventories(iris)
 
-        iris.irisData.chests = chests
+        iris.irisData.inventories = inventories
         iris.irisData.iris.lastScannedAt = os.epoch("utc")
         iris.isAtlasDataDirty = true
 
@@ -280,10 +280,10 @@ local function NewIRIS(logger)
         local itemSlotsTotal = 0
         local itemCount = 0
 
-        for _, chestData in pairs(iris.irisData.chests) do
-            itemSlotsTotal = itemSlotsTotal + chestData.totalSlots
-            itemSlotsUsed = itemSlotsUsed + chestData.usedSlots
-            itemCount = itemCount + chestData.totalItems
+        for _, inventoriesData in pairs(iris.irisData.inventories) do
+            itemSlotsTotal = itemSlotsTotal + inventoriesData.totalSlots
+            itemSlotsUsed = itemSlotsUsed + inventoriesData.usedSlots
+            itemCount = itemCount + inventoriesData.totalItems
         end
 
         return itemSlotsUsed, itemSlotsTotal, itemCount, 0
@@ -300,7 +300,7 @@ local function NewIRIS(logger)
         end
     end
 
-    -- Returns all chests that contain a specific item. Returns slot and count.
+    -- Returns all inventories that contain a specific item. Returns slot and count.
     iris.locate = function(name)
         iris.logger.Trace().Str("_name", "locate").Str("name", name).Send()
 
@@ -312,11 +312,11 @@ local function NewIRIS(logger)
             maxStack = atlasEntry.max
         end
 
-        for chestName, chestData in pairs(iris.irisData.chests) do
-            for slotId, item in pairs(chestData.items) do
+        for inventoryName, inventoryData in pairs(iris.irisData.inventories) do
+            for slotId, item in pairs(inventoryData.items) do
                 if item.name == name then
                     table.insert(locations, {
-                        peripheral = chestName,
+                        peripheral = inventoryName,
                         slot = tonumber(slotId),
                         count = item.count,
                         max = maxStack,
@@ -397,14 +397,14 @@ local function NewIRIS(logger)
 
         local output = { hasSpace = false, spacesMissing = 0, candidates = {} }
 
-        for chestName, chestData in pairs(iris.irisData.chests) do
-            if not tableContains(ignoreList, chestName) then
-                if chestData.usedSlots < chestData.totalSlots then
-                    for slotId = 1, chestData.totalSlots, 1 do
-                        if chestData.items[tostring(slotId)] == nil and
+        for inventoryName, inventoryData in pairs(iris.irisData.inventories) do
+            if not tableContains(ignoreList, inventoryName) then
+                if inventoryData.usedSlots < inventoryData.totalSlots then
+                    for slotId = 1, inventoryData.totalSlots, 1 do
+                        if inventoryData.items[tostring(slotId)] == nil and
                             maxSpacesNeeded > 0 then
                             table.insert(output.candidates, {
-                                peripheral = chestName,
+                                peripheral = inventoryName,
                                 slot = tonumber(slotId)
                             })
 
@@ -431,8 +431,8 @@ local function NewIRIS(logger)
 
         local items = {}
 
-        for chestName, chestData in pairs(iris.irisData.chests) do
-            for slotId, item in pairs(chestData.items) do
+        for inventoryName, inventoryData in pairs(iris.irisData.inventories) do
+            for slotId, item in pairs(inventoryData.items) do
                 if items[item.name] == nil then
                     items[item.name] = {}
                 end
@@ -444,7 +444,7 @@ local function NewIRIS(logger)
                 end
 
                 table.insert(items[item.name], {
-                    peripheral = chestName,
+                    peripheral = inventoryName,
                     slot = tonumber(slotId),
                     count = item.count,
                     max = maxStack,
@@ -577,7 +577,7 @@ local function NewIRIS(logger)
         local start = os.epoch("utc")
         iris.logger.Debug().Str("peripheral", peripheralName).Msg("Pushing inventory into IRIS")
 
-        local chest, err = scanner.ScanChest(iris, peripheralName)
+        local inventory, err = scanner.ScanInventory(iris, peripheralName)
         if err ~= nil then
             return 0, err
         end
@@ -585,10 +585,10 @@ local function NewIRIS(logger)
         local itemsTransferred = 0
         local missingSpace = false
 
-        assert(type(chest) == "table")
-        assert(type(chest.items) == "table")
+        assert(type(inventory) == "table")
+        assert(type(inventory.items) == "table")
 
-        for slot, item in pairs(chest.items) do
+        for slot, item in pairs(inventory.items) do
             local maxStack = 1
             local atlasEntry = iris.fetchFromAtlas(item.name)
             if atlasEntry then
@@ -599,7 +599,8 @@ local function NewIRIS(logger)
             if result.hasSpace then
                 for _, candidate in pairs(result.candidates) do
                     if item.count > 0 then
-                        local transferred = iris._push(candidate.peripheral, candidate.slot, peripheralName, slot,
+                        local transferred = iris._push(candidate.peripheral, candidate.slot, peripheralName,
+                            tonumber(slot),
                             math.min(item.count, candidate.max - candidate.count))
                         item.count = item.count - transferred
                         itemsTransferred = itemsTransferred + transferred
@@ -608,7 +609,8 @@ local function NewIRIS(logger)
 
                 for _, emptySlot in pairs(result.emptySlots) do
                     if item.count > 0 then
-                        local transferred = iris._push(emptySlot.peripheral, emptySlot.slot, peripheralName, slot,
+                        local transferred = iris._push(emptySlot.peripheral, emptySlot.slot, peripheralName,
+                            tonumber(slot),
                             math.min(item.count, maxStack))
                         item.count = item.count - transferred
                         itemsTransferred = itemsTransferred + transferred
@@ -645,73 +647,73 @@ local function NewIRIS(logger)
         return transferred, nil
     end
 
-    iris._markAddItem = function(inventory, name, count)
+    iris._markAddItem = function(inventoryName, name, count)
         -- TODO
     end
 
-    iris._markRemoveItem = function(inventory, name, count)
+    iris._markRemoveItem = function(inventoryName, name, count)
         -- TODO
     end
 
-    iris._markAddSlot = function(inventory, slot, count)
-        iris.logger.Trace().Str("_name", "_markAddSlot").Str("inventory", inventory).Str("slot", slot).Str("count", count)
+    iris._markAddSlot = function(inventoryName, slot, count)
+        iris.logger.Trace().Str("_name", "_markAddSlot").Str("inventory", inventoryName).Str("slot", slot).Str("count", count)
             .Send()
-        iris.logger.Debug().Str("inventory", inventory).Str("slot", slot).Str("count", count).Msg("Updating data to add items to slot")
+        iris.logger.Debug().Str("inventory", inventoryName).Str("slot", slot).Str("count", count).Msg("Updating data to add items to slot")
 
-        -- ScanChest if not stored
-        if iris.irisData.chests[inventory] == nil then
-            local chest = scanner.ScanChest(iris, inventory)
+        -- ScanInventory if not stored
+        if iris.irisData.inventories[inventoryName] == nil then
+            local inventory = scanner.ScanInventory(iris, inventoryName)
 
-            iris.irisData.chests[inventory] = chest
+            iris.irisData.inventories[inventoryName] = inventory
             iris.isIRISDataDirty = true
         else
-            -- ScanChest if we don't store an item here or what we store does not make sense.
-            if iris.irisData.chests[inventory].items[tostring(slot)] ==
+            -- ScanInventory if we don't store an item here or what we store does not make sense.
+            if iris.irisData.inventories[inventoryName].items[tostring(slot)] ==
                 nil or
-                iris.irisData.chests[inventory].items[tostring(slot)]
+                iris.irisData.inventories[inventoryName].items[tostring(slot)]
                 .count == nil then
-                local chest = scanner.ScanChest(iris, inventory)
+                local inventory = scanner.ScanInventory(iris, inventoryName)
 
-                iris.irisData.chests[inventory] = chest
+                iris.irisData.inventories[inventoryName] = inventory
                 iris.isIRISDataDirty = true
             else
-                iris.irisData.chests[inventory].items[tostring(slot)]
-                    .count = iris.irisData.chests[inventory].items[tostring(
+                iris.irisData.inventories[inventoryName].items[tostring(slot)]
+                    .count = iris.irisData.inventories[inventoryName].items[tostring(
                     slot)].count + count
                 iris.isIRISDataDirty = true
             end
         end
     end
 
-    iris._markRemoveSlot = function(inventory, slot, count)
-        iris.logger.Trace().Str("_name", "_markRemoveSlot").Str("inventory", inventory).Str("slot", slot).Str("count",
+    iris._markRemoveSlot = function(inventoryName, slot, count)
+        iris.logger.Trace().Str("_name", "_markRemoveSlot").Str("inventoryName", inventoryName).Str("slot", slot).Str("count",
             count).Send()
-        iris.logger.Debug().Str("inventory", inventory).Str("slot", slot).Str("count", count).Msg("Updating data to remove items from slot")
+        iris.logger.Debug().Str("inventoryName", inventoryName).Str("slot", slot).Str("count", count).Msg("Updating data to remove items from slot")
 
-        -- ScanChest if not stored
-        if iris.irisData.chests[inventory] == nil then
-            local chest = scanner.ScanChest(iris, inventory)
+        -- ScanInventory if not stored
+        if iris.irisData.inventories[inventoryName] == nil then
+            local inventory = scanner.ScanInventory(iris, inventoryName)
 
-            iris.irisData.chests[inventory] = chest
+            iris.irisData.inventories[inventoryName] = inventory
             iris.isIRISDataDirty = true
         else
-            -- ScanChest if we don't store an item here or what we store does not make sense.
-            if iris.irisData.chests[inventory].items[tostring(slot)] ==
+            -- ScanInventory if we don't store an item here or what we store does not make sense.
+            if iris.irisData.inventories[inventoryName].items[tostring(slot)] ==
                 nil or
-                iris.irisData.chests[inventory].items[tostring(slot)]
+                iris.irisData.inventories[inventoryName].items[tostring(slot)]
                 .count == nil then
-                local chest = scanner.ScanChest(iris, inventory)
+                local inventory = scanner.ScanInventory(iris, inventoryName)
 
-                iris.irisData.chests[inventory] = chest
+                iris.irisData.inventories[inventoryName] = inventory
                 iris.isIRISDataDirty = true
             else
-                iris.irisData.chests[inventory].items[tostring(slot)]
-                    .count = iris.irisData.chests[inventory].items[tostring(
+                iris.irisData.inventories[inventoryName].items[tostring(slot)]
+                    .count = iris.irisData.inventories[inventoryName].items[tostring(
                     slot)].count - count
 
                 -- If count is 0, remove slot
-                if iris.irisData.chests[inventory].items[tostring(slot)].count == 0 then
-                    iris.irisData.chests[inventory].items[tostring(slot)] = nil
+                if iris.irisData.inventories[inventoryName].items[tostring(slot)].count == 0 then
+                    iris.irisData.inventories[inventoryName].items[tostring(slot)] = nil
                 end
 
                 iris.isIRISDataDirty = true

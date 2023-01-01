@@ -317,11 +317,6 @@ local function NewGUI(iris)
             elseif type == events.EventIrisScanStart then
                 gui.isScanning = true
                 gui.drawBase()
-            elseif type == events.EventIrisScanUpdate then
-                gui.isScanning = true
-                gui.scanningCurrent = paramA
-                gui.scanningTotal = paramB
-                gui.drawBase()
             elseif type == events.EventIrisScanComplete then
                 gui.isScanning = false
                 gui.drawBase()

@@ -10,7 +10,7 @@ local function Encode(iris)
             iris = {
                 lastScannedAt = iris.irisData.iris.lastScannedAt
             },
-            chests = iris.irisData.chests
+            inventories = iris.irisData.inventories
         }
     }
 
