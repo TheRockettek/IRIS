@@ -200,7 +200,7 @@ local function NewGUI(iris)
 
     gui.drawResults = function(w, h)
         local startY = 3
-        local padding = 2
+        local padding = 3
 
         local alignNameLeft = false
         local alignCountLeft = false
@@ -231,9 +231,9 @@ local function NewGUI(iris)
 
                     local x
                     if alignCountLeft then
-                        x = w - maxSizeLength
+                        x = w - maxSizeLength + 1
                     else
-                        x = w - #(tostring(result.count))
+                        x = w - #(tostring(result.count)) + 1
                     end
 
                     term.setCursorPos(x, startY + (i - 1))
@@ -244,7 +244,7 @@ local function NewGUI(iris)
                     if alignCountLeft then
                         x = 1
                     else
-                        x = maxSizeLength - #(tostring(result.count))
+                        x = maxSizeLength - #(tostring(result.count)) + 1
                     end
 
                     term.setCursorPos(x, startY + (i - 1))
@@ -359,6 +359,8 @@ local function NewGUI(iris)
             gui.resultQuery = gui.searchQuery
         end
 
+        iris.logger.Debug().Str("page", pageNumber).Str("resetQuery", resetQuery).Msg("Changed page")
+
         local limit = gui.getResultCount()
 
         gui.pageNumber = pageNumber
@@ -386,6 +388,7 @@ local function NewGUI(iris)
     end
 
     gui.queryItems = function()
+        local start = os.epoch("utc")
         local results = {}
 
         local items = iris.flatten(false)
@@ -407,11 +410,13 @@ local function NewGUI(iris)
             return (a.count) < (b.count)
         end)
 
+        iris.logger.Debug().Str("results", #results).Str("query", gui.searchQuery).Dur("duration", start).Msg("Queried items")
+
         return results
     end
 
     gui.matchQuery = function(itemName, query)
-        return itemName:find(query) ~= nil
+        return query == "" or itemName:find(query) ~= nil
     end
 
     gui.run = function()
