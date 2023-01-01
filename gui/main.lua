@@ -351,17 +351,22 @@ local function NewGUI(iris)
         gui.isBusy = true
         gui.drawBottomBar(w, h)
 
-        iris.pushInputIntoIRIS(true)
-
-        local err = iris.save()
+        local transferred, err = iris.pushInputIntoIRIS()
         if err ~= nil then
-            iris.logger.Warn().Err(err).Msg("Failed to save IRIS data")
+            iris.logger.Warn().Err(err).Msg("Failed to push input into IRIS")
         end
 
         gui.isBusy = false
         gui.drawBottomBar(w, h)
 
-        gui.changePagination(gui.pageNumber, false)
+        err = iris.save()
+        if err ~= nil then
+            iris.logger.Warn().Err(err).Msg("Failed to save IRIS data")
+        end
+
+        if transferred > 0 then
+            gui.changePagination(gui.pageNumber, false)
+        end
 
         gui.pullTimer = os.startTimer(pullSpeed)
 
@@ -371,12 +376,9 @@ local function NewGUI(iris)
         end
     end
 
-    gui.mainScreen = function()
-        gui.drawBase()
-
-        os.pullEvent(events.EventIrisInit)
-
+    gui.calculateUsage = function()
         local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
+
         gui.itemSlotsUsed = itemSlotsUsed
         gui.itemSlotsTotal = itemSlotsTotal
         gui.itemCount = itemCount
@@ -386,7 +388,14 @@ local function NewGUI(iris)
         else
             gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
         end
+    end
 
+    gui.mainScreen = function()
+        gui.drawBase()
+
+        os.pullEvent(events.EventIrisInit)
+
+        gui.calculateUsage()
         gui.changePagination(1, true)
         gui.drawBase()
 
@@ -433,11 +442,7 @@ local function NewGUI(iris)
                     gui.nextPage()
                 end
             elseif type == events.EventIrisFullScan then
-                gui.itemSlotsUsed = paramA
-                gui.itemSlotsTotal = paramB
-                gui.itemCount = paramC
-                gui.itemTotal = paramD
-                gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
+                gui.calculateUsage()
                 gui.drawBase()
             elseif type == "term_resize" then
                 gui.changePagination(gui.pageNumber, true)
