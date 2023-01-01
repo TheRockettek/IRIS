@@ -472,11 +472,11 @@ local function NewIRIS(logger)
         local data = iris.getFromAtlas(name)
         if data ~= nil then return data, nil end
 
-        local slots = iris.locate(name)
-        for _, item in pairs(slots) do
-            local inventory = peripheral.wrap(peripheralName)
+        local locations = iris.locate(name)
+        for _, location in pairs(locations) do
+            local inventory = peripheral.wrap(location.peripheral)
             if inventory ~= nil then
-                local itemDetail = inventory.getItemDetail(item.slot)
+                local itemDetail = inventory.getItemDetail(location.slot)
                 if itemDetail ~= nil and itemDetail.name == name then
                     iris.updateAtlasEntry(name, itemDetail.displayName, itemDetail.maxCount, itemDetail.tags)
 
