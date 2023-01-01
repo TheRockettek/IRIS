@@ -273,7 +273,9 @@ local function NewGUI(iris)
                 if paramA == gui.blinkTimer then
                     gui.showBlink = not gui.showBlink
                     gui.blinkTimer = os.startTimer(blinkSpeed)
-                    gui.drawSearch()
+
+                    local w, h = term.getSize()
+                    gui.drawSearch(w, h)
                 end
             elseif type == "char" and gui.isSearching then
                 gui.searchQuery = gui.searchQuery .. paramA
@@ -309,7 +311,8 @@ local function NewGUI(iris)
             gui.pageNumber = page
         end
 
-        gui.drawResults()
+        local w, h = term.getSize()
+        gui.drawResults(w, h)
     end
 
     gui.prevPage = function()
@@ -330,8 +333,9 @@ local function NewGUI(iris)
         gui.pageCount = math.ceil(#gui.results / limit)
         gui.displayedResults = gui.paginateResults(gui.results, pageNumber, limit)
 
-        gui.drawResults()
-        gui.drawBottomBar()
+        local w, h = term.getSize()
+        gui.drawResults(w, h)
+        gui.drawBottomBar(w, h)
     end
 
     gui.paginateResults = function(results, pageNumber, limit)
