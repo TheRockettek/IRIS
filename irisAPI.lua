@@ -112,8 +112,8 @@ local function NewIRIS(logger)
     iris.save = function()
         iris.logger.Trace().Str("_name", "save").Send()
 
-        local ierr = iris.saveIRISData()
-        local aerr = iris.saveAtlasData()
+        local _, ierr = iris.saveIRISData()
+        local _, aerr = iris.saveAtlasData()
 
         return ierr or aerr
     end
@@ -155,7 +155,7 @@ local function NewIRIS(logger)
         iris.logger.Trace().Str("_name", "saveIRISData").Send()
 
 
-        if not iris.isAtlasDataDirty then
+        if not iris.isIRISDataDirty then
             iris.logger.Info().Msg("Skipped saving IRIS data")
             return false, nil
         end
@@ -260,7 +260,7 @@ local function NewIRIS(logger)
 
         iris.irisData.inventories = inventories
         iris.irisData.iris.lastScannedAt = os.epoch("utc")
-        iris.isAtlasDataDirty = true
+        iris.isIRISDataDirty = true
 
         local err = iris.save()
         if err ~= nil then
@@ -495,6 +495,9 @@ local function NewIRIS(logger)
                     iris.updateAtlasEntry(name, itemDetail.displayName, itemDetail.maxCount, itemDetail.tags)
 
                     return iris.getFromAtlas(name), nil
+                else
+                    iris.logger.Warn().Str("name", name).Str("peripheral", location.peripheral).Str("slot", location.slot)
+                        .Json("itemDetail", itemDetail).Msg("getItemDetail did not match expected item")
                 end
             end
         end
