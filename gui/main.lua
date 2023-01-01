@@ -234,9 +234,9 @@ local function NewGUI(iris)
 
                 local tCol
                 local bCol
+                local trim = result.name:sub(1, w - maxSizeLength - countGap - (padding * 2))
                 local text = (" "):rep(padding) ..
-                    result.name:sub(1, w - maxSizeLength - countGap - (padding * 2)) ..
-                    (" "):rep(countGap) ..
+                    trim .. (" "):rep(w - #trim - maxSizeLength - (padding * 2)) ..
                     result.count .. (" "):rep(padding + (maxSizeLength - #tostring(result.count))) .. (" "):rep(padding)
 
                 if gui.displayedResults == gui.selectedResult then
@@ -252,7 +252,7 @@ local function NewGUI(iris)
                     bCol = colours.toBlit(irisColours.background.colour):rep(w)
                 end
 
-                term.blit(text, tCol, bCol)
+                iris.logger.term.blit(text, tCol, bCol)
             end
         end
     end
