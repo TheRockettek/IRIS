@@ -78,6 +78,8 @@ local function NewIRIS(logger)
 
         if iris.configuration.scanOnStart then iris.fullScan() end
 
+        iris.logger.silent = true
+
         os.queueEvent(events.EventIrisInit)
     end
 
