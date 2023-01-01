@@ -85,6 +85,8 @@ local function NewIRIS(logger)
     -- Loads configuration. Overrides existing default configuration keys,
     -- preserving keys from the default config if not passed in a custom file.
     iris.loadConfiguration = function(path)
+        iris.logger.Trace().Str("_name", "loadConfiguration").Send()
+
         if not fs.exists(path) then
             return nil, errors.ErrConfigurationDoesNotExist
         end
@@ -109,8 +111,17 @@ local function NewIRIS(logger)
         return configuration, nil
     end
 
+    iris.save = function()
+        iris.logger.Trace().Str("_name", "save").Send()
+
+        iris.saveIRISData()
+        iris.saveAtlasData()
+    end
+
     -- Loads data from an IRIS file
     iris.loadIRISData = function()
+        iris.logger.Trace().Str("_name", "loadIRISsData").Send()
+
         local path = iris.configuration.irisFileLocation
 
         if not fs.exists(path) then
@@ -138,14 +149,12 @@ local function NewIRIS(logger)
         return true
     end
 
-    iris.save = function()
-        iris.saveIRISData()
-        iris.saveAtlasData()
-    end
-
     -- Saves data from memory to file. If not changes
     -- have been made indicated by isIRISDataDirty, returns false.
     iris.saveIRISData = function()
+        iris.logger.Trace().Str("_name", "saveIRISData").Send()
+
+
         if not iris.isAtlasDataDirty then
             iris.logger.Info().Msg("Skipped saving IRIS data")
             return false, nil
@@ -172,6 +181,8 @@ local function NewIRIS(logger)
 
     -- Loads data from an IRIS file
     iris.loadAtlasData = function()
+        iris.logger.Trace().Str("_name", "loadAtlasData").Send()
+
         local path = iris.configuration.atlasFileLocation
 
         if not fs.exists(path) then
@@ -202,6 +213,8 @@ local function NewIRIS(logger)
     -- Saves data from memory to file. If not changes
     -- have been made indicated by isIRISDataDirty, returns false.
     iris.saveAtlasData = function()
+        iris.logger.Trace().Str("_name", "saveAtlasData").Send()
+
         if not iris.isAtlasDataDirty then
             iris.logger.Info().Msg("Skipped saving IRIS Atlas")
             return false, nil
@@ -229,6 +242,8 @@ local function NewIRIS(logger)
     -- Performs a scan of all chests, stores and saves changes.
     -- If the last scan is before the scan delay, will not run and return false.
     iris.fullScan = function()
+        iris.logger.Trace().Str("_name", "fullScan").Send()
+
         local timeSince = os.epoch("utc") - iris.irisData.iris.lastScannedAt
         if timeSince < iris.configuration.scanDelay then
             iris.logger.Info().Str("since", timeSince).Str("delay",
@@ -259,6 +274,8 @@ local function NewIRIS(logger)
     end
 
     iris.calculateUsage = function()
+        iris.logger.Trace().Str("_name", "calculateUsage").Send()
+
         local itemSlotsUsed = 0
         local itemSlotsTotal = 0
         local itemCount = 0
@@ -273,6 +290,8 @@ local function NewIRIS(logger)
     end
 
     iris.tryWrapPeripheral = function(name)
+        iris.logger.Trace().Str("_name", "tryWrapPeripheral").Str("name", name).Send()
+
         if peripheral.wrap(name) == nil then
             iris.logger.Panic().Err(errors.ErrCouldNotWrapPeripheral).Str(
                 "name", name).Msg("Failed to wrap to peripheral")
@@ -282,8 +301,8 @@ local function NewIRIS(logger)
     end
 
     -- Returns all chests that contain a specific item. Returns slot and count.
-    iris.locate = function(tryScan, name)
-        if tryScan then iris.fullScan() end
+    iris.locate = function(name)
+        iris.logger.Trace().Str("_name", "locate").Str("name", name).Send()
 
         local locations = {}
 
@@ -306,10 +325,13 @@ local function NewIRIS(logger)
     -- Find partial stacks of empty items.
     -- Returns list of partial stacks and empty slot candidate.
     -- Passing total store will make it only return slots that are needed.
-    iris.findSpot = function(tryScan, name, totalStore, maxStack)
+    iris.findSpot = function(name, totalStore, maxStack)
+        iris.logger.Trace().Str("_name", "findSpot").Str("name", name).Str("totalStore", totalStore).Str("maxStack",
+            maxStack).Send()
+
         local tryFindOptimalSlots = totalStore > 0
 
-        local slots = iris.locate(tryScan, name)
+        local slots = iris.locate(name)
 
         local output = {
             hasSpace = false,
@@ -336,7 +358,7 @@ local function NewIRIS(logger)
 
             -- We have filled up all slots we have in storage, find more empty space.
             if toFit > 0 then
-                local emptySlots = iris.findEmptySpaces(tryScan, math.ceil(
+                local emptySlots = iris.findEmptySpaces(math.ceil(
                     toFit / maxStack))
 
                 output.hasSpace = emptySlots.hasSpace
@@ -344,7 +366,7 @@ local function NewIRIS(logger)
                 output.emptySlots = emptySlots.candidates
             end
         else
-            local emptySlots = iris.findEmptySpaces(tryScan, math.ceil(
+            local emptySlots = iris.findEmptySpaces(math.ceil(
                 totalStore / maxStack))
 
             output.hasSpace = emptySlots.hasSpace
@@ -355,7 +377,10 @@ local function NewIRIS(logger)
         return output
     end
 
-    iris.findEmptySpaces = function(tryScan, maxSpacesNeeded, ignoreList)
+    iris.findEmptySpaces = function(maxSpacesNeeded, ignoreList)
+        iris.logger.Trace().Str("_name", "findEmptySpaces").Str("maxSpacesNeeded", maxSpacesNeeded).Str("ignoreList",
+            textutils.serializeJSON(ignoreList)).Send()
+
         if type(ignoreList) == "string" then
             ignoreList = { ignoreList }
         elseif ignoreList == nil then
@@ -363,8 +388,6 @@ local function NewIRIS(logger)
         end
 
         assert(type(ignoreList) == "table")
-
-        if tryScan then iris.fullScan() end
 
         local output = { hasSpace = false, spacesMissing = 0, candidates = {} }
 
@@ -397,8 +420,8 @@ local function NewIRIS(logger)
     end
 
     -- Returns all items based on locations.
-    iris.flatten = function(tryScan)
-        if tryScan then iris.fullScan() end
+    iris.flatten = function()
+        iris.logger.Trace().Str("_name", "flatten").Send()
 
         local items = {}
 
@@ -421,6 +444,8 @@ local function NewIRIS(logger)
 
     -- Returns data from atlas.
     iris.getFromAtlas = function(name)
+        iris.logger.Trace().Str("_name", "getFromAtlas").Str("name", name).Send()
+
         local data = iris.atlasData[name]
 
         return data
@@ -429,6 +454,8 @@ local function NewIRIS(logger)
     -- Returns data from atlas. If it does not exist,
     -- will try fetch data.
     iris.fetchFromAtlas = function(name)
+        iris.logger.Trace().Str("_name", "fetchFromAtlas").Str("name", name).Send()
+
         local data = iris.getFromAtlas(name)
         if data ~= nil then return data, nil end
 
@@ -454,6 +481,9 @@ local function NewIRIS(logger)
 
     -- Updates atlas entry.
     iris.updateAtlasEntry = function(name, displayName, maxCount, tags)
+        iris.logger.Trace().Str("_name", "updateAtlasEntry").Str("displayName", displayName).Str("maxCount", maxCount).Str("tags"
+            , textutils.serializeJSON(tags)).Send()
+
         local orig = iris.atlasData[name]
 
         iris.atlasData[name] = { displayName = displayName, max = maxCount, tags = tags }
@@ -470,29 +500,40 @@ local function NewIRIS(logger)
     -- IRIS operations
 
     iris.pullItemFromIRIS = function(name, count)
+        iris.logger.Trace().Str("_name", "pullItemFromIRIS").Str("name", name).Str("count", count).Send()
+
         return iris._pullItemIntoInventory(iris.configuration.turtleOutput, name, count)
     end
 
     iris.pushInputIntoIRIS = function()
+        iris.logger.Trace().Str("_name", "pushInputIntoIRIS").Send()
+
         return iris._pushInventoryIntoIRIS(iris.configuration.turtleInput)
     end
 
     iris.pullItemIntoBuffer = function(name, count)
+        iris.logger.Trace().Str("_name", "pullItemIntoBuffer").Str("name", name).Str("count", count).Send()
+
         return iris._pullItemIntoInventory(turtleBuffer, name, count)
     end
 
     iris.pushBufferIntoIRIS = function()
+        iris.logger.Trace().Str("_name", "pushBufferIntoIRIS").Send()
+
         return iris._pushInventoryIntoIRIS(turtleBuffer)
     end
 
     iris._pullItemIntoInventory = function(peripheralName, name, count)
+        iris.logger.Trace().Str("_name", "_pullItemIntoInventory").Str("peripheralName", peripheralName).Str("name", name)
+            .Str("count", count).Send()
+
         local inventory = peripheral.wrap(peripheralName)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
         local start = os.epoch("utc")
         iris.logger.Debug().Str("name", name).Str("count", count).Str("peripheral", peripheralName).Msg("Pulling from IRIS into inventory")
 
-        local locations, err = iris.locate(false, name)
+        local locations, err = iris.locate(name)
         if err ~= nil then
             return 0, err
         end
@@ -519,6 +560,8 @@ local function NewIRIS(logger)
     end
 
     iris._pushInventoryIntoIRIS = function(peripheralName)
+        iris.logger.Trace().Str("_name", "_pushInventoryIntoIRIS").Str("peripheralName", peripheralName).Send()
+
         local inventory = peripheral.wrap(peripheralName)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
@@ -539,7 +582,7 @@ local function NewIRIS(logger)
         for slot, item in pairs(chest.items) do
             local maxStack = iris.fetchFromAtlas(item.name)
 
-            local result = iris.findSpot(false, item.name, item.count, maxStack)
+            local result = iris.findSpot(item.name, item.count, maxStack)
             if result.hasSpace then
                 for _, candidate in pairs(result.candidates) do
                     if item.count > 0 then
@@ -574,6 +617,9 @@ local function NewIRIS(logger)
     end
 
     iris._pull = function(fromInventory, toInventory, localSlot, peripheralSlot, count)
+        iris.logger.Trace().Str("_name", "_pull").Str("fromInventory", fromInventory).Str("toInventory", toInventory).Str("localSlot"
+            , localSlot).Str("peripheralSlot", peripheralSlot).Str("count", count).Send()
+
         local inventory = peripheral.wrap(fromInventory)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
@@ -587,6 +633,9 @@ local function NewIRIS(logger)
     end
 
     iris._push = function(fromInventory, toInventory, localSlot, peripheralSlot, count)
+        iris.logger.Trace().Str("_name", "_push").Str("fromInventory", fromInventory).Str("toInventory", toInventory).Str("localSlot"
+            , localSlot).Str("peripheralSlot", peripheralSlot).Str("count", count).Send()
+
         local inventory = peripheral.wrap(fromInventory)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
@@ -608,6 +657,8 @@ local function NewIRIS(logger)
     end
 
     iris._markAddSlot = function(inventory, slot, count)
+        iris.logger.Trace().Str("_name", "_markAddSlot").Str("inventory", inventory).Str("slot", slot).Str("count", count)
+            .Send()
         iris.logger.Debug().Str("inventory", inventory).Str("slot", slot).Str("count", count).Msg("Updating data to add items to slot")
 
         -- ScanChest if not stored
@@ -636,6 +687,8 @@ local function NewIRIS(logger)
     end
 
     iris._markRemoveSlot = function(inventory, slot, count)
+        iris.logger.Trace().Str("_name", "_markRemoveSlot").Str("inventory", inventory).Str("slot", slot).Str("count",
+            count).Send()
         iris.logger.Debug().Str("inventory", inventory).Str("slot", slot).Str("count", count).Msg("Updating data to remove items from slot")
 
         -- ScanChest if not stored

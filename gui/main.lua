@@ -408,7 +408,7 @@ local function NewGUI(iris)
         local start = os.epoch("utc")
         local results = {}
 
-        local items = iris.flatten(false)
+        local items = iris.flatten()
         for itemName, itemLocations in pairs(items) do
             if gui.matchQuery(itemName, gui.searchQuery) then
                 local itemCount = 0
