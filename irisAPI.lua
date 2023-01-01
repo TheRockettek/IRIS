@@ -380,7 +380,7 @@ local function NewIRIS(logger)
 
                 output.hasSpace = emptySlots.hasSpace
                 output.spacesMissing = emptySlots.spacesMissing
-                output.emptySlots = emptySlots.candidatesbut
+                output.emptySlots = emptySlots.candidates
             end
         else
             local emptySlots = iris.findEmptySpaces(math.ceil(
@@ -401,6 +401,8 @@ local function NewIRIS(logger)
         iris.logger.Trace().Str("_name", "findEmptySpaces").Str("maxSpacesNeeded", maxSpacesNeeded).Json("ignoreList",
             ignoreList).Send()
 
+        local start = os.epoch("utc")
+
         if type(ignoreList) == "string" then
             ignoreList = { ignoreList }
         elseif ignoreList == nil then
@@ -412,9 +414,14 @@ local function NewIRIS(logger)
         local output = { hasSpace = false, spacesMissing = 0, candidates = {} }
 
         for inventoryName, inventoryData in pairs(iris.irisData.inventories) do
+            iris.logger.Trace().Str("name", inventoryName).Msg("Looking for spaces")
             if not tableContains(ignoreList, inventoryName) then
+                iris.logger.Trace().Str("used", inventoryData.usedSlots).Str("total", inventoryData.totalSlots).Msg("Inventory is not ignored")
                 if inventoryData.usedSlots < inventoryData.totalSlots then
+                    iris.logger.Trace().Msg("Inventory has space")
                     for slotId = 1, inventoryData.totalSlots, 1 do
+                        iris.logger.Trace().Str("slotId", slotId).Json("slot", inventoryData.items[tostring(slotId)]).Str("maxspace"
+                            , maxSpacesNeeded).Msg("Scanning slot")
                         if inventoryData.items[tostring(slotId)] == nil and
                             maxSpacesNeeded > 0 then
                             table.insert(output.candidates, {
@@ -424,6 +431,8 @@ local function NewIRIS(logger)
 
                             maxSpacesNeeded = maxSpacesNeeded - 1
                             output.hasSpace = true
+
+                            iris.logger.Trace().Str("newSpacesNeeded", maxSpacesNeeded).Msg("Added slot")
                         end
                     end
 
@@ -433,8 +442,10 @@ local function NewIRIS(logger)
         end
 
         -- If we have a number greater than 0, we do not have enough spaces available.
-        output.hasSpace = maxSpacesNeeded > 0
+        output.hasSpace = maxSpacesNeeded == 0
         output.spacesMissing = maxSpacesNeeded
+
+        iris.logger.Trace().Json("candidates", output.candidates).Dur("duration", start).Msg("Completed finding empty spaces")
 
         return output
     end
@@ -492,9 +503,10 @@ local function NewIRIS(logger)
             if inventory ~= nil then
                 local itemDetail = inventory.getItemDetail(location.slot)
                 if itemDetail ~= nil and itemDetail.name == name then
-                    iris.updateAtlasEntry(name, itemDetail.displayName, itemDetail.maxCount, itemDetail.tags)
+                    local atlasEntry = iris.updateAtlasEntry(name, itemDetail.displayName, itemDetail.maxCount,
+                        itemDetail.tags)
 
-                    return iris.getFromAtlas(name), nil
+                    return atlasEntry, nil
                 else
                     iris.logger.Warn().Str("name", name).Str("peripheral", location.peripheral).Str("slot", location.slot)
                         .Json("itemDetail", itemDetail).Msg("getItemDetail did not match expected item")
@@ -516,11 +528,9 @@ local function NewIRIS(logger)
 
         if orig ~= iris.atlasData[name] then
             iris.isAtlasDataDirty = true
-
-            return true
         end
 
-        return false
+        return iris.atlasData[name]
     end
 
     -- IRIS operations
