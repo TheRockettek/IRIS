@@ -407,7 +407,7 @@ local function NewGUI(iris)
         end
 
         table.sort(results, function(a, b)
-            return (a.count) < (b.count)
+            return (a.count) > (b.count)
         end)
 
         iris.logger.Debug().Str("results", #results).Str("query", gui.searchQuery).Dur("duration", start).Msg("Queried items")

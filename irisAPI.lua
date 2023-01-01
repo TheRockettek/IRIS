@@ -295,7 +295,7 @@ local function NewIRIS(logger)
 
         if tryFindOptimalSlots then
             table.sort(slots, function(a, b)
-                return (a.max - a.count) < (b.max - b.count)
+                return (a.max - a.count) > (b.max - b.count)
             end)
 
             local toFit = totalStore
