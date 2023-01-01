@@ -262,12 +262,6 @@ local function NewGUI(iris)
     gui.mainScreen = function()
         gui.drawBase()
 
-        local pullSpeed = 5
-        local pullTimer = os.startTimer(0)
-
-        local syncSpeed = 15
-        local syncTimer = os.startTimer(0)
-
         local blinkSpeed = 0.5
 
         os.pullEvent(events.EventIrisInit)
@@ -286,6 +280,12 @@ local function NewGUI(iris)
 
         gui.changePagination(1, true)
         gui.drawBase()
+
+        local pullSpeed = 5
+        local pullTimer = os.startTimer(0)
+
+        local syncSpeed = 15
+        local syncTimer = os.startTimer(0)
 
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
@@ -323,6 +323,10 @@ local function NewGUI(iris)
                     iris.save()
 
                     pullTimer = os.startTimer(pullSpeed)
+
+                    -- This timer could have been consumed, reschedule.
+                    os.cancelTimer(syncTimer)
+                    syncTimer = os.startTimer(0)
                 elseif paramA == syncTimer then
                     gui.changePagination(gui.pageNumber, false)
 

@@ -73,7 +73,7 @@ local function NewIRIS(logger)
         iris.loadIRISData()
 
         -- Load iris atlas data
-        iris.loadIRISData()
+        iris.loadAtlasData()
 
         if iris.configuration.scanOnStart then iris.fullScan() end
 
@@ -260,10 +260,7 @@ local function NewIRIS(logger)
         iris.irisData.iris.lastScannedAt = os.epoch("utc")
         iris.isAtlasDataDirty = true
 
-        local _, err = iris.saveIRISData()
-        if err ~= nil then
-            iris.logger.Warn().Err(err).Msg("Failed to save IRIS data")
-        end
+        iris.save()
 
         local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
         os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal)
