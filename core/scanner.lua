@@ -6,7 +6,7 @@ local waitgroup   = require("libs.waitgroup")
 local function ScanInventory(iris, name)
     assert(type(name) == "string")
 
-    iris.logger.Debug().Str("name", name).Msg("Scanning inventory")
+    iris.logger.Debug().Str("name", name).Msg("[TINTER] Scanning inventory")
 
     local inventory = peripheral.wrap(name)
     if inventory == nil then

@@ -289,7 +289,6 @@ local function NewGUI(iris)
 
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
-            iris.logger.Trace().Str("type", type).Str("a", paramA).Str("b", paramB).Str("c", paramC).Str("d", paramD).Send()
             if type == "key" then
                 if paramA == keys.backspace and gui.isSearching then
                     gui.searchQuery = gui.searchQuery:sub(1, -2)

@@ -364,9 +364,7 @@ local function NewIRIS(logger)
             local toFit = totalStore
 
             for _, value in pairs(slots) do
-                iris.logger.Trace().Str("p", value.peripheral).Json("ignoreList", ignoreList).Msg("Can add?")
                 if not tableContainsValue(ignoreList, value.peripheral) then
-                    iris.logger.Trace().Str("p", value.peripheral).Json("ignoreList", ignoreList).Msg("Can add.")
                     if value.count ~= value.max then
                         table.insert(output.candidates, value)
                         output.hasSpace = true
@@ -393,9 +391,6 @@ local function NewIRIS(logger)
             output.spacesMissing = emptySlots.spacesMissing
             output.emptySlots = emptySlots.candidates
         end
-
-        iris.logger.Trace().Str("hasSpace", output.hasSpace).Str("spacesMissing", output.spacesMissing).Json("emptySlots"
-            , output.emptySlots).Json("candidates", output.candidates).Dur("duration", start).Msg("Completed finding spot")
 
         return output
     end
@@ -443,8 +438,6 @@ local function NewIRIS(logger)
         -- If we have a number greater than 0, we do not have enough spaces available.
         output.hasSpace = maxSpacesNeeded == 0
         output.spacesMissing = maxSpacesNeeded
-
-        iris.logger.Trace().Json("candidates", output.candidates).Dur("duration", start).Msg("Completed finding empty spaces")
 
         return output
     end
@@ -500,6 +493,7 @@ local function NewIRIS(logger)
         for _, location in pairs(locations) do
             local inventory = peripheral.wrap(location.peripheral)
             if inventory ~= nil then
+                iris.logger.Debug().Str("_name", "fetchFromAtlas.getItemDetails").Str("peripheral", location.peripheral).Str("slot", location.slot).Msg("[TINTER]")
                 local itemDetail = inventory.getItemDetail(location.slot)
                 if itemDetail ~= nil and itemDetail.name == name then
                     local atlasEntry = iris.updateAtlasEntry(name, itemDetail.displayName, itemDetail.maxCount,
@@ -674,11 +668,10 @@ local function NewIRIS(logger)
     iris._push = function(fromInventory, fromSlot, toInventory, toSlot, count)
         iris.logger.Trace().Str("_name", "_push").Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory"
             , toInventory).Str("toSlot"
-            , toSlot).Str("count", count).Send()
+            , toSlot).Str("count", count).Msg("[TINTER]")
 
         local inventory = peripheral.wrap(fromInventory)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
-
         local transferred = inventory.pushItems(toInventory, fromSlot, count, toSlot)
 
         iris._markAddSlot(toInventory, fromSlot, count)
