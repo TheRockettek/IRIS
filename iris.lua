@@ -3,6 +3,7 @@ local irisAPI = require("irisAPI")
 local gui = require("gui.main")
 
 local logger = logging.NewLogger("-", "iris.log")
+logger.setLevel("info")
 
 local iris = irisAPI.NewIRIS(logger)
 
