@@ -336,6 +336,8 @@ local function NewIRIS(logger)
             maxStack).Json("ignoreList",
             ignoreList).Send()
 
+        local start = os.epoch("utc")
+
         if type(ignoreList) == "string" then
             ignoreList = { ignoreList }
         elseif ignoreList == nil then
@@ -388,6 +390,9 @@ local function NewIRIS(logger)
             output.spacesMissing = emptySlots.spacesMissing
             output.emptySlots = emptySlots.candidates
         end
+
+        iris.logger.Trace().Str("hasSpace", output.hasSpace).Str("spacesMissing", output.spacesMissing).Json("emptySlots"
+            , output.emptySlots).Json("candidates", output.candidates).Dur("duration", start).Msg("Completed finding spot")
 
         return output
     end
