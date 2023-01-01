@@ -252,7 +252,7 @@ local function NewGUI(iris)
                     bCol = colours.toBlit(irisColours.background.colour):rep(w)
                 end
 
-                iris.logger.term.blit(text, tCol, bCol)
+                term.blit(text, tCol, bCol)
             end
         end
     end
