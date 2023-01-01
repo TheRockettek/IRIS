@@ -557,7 +557,7 @@ local function NewIRIS(logger)
 
         for _, location in pairs(locations) do
             if count > 0 then
-                local transferred = iris._push(peripheralName, location.peripheral, nil, location.slot,
+                local transferred = iris._push(location.peripheral, location.slot, peripheralName, nil,
                     math.min(count, location.max - location.count))
                 count = count - transferred
                 itemsTransferred = itemsTransferred + transferred
@@ -605,7 +605,7 @@ local function NewIRIS(logger)
             if result.hasSpace then
                 for _, candidate in pairs(result.candidates) do
                     if item.count > 0 then
-                        local transferred = iris._push(peripheralName, candidate.peripheral, slot, candidate.slot,
+                        local transferred = iris._push(candidate.peripheral, candidate.slot, peripheralName, slot,
                             math.min(item.count, candidate.max - candidate.count))
                         item.count = item.count - transferred
                         itemsTransferred = itemsTransferred + transferred
@@ -614,7 +614,7 @@ local function NewIRIS(logger)
 
                 for _, emptySlot in pairs(result.emptySlots) do
                     if item.count > 0 then
-                        local transferred = iris._push(peripheralName, emptySlot.peripheral, slot, emptySlot.slot,
+                        local transferred = iris._push(emptySlot.peripheral, emptySlot.slot, peripheralName, slot,
                             math.min(item.count, maxStack))
                         item.count = item.count - transferred
                         itemsTransferred = itemsTransferred + transferred
@@ -635,34 +635,18 @@ local function NewIRIS(logger)
         return itemsTransferred, nil
     end
 
-    iris._pull = function(fromInventory, toInventory, localSlot, peripheralSlot, count)
-        iris.logger.Trace().Str("_name", "_pull").Str("fromInventory", fromInventory).Str("toInventory", toInventory).Str("localSlot"
-            , localSlot).Str("peripheralSlot", peripheralSlot).Str("count", count).Send()
+    iris._push = function(fromInventory, fromSlot, toInventory, toSlot, count)
+        iris.logger.Trace().Str("_name", "_push").Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory"
+            , toInventory).Str("toSlot"
+            , toSlot).Str("count", count).Send()
 
         local inventory = peripheral.wrap(fromInventory)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
-        local transferred = inventory.pullItems(toInventory, localSlot, count,
-            peripheralSlot)
+        local transferred = inventory.pushItems(toInventory, fromSlot, count, toSlot)
 
-        iris._markRemoveSlot(fromInventory, localSlot, count)
-        iris._markAddSlot(toInventory, peripheralSlot, count)
-
-        return transferred, nil
-    end
-
-    iris._push = function(fromInventory, toInventory, localSlot, peripheralSlot, count)
-        iris.logger.Trace().Str("_name", "_push").Str("fromInventory", fromInventory).Str("toInventory", toInventory).Str("localSlot"
-            , localSlot).Str("peripheralSlot", peripheralSlot).Str("count", count).Send()
-
-        local inventory = peripheral.wrap(fromInventory)
-        if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
-
-        local transferred = inventory.pushItems(toInventory, localSlot, count,
-            peripheralSlot)
-
-        iris._markAddSlot(toInventory, peripheralSlot, count)
-        iris._markRemoveSlot(fromInventory, localSlot, count)
+        iris._markAddSlot(toInventory, fromSlot, count)
+        iris._markRemoveSlot(fromInventory, toSlot, count)
 
         return transferred, nil
     end
