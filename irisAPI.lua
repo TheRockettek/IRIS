@@ -317,7 +317,7 @@ local function NewIRIS(logger)
                 if item.name == name then
                     table.insert(locations, {
                         peripheral = chestName,
-                        slot = slotId,
+                        slot = tonumber(slotId),
                         count = item.count,
                         max = maxStack,
                     })
@@ -405,7 +405,7 @@ local function NewIRIS(logger)
                             maxSpacesNeeded > 0 then
                             table.insert(output.candidates, {
                                 peripheral = chestName,
-                                slot = slotId
+                                slot = tonumber(slotId)
                             })
 
                             maxSpacesNeeded = maxSpacesNeeded - 1
@@ -445,7 +445,7 @@ local function NewIRIS(logger)
 
                 table.insert(items[item.name], {
                     peripheral = chestName,
-                    slot = slotId,
+                    slot = tonumber(slotId),
                     count = item.count,
                     max = maxStack,
                 })
