@@ -320,7 +320,11 @@ local function NewGUI(iris)
                     gui.drawSearch(w, h)
                 elseif paramA == pullTimer then
                     iris.pushInputIntoIRIS(true)
-                    iris.save()
+
+                    local err = iris.save()
+                    if err ~= nil then
+                        iris.logger.Warn().Err(err).Msg("Failed to save IRIS data")
+                    end
 
                     pullTimer = os.startTimer(pullSpeed)
 

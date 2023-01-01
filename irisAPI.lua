@@ -112,8 +112,10 @@ local function NewIRIS(logger)
     iris.save = function()
         iris.logger.Trace().Str("_name", "save").Send()
 
-        iris.saveIRISData()
-        iris.saveAtlasData()
+        local ierr = iris.saveIRISData()
+        local aerr = iris.saveAtlasData()
+
+        return ierr or aerr
     end
 
     -- Loads data from an IRIS file
@@ -260,7 +262,10 @@ local function NewIRIS(logger)
         iris.irisData.iris.lastScannedAt = os.epoch("utc")
         iris.isAtlasDataDirty = true
 
-        iris.save()
+        local err = iris.save()
+        if err ~= nil then
+            iris.logger.Warn().Err(err).Msg("Failed to save data")
+        end
 
         local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
         os.queueEvent(events.EventIrisFullScan, itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal)
