@@ -16,7 +16,6 @@ local function ScanInventory(iris, name)
     end
 
     local inventorySize = inventory.size()
-    -- local inventoryList = inventory.list()
 
     local inventoryData = {
         totalSlots = inventorySize,
@@ -66,20 +65,14 @@ local function ScanAllInventories(iris)
     local inventories = {}
     local inventoryNames = peripherals.FindAllInventories(iris)
 
-    local wg = waitgroup.NewWaitGroup()
-
     for _, name in pairs(inventoryNames) do
-        wg.Add(function()
-            local inventory, err = ScanInventory(iris, name)
-            if err ~= nil then
-                iris.logger.Warn().Str("name", name).Err(err).Msg("Failed to scan inventory")
-            else
-                inventories[name] = inventory
-            end
-        end)
+        local inventory, err = ScanInventory(iris, name)
+        if err ~= nil then
+            iris.logger.Warn().Str("name", name).Err(err).Msg("Failed to scan inventory")
+        else
+            inventories[name] = inventory
+        end
     end
-
-    wg.Wait()
 
     iris.logger.Debug().Dur("duration", start).Msg("Finished scanning inventorys")
 
