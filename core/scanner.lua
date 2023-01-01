@@ -28,9 +28,7 @@ local function ScanInventory(iris, name)
 
     for i = 1, inventorySize, 1 do
         wg.Add(function()
-            iris.logger.Trace().Str("name", name).Str("slot", i).Str("size", inventorySize).Msg("[TINTER] Scanning slot")
             local item = inventory.getItemDetail(i)
-            iris.logger.Trace().Str("name", name).Str("slot", i).Str("size", inventorySize).Msg("[TINTER] Scanned slot")
 
             if item then
                 inventoryData.items[tostring(i)] = {
