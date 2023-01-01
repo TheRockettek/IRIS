@@ -236,15 +236,17 @@ local function NewGUI(iris)
                 local bCol
 
                 if gui.displayedResults == gui.selectedResult then
-                    tCol = colours.toBlit(irisColours.contrast):rep(w)
-                    bCol = colours.toBlit(irisColours.accent):rep(w)
+                    tCol = colours.toBlit(irisColours.contrast.colour):rep(w)
+                    bCol = colours.toBlit(irisColours.accent.colour):rep(w)
                 else
-                    tCol = colours.toBlit(irisColours.background:rep(padding)) ..
-                        colours.toBlit(irisColours.contrast):sub(1, w - maxSizeLength - countGap - (padding * 2)) ..
-                        colours.toBlit(irisColours.background):rep(countGap) ..
+                    tCol = colours.toBlit(irisColours.background.colour):rep(padding) ..
+                        colours.toBlit(irisColours.contrast.colour):sub(1, w - maxSizeLength - countGap - (padding * 2))
+                        ..
+                        colours.toBlit(irisColours.background.colour):rep(countGap) ..
                         colours.toBlit(colours.grey):rep(#tostring(result.count)) ..
-                        colours.toBlit(irisColours.background):rep(padding + (#tostring(result.count) - maxSizeLength))
-                    bCol = colours.toBlit(irisColours.background):rep(w)
+                        colours.toBlit(irisColours.background.colour):rep(padding +
+                            (#tostring(result.count) - maxSizeLength))
+                    bCol = colours.toBlit(irisColours.background.colour):rep(w)
                 end
 
                 term.blit(
