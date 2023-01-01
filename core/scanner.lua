@@ -14,7 +14,7 @@ local function ScanInventory(iris, name)
     end
 
     local inventorySize = inventory.size()
-    local inventoryList = inventory.list()
+    -- local inventoryList = inventory.list()
 
     local inventoryData = {
         totalSlots = inventorySize,
