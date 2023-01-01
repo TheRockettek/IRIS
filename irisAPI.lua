@@ -11,11 +11,12 @@ local VERSION = "0.0.1"
 local configurationPath = "iris.config"
 
 -- We need the turtle to be able to interact directly with this inventory
-local turtleInventory = "bottom"
+local turtleInventoryRelative = "bottom"
 
 local defaultConfiguration = {
     inputInventory = "top",
     outputInventory = "left",
+    turtleInventory = "bottom",
 
     irisFileLocation = "iris.data",
     atlasFileLocation = "atlas.data",
@@ -67,7 +68,8 @@ local function NewIRIS(logger)
         iris.tryWrapPeripheral(iris.configuration.outputInventory)
 
         -- Validate buffer is wrappable
-        iris.tryWrapPeripheral(turtleInventory)
+        iris.tryWrapPeripheral(turtleInventoryRelative)
+        iris.tryWrapPeripheral(iris.configuration.turtleInventory)
 
         -- Load iris data
         iris.loadIRISData()
@@ -550,13 +552,13 @@ local function NewIRIS(logger)
     iris.pullItemIntoBuffer = function(name, count)
         iris.logger.Trace().Str("_name", "pullItemIntoBuffer").Str("name", name).Str("count", count).Send()
 
-        return iris._pullItemIntoInventory(turtleInventory, name, count)
+        return iris._pullItemIntoInventory(iris.configuration.turtleInventory, name, count)
     end
 
     iris.pushBufferIntoIRIS = function()
         iris.logger.Trace().Str("_name", "pushBufferIntoIRIS").Send()
 
-        return iris._pushInventoryIntoIRIS(turtleInventory)
+        return iris._pushInventoryIntoIRIS(iris.configuration.turtleInventory)
     end
 
     iris._pullItemIntoInventory = function(peripheralName, name, count)
@@ -627,7 +629,8 @@ local function NewIRIS(logger)
                     peripheralName,
                     iris.configuration.inputInventory,
                     iris.configuration.outputInventory,
-                    turtleInventory,
+                    iris.configuration.turtleInventory,
+                    turtleInventoryRelative,
                 })
             if result.hasSpace then
                 for _, candidate in pairs(result.candidates) do
