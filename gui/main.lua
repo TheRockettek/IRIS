@@ -262,6 +262,9 @@ local function NewGUI(iris)
     gui.mainScreen = function()
         gui.drawBase()
 
+        local pullSpeed = 5
+        local pullTimer = nil
+
         local blinkSpeed = 0.5
 
         while true do
@@ -295,6 +298,10 @@ local function NewGUI(iris)
 
                     local w, h = term.getSize()
                     gui.drawSearch(w, h)
+                elseif paramA == pullTimer then
+                    iris.push(true)
+
+                    pullTimer = os.startTimer(pullSpeed)
                 end
             elseif type == "char" and gui.isSearching then
                 gui.searchQuery = gui.searchQuery .. paramA
@@ -330,6 +337,8 @@ local function NewGUI(iris)
                 else
                     gui.itemPercentage = math.floor((gui.itemSlotsUsed / gui.itemSlotsTotal) * 100)
                 end
+
+                pullTimer = os.startTimer(pullSpeed)
 
                 gui.changePagination(1, true)
                 gui.drawBase()
