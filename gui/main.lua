@@ -130,7 +130,7 @@ local function NewGUI(iris)
         term.setBackgroundColour(irisColours.background.colour)
 
         if gui.isBusy then
-            term.write("BUSY")
+            term.write("BUSY" .. (" "):rep(w - 4))
 
             return
         end
@@ -494,7 +494,7 @@ local function NewGUI(iris)
                 if paramA == gui.blinkTimer then
                     gui.blinkTimer = os.startTimer(blinkSpeed)
                 elseif type == "mouse_click" then
-                    break
+                    return
                 elseif paramA == gui.pullTimer then
                     gui.pullTask()
                 end
