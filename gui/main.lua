@@ -284,9 +284,6 @@ local function NewGUI(iris)
         local pullSpeed = 5
         local pullTimer = os.startTimer(0)
 
-        local syncSpeed = 15
-        local syncTimer = os.startTimer(0)
-
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
             if type == "key" then
@@ -325,22 +322,14 @@ local function NewGUI(iris)
                         iris.logger.Warn().Err(err).Msg("Failed to save IRIS data")
                     end
 
-                    pullTimer = os.startTimer(pullSpeed)
+                    gui.changePagination(gui.pageNumber, false)
 
-                    -- Timers could have been consumed, reschedule.
-                    if syncTimer ~= nil then
-                        os.cancelTimer(syncTimer)
-                        syncTimer = os.startTimer(syncSpeed)
-                    end
+                    pullTimer = os.startTimer(pullSpeed)
 
                     if gui.blinkTimer ~= nil then
                         os.cancelTimer(gui.blinkTimer)
                         gui.blinkTimer = os.startTimer(blinkSpeed)
                     end
-                elseif paramA == syncTimer then
-                    gui.changePagination(gui.pageNumber, false)
-
-                    syncTimer = os.startTimer(syncSpeed)
                 end
             elseif type == "char" and gui.isSearching then
                 gui.searchQuery = gui.searchQuery .. paramA
