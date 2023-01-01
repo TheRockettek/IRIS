@@ -108,7 +108,7 @@ local function NewIRIS(logger)
 
         local _, ierr = iris.saveIRISData()
 
-        return ierr or aerr
+        return ierr
     end
 
     -- Loads data from an IRIS file
@@ -511,7 +511,7 @@ local function NewIRIS(logger)
                     for _, candidate in pairs(result.emptySlots) do
                         local transferred = iris._push(peripheralName, tonumber(slot), candidate.peripheral,
                             candidate.slot,
-                            math.min(item.count, maxStack))
+                            math.min(item.count, item.max))
                         item.count = item.count - transferred
                         itemsTransferred = itemsTransferred + transferred
 
