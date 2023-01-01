@@ -490,8 +490,10 @@ local function NewIRIS(logger)
         if data ~= nil then return data, nil end
 
         local locations = iris.locate(name)
+        iris.logger.Trace().Str("_name", "fetchFromAtlas").Json("locations", locations).Msg("Found locations for item")
         for _, location in pairs(locations) do
             local inventory = peripheral.wrap(location.peripheral)
+            iris.logger.Trace().Str("location", location.peripheral).Str("inventory", inventory).Msg("Wrapped")
             if inventory ~= nil then
                 iris.logger.Debug().Str("_name", "fetchFromAtlas.getItemDetails").Str("peripheral", location.peripheral)
                     .Str("slot", location.slot).Msg("[TINTER]")
