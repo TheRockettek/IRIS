@@ -6,7 +6,7 @@ local waitgroup   = require("libs.waitgroup")
 local function ScanInventory(iris, name)
     assert(type(name) == "string")
 
-    iris.logger.Trace().Str("name", name).Msg("[TINTER] Scanning inventory")
+    iris.logger.Debug().Str("name", name).Msg("[TINTER] Scanning inventory")
 
     local start = os.epoch("utc")
 
@@ -48,13 +48,13 @@ local function ScanInventory(iris, name)
 
     wg.Wait()
 
-    iris.logger.Info().Str("name", name).Dur("duration", start).Msg("[TINTER] Scanned inventory")
+    iris.logger.Debug().Str("name", name).Dur("duration", start).Msg("[TINTER] Scanned inventory")
 
     return inventoryData, nil
 end
 
 local function ScanAllInventories(iris)
-    iris.logger.Debug().Msg("Scanning all inventories")
+    iris.logger.Info().Msg("Scanning all inventories")
 
     os.queueEvent(events.EventIrisScanStart)
 
@@ -72,7 +72,7 @@ local function ScanAllInventories(iris)
         end
     end
 
-    iris.logger.Debug().Dur("duration", start).Msg("Finished scanning inventorys")
+    iris.logger.Info().Dur("duration", start).Msg("Finished scanning inventories")
 
     os.queueEvent(events.EventIrisScanComplete)
 
