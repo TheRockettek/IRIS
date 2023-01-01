@@ -2,6 +2,11 @@ local events = require "core.events"
 -- Colours to use within IRIS gui
 -- original colour to use, r, g, b
 
+local alignNameLeft = false
+local alignCountLeft = false
+local countGap = 2
+local countPadding = 1
+
 local irisColours = {
     main        = { colour = colours.blue, hex = 0x2F80ED },
     accent      = { colour = colours.cyan, hex = 0x2162BA },
@@ -200,10 +205,6 @@ local function NewGUI(iris)
 
     gui.drawResults = function(w, h)
         local startY = 3
-        local padding = 3
-
-        local alignNameLeft = false
-        local alignCountLeft = false
 
         local maxSizeLength = 0
         for _, result in pairs(gui.displayedResults) do
@@ -227,13 +228,13 @@ local function NewGUI(iris)
                 if alignNameLeft then
                     term.setCursorPos(1, startY + (i - 1))
                     term.setTextColour(irisColours.contrast.colour)
-                    term.write(result.name:sub(1, w - maxSizeLength - padding))
+                    term.write(result.name:sub(1, w - maxSizeLength - countGap - countPadding))
 
                     local x
                     if alignCountLeft then
-                        x = w - maxSizeLength + 1
+                        x = w - maxSizeLength + 1 - countPadding
                     else
-                        x = w - #(tostring(result.count)) + 1
+                        x = w - #(tostring(result.count)) + 1 - countPadding
                     end
 
                     term.setCursorPos(x, startY + (i - 1))
@@ -242,18 +243,18 @@ local function NewGUI(iris)
                 else
                     local x
                     if alignCountLeft then
-                        x = 1
+                        x = 1 + countPadding
                     else
-                        x = maxSizeLength - #(tostring(result.count)) + 1
+                        x = countPadding + maxSizeLength - #(tostring(result.count)) + 1
                     end
 
                     term.setCursorPos(x, startY + (i - 1))
                     term.setTextColour(colours.grey)
                     term.write(result.count)
 
-                    term.setCursorPos(maxSizeLength + padding, startY + (i - 1))
+                    term.setCursorPos(maxSizeLength + countGap, startY + (i - 1))
                     term.setTextColour(irisColours.contrast.colour)
-                    term.write(result.name)
+                    term.write(result.name:sub(1, w - maxSizeLength - countGap - countPadding))
                 end
             end
         end
