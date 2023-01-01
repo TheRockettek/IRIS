@@ -302,7 +302,8 @@ local function NewGUI(iris)
                     local w, h = term.getSize()
                     gui.drawSearch(w, h)
                 elseif paramA == pullTimer then
-                    iris.push(true)
+                    iris.pushInputIntoIRIS(true)
+                    iris.save()
 
                     pullTimer = os.startTimer(pullSpeed)
                 elseif paramA == syncTimer then
