@@ -384,8 +384,8 @@ local function NewIRIS(logger)
     end
 
     iris.findEmptySpaces = function(maxSpacesNeeded, ignoreList)
-        iris.logger.Trace().Str("_name", "findEmptySpaces").Str("maxSpacesNeeded", maxSpacesNeeded).Str("ignoreList",
-            textutils.serializeJSON(ignoreList)).Send()
+        iris.logger.Trace().Str("_name", "findEmptySpaces").Str("maxSpacesNeeded", maxSpacesNeeded).Json("ignoreList",
+            ignoreList).Send()
 
         if type(ignoreList) == "string" then
             ignoreList = { ignoreList }
@@ -496,8 +496,8 @@ local function NewIRIS(logger)
 
     -- Updates atlas entry.
     iris.updateAtlasEntry = function(name, displayName, maxCount, tags)
-        iris.logger.Trace().Str("_name", "updateAtlasEntry").Str("displayName", displayName).Str("maxCount", maxCount).Str("tags"
-            , textutils.serializeJSON(tags)).Send()
+        iris.logger.Trace().Str("_name", "updateAtlasEntry").Str("displayName", displayName).Str("maxCount", maxCount).Json("tags"
+            , tags).Send()
 
         local orig = iris.atlasData[name]
 

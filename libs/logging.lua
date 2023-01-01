@@ -169,9 +169,14 @@ local function NewLogger(timeFormat, fileName)
         end
 
         loggerMessage.Dur = function(name, epoch)
-            loggerMessage.Str(name, formatEpoch(epoch))
+            return loggerMessage.Str(name, formatEpoch(epoch))
+        end
 
-            return loggerMessage
+        loggerMessage.Json = function(name, object)
+            if object == nil then
+                return loggerMessage.Str(name, "nil")
+            end
+            return loggerMessage.Str(name, textutils.serializeJSON(object))
         end
 
         return loggerMessage
