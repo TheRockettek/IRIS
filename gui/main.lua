@@ -85,10 +85,11 @@ local function NewGUI(iris)
     gui.getResultCount = function()
         local w, h = term.getSize()
 
+        -- We also remove an extra line from bottom. I think it looks nicer like that...
         if gui.isSmallDisplay(w) then
-            return h - 4
+            return h - 5
         else
-            return h - 3
+            return h - 4
         end
     end
 
