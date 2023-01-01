@@ -672,17 +672,17 @@ local function NewIRIS(logger)
             iris.isIRISDataDirty = true
         else
             -- ScanChest if we don't store an item here or what we store does not make sense.
-            if iris.irisData.chests[inventory].slots[tostring(slot)] ==
+            if iris.irisData.chests[inventory].items[tostring(slot)] ==
                 nil or
-                iris.irisData.chests[inventory].slots[tostring(slot)]
+                iris.irisData.chests[inventory].items[tostring(slot)]
                 .count == nil then
                 local chest = scanner.ScanChest(iris, inventory)
 
                 iris.irisData.chests[inventory] = chest
                 iris.isIRISDataDirty = true
             else
-                iris.irisData.chests[inventory].slots[tostring(slot)]
-                    .count = iris.irisData.chests[inventory].slots[tostring(
+                iris.irisData.chests[inventory].items[tostring(slot)]
+                    .count = iris.irisData.chests[inventory].items[tostring(
                     slot)].count + count
                 iris.isIRISDataDirty = true
             end
@@ -702,22 +702,22 @@ local function NewIRIS(logger)
             iris.isIRISDataDirty = true
         else
             -- ScanChest if we don't store an item here or what we store does not make sense.
-            if iris.irisData.chests[inventory].slots[tostring(slot)] ==
+            if iris.irisData.chests[inventory].items[tostring(slot)] ==
                 nil or
-                iris.irisData.chests[inventory].slots[tostring(slot)]
+                iris.irisData.chests[inventory].items[tostring(slot)]
                 .count == nil then
                 local chest = scanner.ScanChest(iris, inventory)
 
                 iris.irisData.chests[inventory] = chest
                 iris.isIRISDataDirty = true
             else
-                iris.irisData.chests[inventory].slots[tostring(slot)]
-                    .count = iris.irisData.chests[inventory].slots[tostring(
+                iris.irisData.chests[inventory].items[tostring(slot)]
+                    .count = iris.irisData.chests[inventory].items[tostring(
                     slot)].count - count
 
                 -- If count is 0, remove slot
-                if iris.irisData.chests[inventory].slots[tostring(slot)].count == 0 then
-                    iris.irisData.chests[inventory].slots[tostring(slot)] = nil
+                if iris.irisData.chests[inventory].items[tostring(slot)].count == 0 then
+                    iris.irisData.chests[inventory].items[tostring(slot)] = nil
                 end
 
                 iris.isIRISDataDirty = true
