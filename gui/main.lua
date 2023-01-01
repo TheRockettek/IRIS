@@ -24,13 +24,17 @@ end
 
 local function NewGUI(iris)
     local gui = {
-        searchQuery = "",
-        isSearching = "",
-
-        pageNumber = 0,
-        pageCount = 0,
+        pageNumber = 1,
+        pageCount = 1,
 
         results = {},
+        displayedResults = {},
+
+        showBlink = false,
+        blinkTimer = nil,
+
+        isSearching = false,
+        searchQuery = "",
 
         isInitialized = false,
 
@@ -63,28 +67,46 @@ local function NewGUI(iris)
         paintutils.drawBox(1, 2, w, 2, irisColours.accent.colour)
 
         -- Add search
-        term.setCursorPos(1, 2)
-        term.write(gui.searchQuery)
+        gui.drawSearch(w, h)
 
-        local paginationDisplay = " < " .. tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount) .. " > "
+        -- Draw results
+        gui.drawResults(w, h)
 
-        local isSmallDisplay = w < 39 -- When enabled, the pagination and item count will be on seperate lines
+        -- Draw bottom bar
+        gui.drawBottomBar(w, h)
+    end
 
+    gui.getResultCount = function()
+        local w, h = term.getSize()
+
+        if gui.isSmallDisplay(w) then
+            return h - 4
+        else
+            return h - 3
+        end
+    end
+
+    gui.isSmallDisplay = function(termW)
+        return termW < 39
+    end
+
+    gui.drawSearch = function(w, h)
         term.setTextColour(irisColours.contrast.colour)
 
-        if isSmallDisplay then
-            paintutils.drawBox(1, h, w, h, irisColours.main.colour)
-            term.setCursorPos(math.floor((w - #paginationDisplay) / 2), h)
-            term.write(paginationDisplay)
+        paintutils.drawBox(1, 2, w, 2, irisColours.accent.colour)
 
-            gui.drawPercentage(1, h - 1, w)
+        local text
+        if gui.isSearching then
+            text = gui.searchQuery:sub((-w) + 1, -1)
+            if gui.showBlink then
+                text = text .. "_"
+            end
         else
-            paintutils.drawBox(w - #paginationDisplay + 1, h, w, h, irisColours.main.colour)
-            term.setCursorPos(w - #paginationDisplay + 1, h)
-            term.write(paginationDisplay)
-
-            gui.drawPercentage(1, h, w - #paginationDisplay)
+            text = gui.searchQuery:sub(-w, -1)
         end
+
+        term.setCursorPos(1, 2)
+        term.write(text)
     end
 
     gui.drawPercentage = function(x, y, w)
@@ -137,8 +159,80 @@ local function NewGUI(iris)
         )
     end
 
+    gui.drawBottomBar = function(w, h)
+        local paginationDisplay = " < " .. tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount) .. " > "
+
+        term.setTextColour(irisColours.contrast.colour)
+
+        if gui.isSmallDisplay(w) then -- When enabled, the pagination and item count will be on seperate lines
+            paintutils.drawBox(1, h, w, h, irisColours.main.colour)
+            term.setCursorPos(math.floor((w - #paginationDisplay) / 2), h)
+            term.write(paginationDisplay)
+
+            gui.drawPercentage(1, h - 1, w)
+        else
+            paintutils.drawBox(w - #paginationDisplay + 1, h, w, h, irisColours.main.colour)
+            term.setCursorPos(w - #paginationDisplay + 1, h)
+            term.write(paginationDisplay)
+
+            gui.drawPercentage(1, h, w - #paginationDisplay)
+        end
+    end
+
+    gui.drawResults = function(w, h)
+        local startY = 3
+        local padding = 2
+
+        local alignNameLeft = false
+        local alignCountLeft = false
+
+        local maxSizeLength = 0
+        for _, result in pairs(gui.displayedResults) do
+            local sizeLength = #(tostring(result.count))
+            if sizeLength > maxSizeLength then
+                maxSizeLength = sizeLength
+            end
+        end
+
+        for i, result in pairs(gui.displayedResults) do
+            if alignNameLeft then
+                term.setCursorPos(1, startY + (i - 1))
+                term.setTextColour(irisColours.contrast.colour)
+                term.write(result.name:sub(1, w - maxSizeLength - padding))
+
+                local x
+                if alignCountLeft then
+                    x = w - maxSizeLength
+                else
+                    x = w - #(tostring(result.count))
+                end
+
+                term.setCursorPos(x, startY + (i - 1))
+                term.setTextColour(colours.grey)
+                term.write(result.count)
+            else
+                local x
+                if alignCountLeft then
+                    x = 1
+                else
+                    x = maxSizeLength - #(tostring(result.count))
+                end
+
+                term.setCursorPos(1, startY + (i - 1))
+                term.setTextColour(colours.grey)
+                term.write(result.count)
+
+                term.setCursorPos(maxSizeLength + padding, startY + (i - 1))
+                term.setTextColour(irisColours.contrast.colour)
+                term.write(result.name)
+            end
+        end
+    end
+
     gui.mainScreen = function()
         gui.drawBase()
+
+        local blinkSpeed = 0.5
 
         local itemSlotsUsed, itemSlotsTotal, itemCount, itemTotal = iris.calculateUsage()
         gui.itemSlotsUsed = itemSlotsUsed
@@ -150,7 +244,37 @@ local function NewGUI(iris)
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
             iris.logger.Trace().Str("type", type).Str("a", paramA).Str("b", paramB).Str("c", paramC).Str("d", paramD).Send()
-            if type == events.EventIrisScanStart then
+            if type == "key" then
+                if paramA == keys.backspace and gui.isSearching then
+                    gui.searchQuery = gui.searchQuery:sub(1, -2)
+                    gui.changePagination(1, false)
+                elseif paramA == keys.enter then
+                    gui.isSearching = false
+                    if gui.blinkTimer ~= nil then
+                        os.cancelTimer(gui.blinkTimer)
+                        gui.blinkTimer = nil
+                    end
+                elseif paramA == keys.down or paramA == keys.pageDown then
+                    gui.nextPage()
+                elseif paramA == keys.up or paramA == keys.pageUp then
+                    gui.prevPage()
+                elseif paramA == keys.home then
+                    gui.changePagination(1, false)
+                end
+            elseif type == "mouse_click" then
+                -- if clicking search
+                gui.isSearching = true
+                gui.blinkTimer = os.startTimer(blinkSpeed)
+            elseif type == "timer" then
+                if paramA == gui.blinkTimer then
+                    gui.showBlink = not gui.showBlink
+                    gui.blinkTimer = os.startTimer(blinkSpeed)
+                    gui.drawSearch()
+                end
+            elseif type == "char" and gui.isSearching then
+                gui.searchQuery = gui.searchQuery .. paramA
+                gui.changePagination(1, false)
+            elseif type == events.EventIrisScanStart then
                 gui.isScanning = true
                 gui.drawBase()
             elseif type == events.EventIrisScanUpdate then
@@ -173,6 +297,81 @@ local function NewGUI(iris)
                 gui.drawBase()
             end
         end
+    end
+
+    gui.nextPage = function()
+        local page = gui.pageNumber + 1
+        if page <= gui.pageCount then
+            gui.pageNumber = page
+        end
+
+        gui.drawResults()
+    end
+
+    gui.prevPage = function()
+        if gui.pageNumber > 1 then
+            gui.changePagination(gui.pageNumber - 1, false)
+        end
+    end
+
+    gui.changePagination = function(pageNumber, resetQuery)
+        if resetQuery then
+            gui.searchQuery = ""
+            gui.results = gui.queryItems()
+        end
+
+        local limit = gui.getResultCount()
+
+        gui.pageNumber = pageNumber
+        gui.pageCount = math.ceil(#gui.results / limit)
+        gui.displayedResults = gui.paginateResults(gui.results, pageNumber, limit)
+
+        gui.drawResults()
+        gui.drawBottomBar()
+    end
+
+    gui.paginateResults = function(results, pageNumber, limit)
+        local displayedResults = {}
+
+        for i = 1 + (limit * (pageNumber - 1)), limit * pageNumber, 1 do
+            local result = results[i]
+            if result then
+                table.insert(displayedResults, result)
+            else
+                break
+            end
+        end
+
+        return displayedResults
+    end
+
+    gui.queryItems = function()
+        local results = {}
+
+        local items = iris.flatten(false)
+        for itemName, itemLocations in pairs(items) do
+            if gui.matchQuery(itemName, gui.searchQuery) then
+                local itemCount = 0
+                for _, itemLocation in pairs(itemLocations) do
+                    itemCount = itemCount + itemLocation.count
+                end
+
+                table.insert(results, {
+                    name = itemName,
+                    count = itemCount,
+                })
+            end
+        end
+
+        table.sort(results, function(a, b)
+            return (a.count) < (b.count)
+        end)
+
+        return results
+    end
+
+    gui.matchQuery = function(itemName, query)
+        return itemName:find(query) ~= nil
     end
 
     gui.run = function()

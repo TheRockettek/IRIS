@@ -387,7 +387,6 @@ local function NewIRIS(logger)
                     peripheral = chestName,
                     slot = slotId,
                     count = item.count,
-                    max = item.max
                 })
             end
         end
