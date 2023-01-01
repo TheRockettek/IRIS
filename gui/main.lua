@@ -230,37 +230,30 @@ local function NewGUI(iris)
             term.clearLine()
 
             if result then
-                if alignNameLeft then
-                    term.setCursorPos(1 + padding, startY + (i - 1))
-                    term.setTextColour(irisColours.contrast.colour)
-                    term.write(result.name:sub(1, w - maxSizeLength - countGap - (padding * 2)))
+                term.setCursorPos(1, startY + (i - 1))
 
-                    local x
-                    if alignCountLeft then
-                        x = w - maxSizeLength + 1 - padding
-                    else
-                        x = w - #(tostring(result.count)) + 1 - padding
-                    end
+                local tCol
+                local bCol
 
-                    term.setCursorPos(x, startY + (i - 1))
-                    term.setTextColour(colours.grey)
-                    term.write(result.count)
+                if gui.displayedResults == gui.selectedResult then
+                    tCol = irisColours.contrast:rep(w)
+                    bCol = irisColours.accent:rep(w)
                 else
-                    local x
-                    if alignCountLeft then
-                        x = 1 + padding
-                    else
-                        x = padding + maxSizeLength - #(tostring(result.count)) + 1
-                    end
-
-                    term.setCursorPos(x, startY + (i - 1))
-                    term.setTextColour(colours.grey)
-                    term.write(result.count)
-
-                    term.setCursorPos(maxSizeLength + countGap + padding, startY + (i - 1))
-                    term.setTextColour(irisColours.contrast.colour)
-                    term.write(result.name:sub(1, w - maxSizeLength - countGap - (padding * 2)))
+                    tCol = colours.toBlit(irisColours.background:rep(padding)) ..
+                        colours.toBlit(irisColours.contrast):sub(1, w - maxSizeLength - countGap - (padding * 2)) ..
+                        irisColours.background:rep(countGap) ..
+                        colours.grey:rep(#tostring(result.count)) ..
+                        irisColours.background:rep(padding + (#tostring(result.count) - maxSizeLength))
+                    bCol = irisColours.background:rep(w)
                 end
+
+                term.blit(
+                    (" "):rep(padding) ..
+                    result.name:sub(1, w - maxSizeLength - countGap - (padding * 2)) ..
+                    (" "):rep(countGap) .. result.count .. (" "):rep(padding + (#tostring(result.count) - maxSizeLength))
+                    ,
+                    tCol, bCol
+                )
             end
         end
     end
