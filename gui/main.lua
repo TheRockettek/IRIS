@@ -329,11 +329,15 @@ local function NewGUI(iris)
                     pullTimer = os.startTimer(pullSpeed)
 
                     -- Timers could have been consumed, reschedule.
-                    os.cancelTimer(syncTimer)
-                    syncTimer = os.startTimer(syncSpeed)
+                    if syncTimer ~= nil then
+                        os.cancelTimer(syncTimer)
+                        syncTimer = os.startTimer(syncSpeed)
+                    end
 
-                    os.cancelTimer(gui.blinkTimer)
-                    gui.blinkTimer = os.startTimer(blinkSpeed)
+                    if gui.blinkTimer ~= nil then
+                        os.cancelTimer(gui.blinkTimer)
+                        gui.blinkTimer = os.startTimer(blinkSpeed)
+                    end
                 elseif paramA == syncTimer then
                     gui.changePagination(gui.pageNumber, false)
 
