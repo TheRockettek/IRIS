@@ -328,9 +328,12 @@ local function NewGUI(iris)
 
                     pullTimer = os.startTimer(pullSpeed)
 
-                    -- This timer could have been consumed, reschedule.
+                    -- Timers could have been consumed, reschedule.
                     os.cancelTimer(syncTimer)
-                    syncTimer = os.startTimer(0)
+                    syncTimer = os.startTimer(syncSpeed)
+
+                    os.cancelTimer(gui.blinkTimer)
+                    gui.blinkTimer = os.startTimer(blinkSpeed)
                 elseif paramA == syncTimer then
                     gui.changePagination(gui.pageNumber, false)
 
