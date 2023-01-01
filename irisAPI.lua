@@ -681,8 +681,8 @@ local function NewIRIS(logger)
         if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
         local transferred = inventory.pushItems(toInventory, fromSlot, count, toSlot)
 
-        iris._markAddSlot(toInventory, fromSlot, count)
-        iris._markRemoveSlot(fromInventory, toSlot, count)
+        iris._markAddSlot(toInventory, toSlot, count)
+        iris._markRemoveSlot(fromInventory, fromSlot, count)
 
         return transferred, nil
     end
