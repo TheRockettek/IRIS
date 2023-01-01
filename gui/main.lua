@@ -160,7 +160,24 @@ local function NewGUI(iris)
     end
 
     gui.drawBottomBar = function(w, h)
-        local paginationDisplay = " < " .. tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount) .. " > "
+        local paginationDisplay
+        if gui.pageCount == 0 then
+            paginationDisplay = (" "):rep(9)
+        else
+            if gui.pageNumber > 1 then
+                paginationDisplay = " < "
+            else
+                paginationDisplay = "   "
+            end
+
+            paginationDisplay = paginationDisplay .. tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount)
+
+            if gui.pageNumber < gui.pageCount then
+                paginationDisplay = paginationDisplay .. " > "
+            else
+                paginationDisplay = paginationDisplay .. "   "
+            end
+        end
 
         term.setTextColour(irisColours.contrast.colour)
 
