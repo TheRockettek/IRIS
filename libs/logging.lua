@@ -56,6 +56,7 @@ end
 
 local function NewLogger(timeFormat, fileName)
     local logger = {
+        startEpoch = os.epoch("utc"),
         timeFormat = timeFormat or defaultTimeStamp,
         minimumLevel = -1,
         fileName = "", -- filename to log to. If not passed, will not log to file.
@@ -97,7 +98,11 @@ local function NewLogger(timeFormat, fileName)
             local text = ""
 
             if not logger.silent then term.setTextColour(colours.grey) end
-            text = os.date(loggerMessage.logger.timeFormat) .. " "
+            if loggerMessage.logger.timeFormat == "-" then
+                text = tostring(os.epoch("utc") - logger.startEpoch) .. " "
+            else
+                text = os.date(loggerMessage.logger.timeFormat) .. " "
+            end
             outputText = outputText .. text
             if not logger.silent then term.write(text) end
 

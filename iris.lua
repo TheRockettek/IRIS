@@ -2,7 +2,7 @@ local logging = require("libs.logging")
 local irisAPI = require("irisAPI")
 local gui = require("gui.main")
 
-local logger = logging.NewLogger(nil, "iris.log")
+local logger = logging.NewLogger("-", "iris.log")
 logger.silent = true
 
 local iris = irisAPI.NewIRIS(logger)
