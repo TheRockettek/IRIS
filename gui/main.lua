@@ -263,10 +263,10 @@ local function NewGUI(iris)
         gui.drawBase()
 
         local pullSpeed = 5
-        local pullTimer = nil
+        local pullTimer = os.startTimer(0)
 
         local syncSpeed = 15
-        local syncTimer = nil
+        local syncTimer = os.startTimer(0)
 
         local blinkSpeed = 0.5
 
