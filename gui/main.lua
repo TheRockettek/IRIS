@@ -415,7 +415,7 @@ local function NewGUI(iris)
                     gui.changePagination(1, false)
                 end
             elseif type == "mouse_click" then
-                gui.onClick(paramB, paramC)
+                gui.onClick(paramA, paramB, paramC)
             elseif type == "turtle_inventory" then
                 gui.pullTask()
             elseif type == "timer" then
@@ -445,21 +445,32 @@ local function NewGUI(iris)
         end
     end
 
-    gui.onClick = function(x, y)
-        if y == 2 then
-            -- if clicking search
-            gui.isSearching = true
-            gui.blinkTimer = os.startTimer(blinkSpeed)
-        elseif y >= startY and y <= startY + gui.pageLimit then
-            local selectedResult = gui.displayedResults[y - startY + 1]
-            if selectedResult == gui.selectedResult and selectedResult ~= nil then
-                gui.popup()
-                gui.drawBase()
-            else
-                gui.selectedResult = selectedResult
+    gui.onClick = function(mouseButton, x, y)
+        gui.isSearching = false
 
-                local w, h = term.getSize()
-                gui.drawResults(w, h)
+        if mouseButton == 1 then -- Left click
+            if y == 2 then -- Clicking search
+                gui.isSearching = true
+                gui.blinkTimer = os.startTimer(blinkSpeed)
+            elseif y >= startY and y <= startY + gui.pageLimit then
+                local selectedResult = gui.displayedResults[y - startY + 1]
+                if selectedResult == gui.selectedResult and selectedResult ~= nil then -- Double clicked result
+                    -- TODO: pull stack from IRIS
+                    gui.changePagination(gui.pageNumber, false)
+                else
+                    gui.selectedResult = selectedResult
+
+                    local w, h = term.getSize()
+                    gui.drawResults(w, h)
+                end
+            end
+        elseif mouseButton == 2 then -- Right click
+            if y >= startY and y <= startY + gui.pageLimit then
+                local selectedResult = gui.displayedResults[y - startY + 1]
+                if selectedResult ~= nil then
+                    gui.selectedResult = selectedResult
+                    gui.popup()
+                end
             end
         end
     end
