@@ -643,7 +643,7 @@ local function NewGUI(iris)
 
         if query == "" then
             return true
-        elseif query[1] == "$" then
+        elseif query:sub(1, 1) == "$" then
             -- the $ allows for searching item tags
             if item.tags then
                 query = query:sub(2, #query)
