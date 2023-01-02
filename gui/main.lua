@@ -400,9 +400,6 @@ local function NewGUI(iris)
         return results
     end
 
-    gui.getFromIRIS = function()
-    end
-
     gui.pullTask = function()
         local w, h = term.getSize()
         gui.isBusy = true
@@ -528,9 +525,17 @@ local function NewGUI(iris)
                     -- Pull stack from IRIS
                     local emptySlot = gui.findSpace()
                     if emptySlot then
+                        local w, h = term.getSize()
+                        gui.isBusy = true
+                        gui.drawBottomBar(w, h)
+
+                        local start = os.epoch("utc")
                         local locations = iris.locate(selectedResult.name, selectedResult.nbt)
                         local max = locations[1].max
                         local totalTransferred = 0
+
+                        iris.logger.Info().Str("name", selectedResult.name).Str("nbt", selectedResult.nbt).Str("max", max)
+                            .Msg("Requesting items from IRIS")
 
                         for _, location in pairs(locations) do
                             if max > 0 then
@@ -540,6 +545,12 @@ local function NewGUI(iris)
                                 max = max - transferred
                             end
                         end
+
+                        iris.logger.Info().Str("name", selectedResult.name).Str("nbt", selectedResult.nbt).Str("transferred"
+                            , totalTransferred).Dur("duration", start).Msg("Requested items from IRIS")
+
+                        gui.isBusy = true
+                        gui.drawBottomBar(w, h)
 
                         gui.setReserved(emptySlot, selectedResult, totalTransferred)
                         gui.selectedResult = nil
