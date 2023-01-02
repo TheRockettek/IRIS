@@ -37,7 +37,7 @@ local function NewIRIS(logger)
 
         isIRISDataLoaded = false,
         isIRISDataDirty = false,
-        irisData = { iris = { lastSca_transferItemsnnedAt = 0 }, inventories = {} },
+        irisData = { iris = { lastScannedAt = 0 }, inventories = {} },
 
         configuration = defaultConfiguration
     }
