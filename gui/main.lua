@@ -185,7 +185,9 @@ local function NewGUI(iris)
                 paginationDisplay = "   "
             end
 
-            paginationDisplay = paginationDisplay .. tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount)
+            paginationDisplay = paginationDisplay ..
+                (" "):rep(#tostring(gui.pageCount) - #tostring(gui.pageNumber)) ..
+                tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount)
 
             if gui.pageNumber < gui.pageCount then
                 paginationDisplay = paginationDisplay .. " > "
@@ -196,13 +198,16 @@ local function NewGUI(iris)
 
         term.setTextColour(irisColours.contrast.colour)
 
+
         if gui.isSmallDisplay(w) then -- When enabled, the pagination and item count will be on seperate lines
+            paintutils.drawBox(1, h - 1, w, h - 1, irisColours.background.colour)
             paintutils.drawBox(1, h, w, h, irisColours.main.colour)
             term.setCursorPos(math.floor((w - #paginationDisplay) / 2), h)
             term.write(paginationDisplay)
 
             gui.drawPercentage(1, h - 1, w)
         else
+            paintutils.drawBox(1, h - 2, w, h - 2, irisColours.background.colour)
             paintutils.drawBox(w - #paginationDisplay + 1, h, w, h, irisColours.main.colour)
             term.setCursorPos(w - #paginationDisplay + 1, h)
             term.write(paginationDisplay)
