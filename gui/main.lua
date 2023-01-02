@@ -81,25 +81,21 @@ local function NewGUI(iris)
             local item = turtle.getItemDetail(slotId, true)
             if item then
                 if reservedSlot == nil or iris._getItemName(item) ~= reservedSlot.name then
-                    table.insert(candidates,
-                        {
-                            peripheral = iris.internalInventory,
-                            slot = slotId,
-                            name = item.name,
-                            nbt = item.nbt,
-                            count = item.count,
-                            max = item.maxCount
-                        })
+                    candidates[tostring(slotId)] = {
+                        peripheral = iris.internalInventory,
+                        name = item.name,
+                        nbt = item.nbt,
+                        count = item.count,
+                        max = item.maxCount
+                    }
                 elseif item.count > reservedSlot.count then
-                    table.insert(candidates,
-                        {
-                            peripheral = iris.internalInventory,
-                            slot = slotId,
-                            name = item.name,
-                            nbt = item.nbt,
-                            count = reservedSlot.count - item.count,
-                            max = item.maxCount
-                        })
+                    candidates[tostring(slotId)] = {
+                        peripheral = iris.internalInventory,
+                        name = item.name,
+                        nbt = item.nbt,
+                        count = reservedSlot.count - item.count,
+                        max = item.maxCount
+                    }
                 end
             else
                 -- The reserved item is no longer in that slot, unreserve it.
