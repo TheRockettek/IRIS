@@ -236,8 +236,8 @@ local function NewGUI(iris)
                 local bCol
                 local trim = result.name:sub(1, w - maxSizeLength - countGap - (padding * 2))
                 local text = (" "):rep(padding) ..
-                    trim .. (" "):rep(w - #trim - maxSizeLength - (padding * 2)) ..
-                    result.count .. (" "):rep(padding + (maxSizeLength - #tostring(result.count))) .. (" "):rep(padding)
+                    trim ..
+                    (" "):rep(w - #trim - #tostring(result.count) - (padding * 2)) .. result.count .. (" "):rep(padding)
 
                 if gui.displayedResults == gui.selectedResult then
                     tCol = colours.toBlit(irisColours.contrast.colour):rep(w)
