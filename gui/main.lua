@@ -368,10 +368,9 @@ local function NewGUI(iris)
         local results = {}
 
         local items = iris.flatten()
-        for itemName, itemLocations in pairs(items) do
+        for _, itemLocations in pairs(items) do
             if #itemLocations > 0 then
                 local location = itemLocations[1]
-                location.name = itemName
 
                 if gui.matchQuery(location, gui.searchQuery) then
                     local itemCount = 0

@@ -276,7 +276,7 @@ local function NewIRIS(logger)
 
     -- Returns all inventories that contain a specific item. Returns slot and count.
     iris.locate = function(name, nbt)
-        iris.logger.Trace().Str("_name", "locate").Str("name", name).Send()
+        iris.logger.Trace().Str("_name", "locate").Str("name", name).Str("nbt", nbt).Send()
 
         local locations = {}
 
