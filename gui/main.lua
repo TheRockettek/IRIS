@@ -51,8 +51,6 @@ local function NewGUI(iris)
         showBlink = false,
         blinkTimer = nil,
 
-        pullTimer = nil,
-
         isSearching = false,
         searchQuery = "",
 
@@ -428,8 +426,6 @@ local function NewGUI(iris)
             gui.changePagination(gui.pageNumber, false)
         end
 
-        gui.pullTimer = os.startTimer(pullSpeed)
-
         if gui.blinkTimer ~= nil then
             os.cancelTimer(gui.blinkTimer)
             gui.blinkTimer = os.startTimer(blinkSpeed)
@@ -460,7 +456,7 @@ local function NewGUI(iris)
         gui.changePagination(1, true)
         gui.drawBase()
 
-        gui.pullTimer = os.startTimer(0)
+        gui.pullTask()
 
         while true do
             local type, paramA, paramB, paramC, paramD = os.pullEvent()
