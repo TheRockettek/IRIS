@@ -554,6 +554,9 @@ local function NewIRIS(logger)
     end
 
     iris._transferItems = function(peripheralName, detailedItems)
+        iris.logger.Trace().Str("_name", "_transferItems").Str("peripheralName", peripheralName).Json("items",
+            detailedItems).Send()
+
         local itemsTransferred = 0
         local missingSpace = false
 

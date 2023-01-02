@@ -80,7 +80,7 @@ local function NewGUI(iris)
 
         for slotId = 1, iris.turtle.size(), 1 do
             local reservedSlot = gui.reservedTurtleSlots[slotId]
-            local item = turtle.getItemDetail(slotId)
+            local item = turtle.getItemDetail(slotId, true)
             if item then
                 if reservedSlot == nil or iris._getItemName(item) ~= reservedSlot.name then
                     table.insert(candidates,
