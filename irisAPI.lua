@@ -598,6 +598,10 @@ local function NewIRIS(logger)
         end
 
         local transferred = inventoryPeripheral.pushItems(toInventory, fromSlot, count, toSlot)
+        if transferred == 0 then
+            iris.logger.Warn().Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory",
+                toInventory).Str("toSlot", toSlot).Str("count", count).Msg("Failed to push items")
+        end
 
         iris._markAddSlot(toInventory, toSlot, count)
         iris._markRemoveSlot(fromInventory, fromSlot, count)
