@@ -392,9 +392,7 @@ local function NewGUI(iris)
             end
         end
 
-        table.sort(results, function(a, b)
-            return (a.count) > (b.count)
-        end)
+        table.sort(results, gui.sortFunction)
 
         iris.logger.Debug().Str("results", #results).Str("query", gui.searchQuery).Dur("duration", start).Msg("Queried items")
 
@@ -621,6 +619,11 @@ local function NewGUI(iris)
     gui.matchQuery = function(item, query)
         return query == "" or item.name:lower():find(query:lower()) ~= nil or
             item.display:lower():find(query:lower()) ~= nil
+    end
+
+    gui.sortFunction = function(a, b)
+        -- return (a.count) > (b.count)
+        return (a.display:lower()) > (b.display:lower())
     end
 
     gui.run = function()
