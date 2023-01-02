@@ -500,7 +500,7 @@ local function NewIRIS(logger)
         if count > 0 then
             for _, location in pairs(locations) do
                 local transferred = iris._push(location.peripheral, location.slot, peripheralName, nil,
-                    math.min(count, location.max - location.count))
+                    math.min(count, location.count))
                 count = count - transferred
                 itemsTransferred = itemsTransferred + transferred
 
