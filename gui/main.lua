@@ -318,7 +318,7 @@ local function NewGUI(iris)
         local items = iris.flatten()
         for itemName, itemLocations in pairs(items) do
             if #itemLocations > 0 then
-                local location = itemLocations[0]
+                local location = itemLocations[1]
                 if gui.matchQuery(location, gui.searchQuery) then
                     local itemCount = 0
                     for _, itemLocation in pairs(itemLocations) do
@@ -329,7 +329,6 @@ local function NewGUI(iris)
                         table.insert(results, {
                             name = itemName,
                             count = itemCount,
-
                             display = location.display,
                             nbt = location.nbt,
                             tags = location.tags,
