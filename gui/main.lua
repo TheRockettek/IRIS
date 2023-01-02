@@ -374,8 +374,8 @@ local function NewGUI(iris)
 
                     if itemCount > 0 then
                         table.insert(results, {
-                            name = itemName,
                             count = itemCount,
+                            name = location.name,
                             display = location.display,
                             nbt = location.nbt,
                             tags = location.tags,

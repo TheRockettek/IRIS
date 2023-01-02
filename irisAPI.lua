@@ -432,6 +432,7 @@ local function NewIRIS(logger)
                     slot = tonumber(slotId),
                     count = item.count,
 
+                    name = item.name,
                     display = item.display or item.name,
                     max = item.max,
                     nbt = item.nbt,
