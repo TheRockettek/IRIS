@@ -623,7 +623,7 @@ local function NewGUI(iris)
 
     gui.sortFunction = function(a, b)
         -- return (a.count) > (b.count)
-        return (a.display:lower()) > (b.display:lower())
+        return (a.display:lower()) < (b.display:lower())
     end
 
     gui.run = function()
