@@ -576,7 +576,7 @@ local function NewIRIS(logger)
                     for _, candidate in pairs(result.candidates) do
                         local transferred = iris._push(peripheralName, tonumber(slot), candidate.peripheral,
                             candidate.slot,
-                            math.min(item.count, candidate.max - candidate.count))
+                            math.min(item.count, candidate.count))
                         item.count = item.count - transferred
                         itemsTransferred = itemsTransferred + transferred
 
