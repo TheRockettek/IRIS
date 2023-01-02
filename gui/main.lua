@@ -319,6 +319,8 @@ local function NewGUI(iris)
         for itemName, itemLocations in pairs(items) do
             if #itemLocations > 0 then
                 local location = itemLocations[1]
+                location.name = itemName
+
                 if gui.matchQuery(location, gui.searchQuery) then
                     local itemCount = 0
                     for _, itemLocation in pairs(itemLocations) do
