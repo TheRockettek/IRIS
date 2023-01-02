@@ -589,9 +589,15 @@ local function NewIRIS(logger)
             , toInventory).Str("toSlot"
             , toSlot).Str("count", count).Msg("[TINTER]")
 
-        local inventory = peripheral.wrap(fromInventory)
-        if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
-        local transferred = inventory.pushItems(toInventory, fromSlot, count, toSlot)
+        local inventoryPeripheral
+        if fromInventory == internalInventory then
+            inventoryPeripheral = iris.turtle
+        else
+            inventoryPeripheral = peripheral.wrap(fromInventory)
+            if inventoryPeripheral == nil then return 0, errors.ErrCouldNotWrapPeripheral end
+        end
+
+        local transferred = inventoryPeripheral.pushItems(toInventory, fromSlot, count, toSlot)
 
         iris._markAddSlot(toInventory, toSlot, count)
         iris._markRemoveSlot(fromInventory, fromSlot, count)
