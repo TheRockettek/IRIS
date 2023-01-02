@@ -609,10 +609,12 @@ local function NewIRIS(logger)
             , toSlot).Str("count", count).Msg("[TINTER]")
 
         local inventoryPeripheral
+        local transferred
+
         if fromInventory == iris.internalInventory then
             inventoryPeripheral = iris.turtle
 
-            local transferred = inventoryPeripheral.pushItems(toInventory, fromSlot, count, toSlot)
+            transferred = inventoryPeripheral.pushItems(toInventory, fromSlot, count, toSlot)
             if transferred == 0 then
                 iris.logger.Warn().Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory",
                     toInventory).Str("toSlot", toSlot).Str("count", count).Msg("Failed to push items")
@@ -620,7 +622,7 @@ local function NewIRIS(logger)
         elseif toInventory == iris.internalInventory then
             inventoryPeripheral = iris.turtle
 
-            local transferred = inventoryPeripheral.pullItems(fromInventory, fromSlot, count, toSlot)
+            transferred = inventoryPeripheral.pullItems(fromInventory, fromSlot, count, toSlot)
             if transferred == 0 then
                 iris.logger.Warn().Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory",
                     toInventory).Str("toSlot", toSlot).Str("count", count).Msg("Failed to pull items (as turtle)")
@@ -629,7 +631,7 @@ local function NewIRIS(logger)
             inventoryPeripheral = peripheral.wrap(fromInventory)
             if inventoryPeripheral == nil then return 0, errors.ErrCouldNotWrapPeripheral end
 
-            local transferred = inventoryPeripheral.pushItems(toInventory, fromSlot, count, toSlot)
+            transferred = inventoryPeripheral.pushItems(toInventory, fromSlot, count, toSlot)
             if transferred == 0 then
                 iris.logger.Warn().Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory",
                     toInventory).Str("toSlot", toSlot).Str("count", count).Msg("Failed to push items")
