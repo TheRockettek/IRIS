@@ -244,11 +244,11 @@ local function NewGUI(iris)
                     bCol = colours.toBlit(irisColours.accent.colour):rep(w)
                 else
                     tCol = colours.toBlit(irisColours.background.colour):rep(padding) ..
-                        colours.toBlit(irisColours.contrast.colour):rep(w - maxSizeLength - countGap - (padding * 2)) ..
-                        colours.toBlit(irisColours.background.colour):rep(countGap) ..
+                        colours.toBlit(irisColours.contrast.colour):rep(#text) ..
+                        colours.toBlit(irisColours.background.colour):rep(w - #trim - #tostring(result.count) -
+                            (padding * 2)) ..
                         colours.toBlit(colours.grey):rep(#tostring(result.count)) ..
-                        colours.toBlit(irisColours.background.colour):rep(padding +
-                            (#tostring(result.count) - maxSizeLength))
+                        colours.toBlit(irisColours.background.colour):rep(padding)
                     bCol = colours.toBlit(irisColours.background.colour):rep(w)
                 end
 
