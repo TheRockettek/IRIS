@@ -1,4 +1,5 @@
 local events = require "core.events"
+local errors = require "core.errors"
 -- Colours to use within IRIS gui
 -- original colour to use, r, g, b
 
@@ -62,7 +63,53 @@ local function NewGUI(iris)
         itemSlotsTotal = 0,
         itemCount = 0,
         itemTotal = 0,
+
+        reservedTurtleSlots = {}
     }
+
+    gui.clearReserved = function()
+        gui.reservedTurtleSlots = {}
+    end
+
+    gui.setReserved = function(slot, item, count)
+        gui.reservedTurtleSlots[slot] = { name = iris._getItemName(item), count = count }
+    end
+
+    gui.findPullable = function()
+        local candidates = {}
+
+        for slotId = 1, iris.turtle.size(), 1 do
+            local reservedSlot = gui.reservedTurtleSlots[slotId]
+            local item = turtle.getItemDetail(slotId)
+            if item then
+                if reservedSlot == nil then
+                    table.insert(candidates, { slot = slotId, count = item.count })
+                elseif iris._getItemName(item) ~= reservedSlot.name then
+                    table.insert(candidates, { slot = slotId, count = item.count })
+                elseif item.count > reservedSlot.count then
+                    table.insert(candidates, { slot = slotId, count = reservedSlot.count - item.count })
+                end
+            else
+                -- The reserved item is no longer in that slot, unreserve it.
+                -- This is likely because someone has just taken it out!
+                if reservedSlot ~= nil then
+                    gui.reservedTurtleSlots[slotId] = nil
+                end
+            end
+        end
+
+        return candidates
+    end
+
+    gui.findSpace = function()
+        for slotId = 1, iris.turtle.size(), 1 do
+            if turtle.getItemCount(slotId) == 0 then
+                return slotId
+            end
+        end
+
+        return nil
+    end
 
     gui.drawBase = function()
         term.setBackgroundColour(irisColours.background.colour)
@@ -339,20 +386,28 @@ local function NewGUI(iris)
         return results
     end
 
+    gui.getFromIRIS = function()
+    end
+
     gui.pullTask = function()
         local w, h = term.getSize()
         gui.isBusy = true
         gui.drawBottomBar(w, h)
 
-        local transferred, err = iris.pushInputIntoIRIS()
-        if err ~= nil then
-            iris.logger.Warn().Err(err).Msg("Failed to push input into IRIS")
+        local candidates = gui.findPullable()
+        local transferred, missingSpace
+
+        if #candidates > 0 then
+            transferred, missingSpace = iris._transferItems(iris.internalInventory, candidates)
+            if missingSpace then
+                iris.logger.Warn().Err(errors.ErrIRISMissingSpace).Msg("Failed to push input into IRIS")
+            end
         end
 
         gui.isBusy = false
         gui.drawBottomBar(w, h)
 
-        err = iris.save()
+        local err = iris.save()
         if err ~= nil then
             iris.logger.Warn().Err(err).Msg("Failed to save IRIS data")
         end
@@ -455,8 +510,20 @@ local function NewGUI(iris)
             elseif y >= startY and y <= startY + gui.pageLimit then
                 local selectedResult = gui.displayedResults[y - startY + 1]
                 if selectedResult == gui.selectedResult and selectedResult ~= nil then -- Double clicked result
-                    -- TODO: pull stack from IRIS
-                    gui.changePagination(gui.pageNumber, false)
+                    -- Pull stack from IRIS
+                    local emptySlot = gui.findSpace()
+                    if emptySlot then
+                        local locations = iris.locate(selectedResult.name, selectedResult.nbt)
+                        if #locations > 0 then
+                            local transferred, _ = iris.pullItemIntoIRIS(selectedResult.name, selectedResult.nbt,
+                                locations[1].max)
+                            gui.setReserved(emptySlot, selectedResult, transferred)
+                            gui.selectedResult = nil
+                            if transferred > 0 then
+                                gui.changePagination(gui.pageNumber, false)
+                            end
+                        end
+                    end
                 else
                     gui.selectedResult = selectedResult
 

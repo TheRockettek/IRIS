@@ -7,7 +7,6 @@ local events = require "core.events"
 local VERSION = "0.0.1"
 
 local configurationPath = "iris.config"
-local internalInventory = "iris_internal:turtle"
 
 local defaultConfiguration = {
     irisFileLocation = "iris.data",
@@ -31,12 +30,14 @@ end
 
 local function NewIRIS(logger)
     local iris = {
+        internalInventory = "iris_internal:turtle",
+
         version = VERSION,
         logger = logger or logging.NewLogger(nil, nil),
 
         isIRISDataLoaded = false,
         isIRISDataDirty = false,
-        irisData = { iris = { lastScannedAt = 0 }, inventories = {} },
+        irisData = { iris = { lastSca_transferItemsnnedAt = 0 }, inventories = {} },
 
         configuration = defaultConfiguration
     }
@@ -57,17 +58,6 @@ local function NewIRIS(logger)
             return 16
         end,
 
-        list = function()
-            local items = {}
-            for i = 1, 16, 1 do
-                local item = turtle.getItemDetail(i)
-                if item then
-                    table.insert(items, item)
-                end
-            end
-            return items
-        end,
-
         getItemDetail = function(slot)
             return turtle.getItemDetail(slot, true)
         end,
@@ -76,6 +66,17 @@ local function NewIRIS(logger)
             return turtle.getItemCount(slot) + turtle.getItemSpace(slot)
         end,
     }
+
+    iris.turtle.list = function()
+        local items = {}
+        for i = 1, iris.turtle.size(), 1 do
+            local item = turtle.getItemDetail(i)
+            if item then
+                table.insert(items, item)
+            end
+        end
+        return items
+    end
 
     iris.turtle.pushItems = function(toName, fromSlot, limit, toSlot)
         local toPeripheral = peripheral.wrap(toName)
@@ -456,32 +457,32 @@ local function NewIRIS(logger)
     iris.pullItemFromIRIS = function(name, nbt, count)
         iris.logger.Trace().Str("_name", "pullItemFromIRIS").Str("name", name).Str("count", count).Send()
 
-        return iris._pullItemIntoInventory(internalInventory, name, nbt, count)
+        return iris._pullItemIntoInventory(iris.internalInventory, name, nbt, count)
     end
 
     iris.pushInputIntoIRIS = function()
         iris.logger.Trace().Str("_name", "pushInputIntoIRIS").Send()
 
-        return iris._pushInventoryIntoIRIS(internalInventory)
+        return iris._pushInventoryIntoIRIS(iris.internalInventory)
     end
 
     iris.pullItemIntoBuffer = function(name, nbt, count)
         iris.logger.Trace().Str("_name", "pullItemIntoBuffer").Str("name", name).Str("count", count).Send()
 
-        return iris._pullItemIntoInventory(internalInventory, name, nbt, count)
+        return iris._pullItemIntoInventory(iris.internalInventory, name, nbt, count)
     end
 
     iris.pushBufferIntoIRIS = function()
         iris.logger.Trace().Str("_name", "pushBufferIntoIRIS").Send()
 
-        return iris._pushInventoryIntoIRIS(internalInventory)
+        return iris._pushInventoryIntoIRIS(iris.internalInventory)
     end
 
     iris._pullItemIntoInventory = function(peripheralName, name, nbt, count)
         iris.logger.Trace().Str("_name", "_pullItemIntoInventory").Str("peripheralName", peripheralName).Str("name", name)
             .Str("count", count).Send()
 
-        if peripheralName ~= internalInventory then
+        if peripheralName ~= iris.internalInventory then
             local inventory = peripheral.wrap(peripheralName)
             if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
         end
@@ -520,15 +521,16 @@ local function NewIRIS(logger)
     iris._pushInventoryIntoIRIS = function(peripheralName)
         iris.logger.Trace().Str("_name", "_pushInventoryIntoIRIS").Str("peripheralName", peripheralName).Send()
 
+        local start = os.epoch("utc")
+
         local inventoryPeripheral
-        if peripheralName == internalInventory then
+        if peripheralName == iris.internalInventory then
             inventoryPeripheral = iris.turtle
         else
             inventoryPeripheral = peripheral.wrap(peripheralName)
             if inventoryPeripheral == nil then return 0, errors.ErrCouldNotWrapPeripheral end
         end
 
-        local start = os.epoch("utc")
         iris.logger.Debug().Str("peripheral", peripheralName).Msg("Pushing inventory into IRIS")
 
         local inventory, err = scanner.ScanInventory(iris, peripheralName, inventoryPeripheral)
@@ -536,13 +538,31 @@ local function NewIRIS(logger)
             return 0, err
         end
 
-        local itemsTransferred = 0
-        local missingSpace = false
-
         assert(type(inventory) == "table")
         assert(type(inventory.items) == "table")
 
-        for slot, item in pairs(inventory.items) do
+        local itemsTransferred, missingSpace = iris._transferItems(peripheralName, inventory.items)
+
+        iris.logger.Debug().Dur("duration", start).Str("peripheral", peripheralName).Str("transferred", itemsTransferred)
+            .Msg("Moved inventory into IRIS")
+
+        if missingSpace then
+            return itemsTransferred, errors.ErrIRISMissingSpace
+        end
+
+        return itemsTransferred, nil
+    end
+
+    iris._transferItems = function(peripheralName, detailedItems)
+        local itemsTransferred = 0
+        local missingSpace = false
+
+        local start = os.epoch("utc")
+
+        assert(type(peripheralName) == "string")
+        assert(type(detailedItems) == "table")
+
+        for slot, item in pairs(detailedItems) do
             local result = iris.findSpot(item.name, item.nbt, item.count, item.max,
                 {
                     peripheralName,
@@ -578,13 +598,9 @@ local function NewIRIS(logger)
         end
 
         iris.logger.Debug().Dur("duration", start).Str("peripheral", peripheralName).Str("transferred", itemsTransferred)
-            .Msg("Moved inventory into IRIS")
+            .Msg("Transferred items")
 
-        if missingSpace then
-            return itemsTransferred, errors.ErrIRISMissingSpace
-        end
-
-        return itemsTransferred, nil
+        return itemsTransferred, missingSpace
     end
 
     iris._push = function(fromInventory, fromSlot, toInventory, toSlot, count)
@@ -593,7 +609,7 @@ local function NewIRIS(logger)
             , toSlot).Str("count", count).Msg("[TINTER]")
 
         local inventoryPeripheral
-        if fromInventory == internalInventory then
+        if fromInventory == iris.internalInventory then
             inventoryPeripheral = iris.turtle
         else
             inventoryPeripheral = peripheral.wrap(fromInventory)
