@@ -1,5 +1,6 @@
 local events = require "core.events"
 local errors = require "core.errors"
+local waitgroup = require "libs.waitgroup"
 -- Colours to use within IRIS gui
 -- original colour to use, r, g, b
 
@@ -76,35 +77,41 @@ local function NewGUI(iris)
     gui.findPullable = function()
         local candidates = {}
 
+        local wg = waitgroup.NewWaitGroup()
+
         for slotId = 1, iris.turtle.size(), 1 do
-            local reservedSlot = gui.reservedTurtleSlots[tostring(slotId)]
-            local item = turtle.getItemDetail(slotId, true)
-            if item then
-                if reservedSlot == nil or iris._getItemName(item) ~= reservedSlot.name then
-                    candidates[tostring(slotId)] = {
-                        peripheral = iris.internalInventory,
-                        name = item.name,
-                        nbt = item.nbt,
-                        count = item.count,
-                        max = item.maxCount
-                    }
-                elseif item.count > reservedSlot.count then
-                    candidates[tostring(slotId)] = {
-                        peripheral = iris.internalInventory,
-                        name = item.name,
-                        nbt = item.nbt,
-                        count = reservedSlot.count - item.count,
-                        max = item.maxCount
-                    }
+            wg.Add(function()
+                local reservedSlot = gui.reservedTurtleSlots[tostring(slotId)]
+                local item = turtle.getItemDetail(slotId, true)
+                if item then
+                    if reservedSlot == nil or iris._getItemName(item) ~= reservedSlot.name then
+                        candidates[tostring(slotId)] = {
+                            peripheral = iris.internalInventory,
+                            name = item.name,
+                            nbt = item.nbt,
+                            count = item.count,
+                            max = item.maxCount
+                        }
+                    elseif item.count > reservedSlot.count then
+                        candidates[tostring(slotId)] = {
+                            peripheral = iris.internalInventory,
+                            name = item.name,
+                            nbt = item.nbt,
+                            count = reservedSlot.count - item.count,
+                            max = item.maxCount
+                        }
+                    end
+                else
+                    -- The reserved item is no longer in that slot, unreserve it.
+                    -- This is likely because someone has just taken it out!
+                    if reservedSlot ~= nil then
+                        gui.reservedTurtleSlots[tostring(slotId)] = nil
+                    end
                 end
-            else
-                -- The reserved item is no longer in that slot, unreserve it.
-                -- This is likely because someone has just taken it out!
-                if reservedSlot ~= nil then
-                    gui.reservedTurtleSlots[tostring(slotId)] = nil
-                end
-            end
+            end)
         end
+
+        wg.Wait()
 
         return candidates
     end
@@ -395,6 +402,8 @@ local function NewGUI(iris)
     end
 
     gui.pullTask = function()
+        local start = os.epoch("utc")
+
         local w, h = term.getSize()
         gui.isBusy = true
         gui.drawBottomBar(w, h)
@@ -428,6 +437,8 @@ local function NewGUI(iris)
             os.cancelTimer(gui.blinkTimer)
             gui.blinkTimer = os.startTimer(blinkSpeed)
         end
+
+        iris.logger.Info().Dur("duration", start).Str("transferred", transferred).Msg("Completed pull task")
     end
 
     gui.calculateUsage = function()
