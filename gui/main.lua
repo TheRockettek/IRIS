@@ -139,16 +139,16 @@ local function NewGUI(iris)
         end
 
         local text
-        -- text = (" %.0f%% - (%d/%d) [%d/%d] "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal,
-        --     gui.itemCount, gui.itemTotal)
-        -- if #text > w then
-        text = (" %.0f%% - (%d/%d) "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount
-            , gui.itemTotal)
+        text = (" %.0f%% - (%d/%d) [%d/%d] "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal,
+            gui.itemCount, gui.itemTotal)
         if #text > w then
-            text = (" %.0f%% "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount,
-                gui.itemTotal)
+            text = (" %.0f%% - (%d/%d) "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount
+                , gui.itemTotal)
+            if #text > w then
+                text = (" %.0f%% "):format(gui.itemPercentage, gui.itemSlotsUsed, gui.itemSlotsTotal, gui.itemCount,
+                    gui.itemTotal)
+            end
         end
-        -- end
 
         text = text .. (" "):rep(w - #text) -- Add any missing padding
 
@@ -376,6 +376,7 @@ local function NewGUI(iris)
         gui.itemSlotsTotal = itemSlotsTotal
         gui.itemCount = itemCount
         gui.itemTotal = itemTotal
+
         if gui.itemSlotsTotal == 0 then
             gui.itemPercentage = 0
         else

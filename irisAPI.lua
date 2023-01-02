@@ -250,14 +250,16 @@ local function NewIRIS(logger)
         local itemSlotsUsed = 0
         local itemSlotsTotal = 0
         local itemCount = 0
+        local itemMaxCount = 0
 
         for _, inventoriesData in pairs(iris.irisData.inventories) do
             itemSlotsTotal = itemSlotsTotal + inventoriesData.totalSlots
             itemSlotsUsed = itemSlotsUsed + inventoriesData.usedSlots
             itemCount = itemCount + inventoriesData.totalItems
+            itemMaxCount = itemCount + inventoriesData.itemMaxCount
         end
 
-        return itemSlotsUsed, itemSlotsTotal, itemCount, 0
+        return itemSlotsUsed, itemSlotsTotal, itemCount, itemMaxCount
     end
 
     iris.tryWrapPeripheral = function(name)

@@ -16,6 +16,7 @@ local function ScanInventory(iris, name, inventory)
         totalSlots = inventorySize,
         usedSlots = 0,
         totalItems = 0,
+        itemMaxCount = 0,
         items = {},
     }
 
@@ -37,6 +38,9 @@ local function ScanInventory(iris, name, inventory)
                 }
                 inventoryData.usedSlots = inventoryData.usedSlots + 1
                 inventoryData.totalItems = inventoryData.totalItems + item.count
+                inventoryData.itemMaxCount = inventoryData.itemMaxCount + item.maxCount
+            else
+                inventoryData.itemMaxCount = inventoryData.itemMaxCount + 64
             end
         end)
     end
