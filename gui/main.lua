@@ -403,11 +403,13 @@ local function NewGUI(iris)
         local transferred = 0
         local missingSpace = false
 
-        if #candidates > 0 then
+        for _, _ in pairs(candidates) do
             transferred, missingSpace = iris._transferItems(iris.internalInventory, candidates)
             if missingSpace then
                 iris.logger.Warn().Err(errors.ErrIRISMissingSpace).Msg("Failed to push input into IRIS")
             end
+
+            break
         end
 
         gui.isBusy = false
