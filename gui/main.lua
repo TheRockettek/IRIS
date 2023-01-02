@@ -176,29 +176,11 @@ local function NewGUI(iris)
     end
 
     gui.drawBottomBar = function(w, h)
-        local paginationDisplay
-        if gui.pageCount == 0 then
-            paginationDisplay = (" "):rep(9)
-        else
-            if gui.pageNumber > 1 then
-                paginationDisplay = " < "
-            else
-                paginationDisplay = "   "
-            end
-
-            paginationDisplay = paginationDisplay ..
-                (" "):rep(#tostring(gui.pageCount) - #tostring(gui.pageNumber)) ..
-                tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount)
-
-            if gui.pageNumber < gui.pageCount then
-                paginationDisplay = paginationDisplay .. " > "
-            else
-                paginationDisplay = paginationDisplay .. "   "
-            end
-        end
+        local paginationDisplay = " " ..
+            (" "):rep(#tostring(gui.pageCount) - #tostring(gui.pageNumber)) ..
+            tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount) .. " "
 
         term.setTextColour(irisColours.contrast.colour)
-
 
         if gui.isSmallDisplay(w) then -- When enabled, the pagination and item count will be on seperate lines
             paintutils.drawBox(1, h, w, h, irisColours.main.colour)
