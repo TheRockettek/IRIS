@@ -16,9 +16,10 @@ local defaultConfiguration = {
     scanDelay = 60000 -- Time in milliseconds to wait between an inventory scan. This is only used during startup.
 }
 
-local function check(func, index, type, value)
-    if type(value) ~= type then
-        return error(('%s: bad argument #%d (expected %s, got %s)'):format(func, index, type, type(value)), 3)
+local function check(func, index, expectedType, value)
+    if type(value) ~= expectedType then
+        return error(('%s: bad argument #%d (expected %s, got %s)'):format(func, index, expectedType, expectedType(value))
+            , 3)
     end
 end
 
