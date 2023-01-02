@@ -185,15 +185,14 @@ local function NewGUI(iris)
         end
 
         term.setTextColour(irisColours.contrast.colour)
+        term.setBackgroundColour(irisColours.background.colour)
 
         if gui.isSmallDisplay(w) then -- When enabled, the pagination and item count will be on seperate lines
-            paintutils.drawBox(1, h, w, h, irisColours.main.colour)
             term.setCursorPos(math.floor((w - #paginationDisplay) / 2), h)
             term.write(paginationDisplay)
 
             gui.drawPercentage(1, h - 1, w)
         else
-            paintutils.drawBox(w - #paginationDisplay + 1, h, w, h, irisColours.main.colour)
             term.setCursorPos(w - #paginationDisplay + 1, h)
             term.write(paginationDisplay)
 
