@@ -234,7 +234,7 @@ local function NewGUI(iris)
 
                 local tCol
                 local bCol
-                local trim = result.name:sub(1, w - maxSizeLength - countGap - (padding * 2))
+                local trim = (result.display or result.name):sub(1, w - maxSizeLength - countGap - (padding * 2))
                 local text = (" "):rep(padding) ..
                     trim ..
                     (" "):rep(w - #trim - #tostring(result.count) - (padding * 2)) .. result.count .. (" "):rep(padding)
