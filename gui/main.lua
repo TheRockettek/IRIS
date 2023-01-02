@@ -528,19 +528,11 @@ local function NewGUI(iris)
                         local start = os.epoch("utc")
                         local locations = iris.locate(selectedResult.name, selectedResult.nbt)
                         local max = locations[1].max
-                        local totalTransferred = 0
 
                         iris.logger.Info().Str("name", selectedResult.name).Str("nbt", selectedResult.nbt).Str("max", max)
                             .Msg("Requesting items from IRIS")
 
-                        for _, location in pairs(locations) do
-                            if max > 0 then
-                                local transferred, _ = iris.pullItemFromIRIS(selectedResult.name, selectedResult.nbt,
-                                    math.min(max, location.count))
-                                totalTransferred = totalTransferred + transferred
-                                max = max - transferred
-                            end
-                        end
+                        local totalTransferred, _ = iris.pullItemFromIRIS(selectedResult.name, selectedResult.nbt, max)
 
                         iris.logger.Info().Str("name", selectedResult.name).Str("nbt", selectedResult.nbt).Str("transferred"
                             , totalTransferred).Dur("duration", start).Msg("Requested items from IRIS")
