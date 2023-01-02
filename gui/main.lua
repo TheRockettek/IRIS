@@ -515,7 +515,7 @@ local function NewGUI(iris)
                     if emptySlot then
                         local locations = iris.locate(selectedResult.name, selectedResult.nbt)
                         if #locations > 0 then
-                            local transferred, _ = iris.pullItemIntoIRIS(selectedResult.name, selectedResult.nbt,
+                            local transferred, _ = iris.pullItemFromIRIS(selectedResult.name, selectedResult.nbt,
                                 locations[1].max)
                             gui.setReserved(emptySlot, selectedResult, transferred)
                             gui.selectedResult = nil
