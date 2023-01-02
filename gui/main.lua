@@ -90,7 +90,7 @@ local function NewGUI(iris)
                             name = item.name,
                             nbt = item.nbt,
                             count = item.count,
-                            max = item.max
+                            max = item.maxCount
                         })
                 elseif item.count > reservedSlot.count then
                     table.insert(candidates,
@@ -100,7 +100,7 @@ local function NewGUI(iris)
                             name = item.name,
                             nbt = item.nbt,
                             count = reservedSlot.count - item.count,
-                            max = item.max
+                            max = item.maxCount
                         })
                 end
             else
