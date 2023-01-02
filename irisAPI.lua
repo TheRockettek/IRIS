@@ -12,7 +12,6 @@ local defaultConfiguration = {
     irisFileLocation = "iris.data",
 
     scanOnStart = true,
-    scanDelay = 60000 -- Time in milliseconds to wait between an inventory scan. This is only used during startup.
 }
 
 local function check(func, index, expectedType, value)
@@ -37,7 +36,7 @@ local function NewIRIS(logger)
 
         isIRISDataLoaded = false,
         isIRISDataDirty = false,
-        irisData = { iris = { lastScannedAt = 0 }, inventories = {} },
+        irisData = { inventories = {} },
 
         configuration = defaultConfiguration
     }
@@ -219,20 +218,9 @@ local function NewIRIS(logger)
     iris.fullScan = function()
         iris.logger.Trace().Str("_name", "fullScan").Send()
 
-        local timeSince = os.epoch("utc") - iris.irisData.iris.lastScannedAt
-        if timeSince < iris.configuration.scanDelay then
-            iris.logger.Info().Str("since", timeSince).Str("delay",
-                iris.configuration
-                .scanDelay).Msg(
-                "Full scan called but not hit delay")
-
-            return false
-        end
-
         local inventories = scanner.ScanAllInventories(iris)
 
         iris.irisData.inventories = inventories
-        iris.irisData.iris.lastScannedAt = os.epoch("utc")
         iris.isIRISDataDirty = true
 
         local err = iris.save()

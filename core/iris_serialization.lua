@@ -6,9 +6,6 @@ local function Encode(iris)
     local file = {
         version = fileVersion,
         data = {
-            iris = {
-                lastScannedAt = iris.irisData.iris.lastScannedAt
-            },
             inventories = iris.irisData.inventories
         }
     }
