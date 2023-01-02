@@ -426,6 +426,8 @@ local function NewGUI(iris)
                 end
             elseif type == "mouse_click" then
                 gui.onClick(paramB, paramC)
+            elseif type == "turtle_inventory" then
+                gui.pullTask()
             elseif type == "timer" then
                 if paramA == gui.blinkTimer then
                     gui.showBlink = not gui.showBlink
@@ -433,8 +435,6 @@ local function NewGUI(iris)
 
                     local w, h = term.getSize()
                     gui.drawSearch(w, h)
-                elseif paramA == gui.pullTimer then
-                    gui.pullTask()
                 end
             elseif type == "char" and gui.isSearching then
                 gui.searchQuery = gui.searchQuery .. paramA
@@ -502,9 +502,9 @@ local function NewGUI(iris)
             if type == "timer" then
                 if paramA == gui.blinkTimer then
                     gui.blinkTimer = os.startTimer(blinkSpeed)
-                elseif paramA == gui.pullTimer then
-                    gui.pullTask()
                 end
+            elseif type == "turtle_inventory" then
+                gui.pullTask()
             elseif type == "mouse_click" then
                 return
             end
