@@ -611,15 +611,29 @@ local function NewIRIS(logger)
         local inventoryPeripheral
         if fromInventory == iris.internalInventory then
             inventoryPeripheral = iris.turtle
+
+            local transferred = inventoryPeripheral.pushItems(toInventory, fromSlot, count, toSlot)
+            if transferred == 0 then
+                iris.logger.Warn().Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory",
+                    toInventory).Str("toSlot", toSlot).Str("count", count).Msg("Failed to push items")
+            end
+        elseif toInventory == iris.internalInventory then
+            inventoryPeripheral = iris.turtle
+
+            local transferred = inventoryPeripheral.pullItems(fromInventory, fromSlot, count, toSlot)
+            if transferred == 0 then
+                iris.logger.Warn().Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory",
+                    toInventory).Str("toSlot", toSlot).Str("count", count).Msg("Failed to pull items (as turtle)")
+            end
         else
             inventoryPeripheral = peripheral.wrap(fromInventory)
             if inventoryPeripheral == nil then return 0, errors.ErrCouldNotWrapPeripheral end
-        end
 
-        local transferred = inventoryPeripheral.pushItems(toInventory, fromSlot, count, toSlot)
-        if transferred == 0 then
-            iris.logger.Warn().Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory",
-                toInventory).Str("toSlot", toSlot).Str("count", count).Msg("Failed to push items")
+            local transferred = inventoryPeripheral.pushItems(toInventory, fromSlot, count, toSlot)
+            if transferred == 0 then
+                iris.logger.Warn().Str("fromInventory", fromInventory).Str("fromSlot", fromSlot).Str("toInventory",
+                    toInventory).Str("toSlot", toSlot).Str("count", count).Msg("Failed to push items")
+            end
         end
 
         iris._markAddSlot(toInventory, toSlot, count)
