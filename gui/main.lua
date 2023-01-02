@@ -639,8 +639,27 @@ local function NewGUI(iris)
     end
 
     gui.matchQuery = function(item, query)
-        return query == "" or item.name:lower():find(query:lower()) ~= nil or
-            item.display:lower():find(query:lower()) ~= nil
+        query = query:lower()
+
+        if query == "" then
+            return true
+        elseif query[1] == "$" then
+            -- the $ allows for searching item tags
+            if item.tags then
+                query = query:sub(2, #query)
+                for tagName, _ in pairs(item.tags) do
+                    if gui.matchString(tagName, query) then
+                        return true
+                    end
+                end
+            end
+        else
+            return gui.matchString(item.name, query) or gui.matchString(item.display, query)
+        end
+    end
+
+    gui.matchString = function(str, query)
+        return str:lower():find(query) ~= nil
     end
 
     gui.sortFunction = function(a, b)
