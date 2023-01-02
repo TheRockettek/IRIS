@@ -178,7 +178,7 @@ local function NewGUI(iris)
     gui.drawBottomBar = function(w, h)
         local paginationDisplay = ""
 
-        if gui.pageCount > 0 then
+        if gui.pageCount > 1 then
             paginationDisplay = " " ..
                 (" "):rep(#tostring(gui.pageCount) - #tostring(gui.pageNumber)) ..
                 tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount) .. " "
