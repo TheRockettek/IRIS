@@ -3,17 +3,12 @@ local errors      = require("core.errors")
 local events      = require("core.events")
 local waitgroup   = require("libs.waitgroup")
 
-local function ScanInventory(iris, name)
-    assert(type(name) == "string")
+local function ScanInventory(iris, name, inventory)
+    assert(type(inventory) == "table")
 
     iris.logger.Debug().Str("name", name).Msg("[TINTER] Scanning inventory")
 
     local start = os.epoch("utc")
-
-    local inventory = peripheral.wrap(name)
-    if inventory == nil then
-        return nil, errors.ErrCouldNotWrapPeripheral
-    end
 
     local inventorySize = inventory.size()
 
@@ -62,11 +57,15 @@ local function ScanAllInventories(iris)
     local inventoryNames = peripherals.FindAllInventories(iris)
 
     for _, name in pairs(inventoryNames) do
-        local inventory, err = ScanInventory(iris, name)
-        if err ~= nil then
-            iris.logger.Warn().Str("name", name).Err(err).Msg("Failed to scan inventory")
-        else
-            inventories[name] = inventory
+
+        local inventoryPeripheral = peripheral.wrap(name)
+        if inventoryPeripheral ~= nil then
+            local inventory, err = ScanInventory(iris, name, inventoryPeripheral)
+            if err ~= nil then
+                iris.logger.Warn().Str("name", name).Err(err).Msg("Failed to scan inventory")
+            else
+                inventories[name] = inventory
+            end
         end
     end
 

@@ -7,20 +7,20 @@ local events = require "core.events"
 local VERSION = "0.0.1"
 
 local configurationPath = "iris.config"
-
--- We need the turtle to be able to interact directly with this inventory
-local turtleInventoryRelative = "bottom"
+local internalInventory = "iris_internal:turtle"
 
 local defaultConfiguration = {
-    inputInventory = "top",
-    outputInventory = "left",
-    turtleInventory = "bottom",
-
     irisFileLocation = "iris.data",
 
     scanOnStart = true,
     scanDelay = 60000 -- Time in milliseconds to wait between an inventory scan. This is only used during startup.
 }
+
+local function check(func, index, type, value)
+    if type(value) ~= type then
+        return error(('%s: bad argument #%d (expected %s, got %s)'):format(func, index, type, type(value)), 3)
+    end
+end
 
 local function tableContainsValue(table, value)
     for _, k in pairs(table) do if k == value then return true end end
@@ -40,6 +40,56 @@ local function NewIRIS(logger)
         configuration = defaultConfiguration
     }
 
+    -- provide dummy storage peripheral
+    iris.turtle = {
+        _getTurtlePeripheral = function()
+            for _, k in pairs(redstone.getSides()) do
+                if peripheral.getType(k) == "modem" then
+                    return peripheral.wrap(k).getNameLocal()
+                end
+            end
+
+            return nil
+        end,
+
+        size = function()
+            return 16
+        end,
+
+        list = function()
+            local items = {}
+            for i = 1, 16, 1 do
+                local item = turtle.getItemDetail(i)
+                if item then
+                    table.insert(items, item)
+                end
+            end
+            return items
+        end,
+
+        getItemDetail = function(slot)
+            return turtle.getItemDetail(slot, true)
+        end,
+
+        getItemLimit = function(slot)
+            return turtle.getItemCount(slot) + turtle.getItemSpace(slot)
+        end,
+    }
+
+    iris.turtle.pushItems = function(toName, fromSlot, limit, toSlot)
+        local toPeripheral = peripheral.wrap(toName)
+        check("pushItems", 1, "table", toPeripheral)
+
+        return toPeripheral.pullItems(iris.turtle._getTurtlePeripheral(), fromSlot, limit, toSlot)
+    end
+
+    iris.turtle.pullItems = function(fromName, fromSlot, limit, toSlot)
+        local fromPeripheral = peripheral.wrap(fromName)
+        check("pullItems", 1, "table", fromPeripheral)
+
+        return fromPeripheral.pushItems(iris.turtle._getTurtlePeripheral(), fromSlot, limit, toSlot)
+    end
+
     -- Initializes IRIS
     iris.init = function(logger)
         if logger ~= nil then iris.logger = logger end
@@ -53,16 +103,6 @@ local function NewIRIS(logger)
         else
             iris.configuration = configuration
         end
-
-        -- Validate input is wrappable
-        iris.tryWrapPeripheral(iris.configuration.inputInventory)
-
-        -- Validate output is wrappable
-        iris.tryWrapPeripheral(iris.configuration.outputInventory)
-
-        -- Validate buffer is wrappable
-        iris.tryWrapPeripheral(turtleInventoryRelative)
-        iris.tryWrapPeripheral(iris.configuration.turtleInventory)
 
         -- Load iris data
         iris.loadIRISData()
@@ -413,33 +453,35 @@ local function NewIRIS(logger)
     iris.pullItemFromIRIS = function(name, nbt, count)
         iris.logger.Trace().Str("_name", "pullItemFromIRIS").Str("name", name).Str("count", count).Send()
 
-        return iris._pullItemIntoInventory(iris.configuration.outputInventory, name, nbt, count)
+        return iris._pullItemIntoInventory(internalInventory, name, nbt, count)
     end
 
     iris.pushInputIntoIRIS = function()
         iris.logger.Trace().Str("_name", "pushInputIntoIRIS").Send()
 
-        return iris._pushInventoryIntoIRIS(iris.configuration.inputInventory)
+        return iris._pushInventoryIntoIRIS(internalInventory)
     end
 
     iris.pullItemIntoBuffer = function(name, nbt, count)
         iris.logger.Trace().Str("_name", "pullItemIntoBuffer").Str("name", name).Str("count", count).Send()
 
-        return iris._pullItemIntoInventory(iris.configuration.turtleInventory, name, nbt, count)
+        return iris._pullItemIntoInventory(internalInventory, name, nbt, count)
     end
 
     iris.pushBufferIntoIRIS = function()
         iris.logger.Trace().Str("_name", "pushBufferIntoIRIS").Send()
 
-        return iris._pushInventoryIntoIRIS(iris.configuration.turtleInventory)
+        return iris._pushInventoryIntoIRIS(internalInventory)
     end
 
     iris._pullItemIntoInventory = function(peripheralName, name, nbt, count)
         iris.logger.Trace().Str("_name", "_pullItemIntoInventory").Str("peripheralName", peripheralName).Str("name", name)
             .Str("count", count).Send()
 
-        local inventory = peripheral.wrap(peripheralName)
-        if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
+        if peripheralName ~= internalInventory then
+            local inventory = peripheral.wrap(peripheralName)
+            if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
+        end
 
         local start = os.epoch("utc")
         iris.logger.Debug().Str("name", name).Str("count", count).Str("peripheral", peripheralName).Msg("Pulling from IRIS into inventory")
@@ -475,13 +517,18 @@ local function NewIRIS(logger)
     iris._pushInventoryIntoIRIS = function(peripheralName)
         iris.logger.Trace().Str("_name", "_pushInventoryIntoIRIS").Str("peripheralName", peripheralName).Send()
 
-        local inventory = peripheral.wrap(peripheralName)
-        if inventory == nil then return 0, errors.ErrCouldNotWrapPeripheral end
+        local inventoryPeripheral
+        if peripheralName == internalInventory then
+            inventoryPeripheral = iris.turtle
+        else
+            inventoryPeripheral = peripheral.wrap(peripheralName)
+            if inventoryPeripheral == nil then return 0, errors.ErrCouldNotWrapPeripheral end
+        end
 
         local start = os.epoch("utc")
         iris.logger.Debug().Str("peripheral", peripheralName).Msg("Pushing inventory into IRIS")
 
-        local inventory, err = scanner.ScanInventory(iris, peripheralName)
+        local inventory, err = scanner.ScanInventory(iris, peripheralName, inventoryPeripheral)
         if err ~= nil then
             return 0, err
         end
@@ -496,11 +543,7 @@ local function NewIRIS(logger)
             local result = iris.findSpot(item.name, item.nbt, item.count, item.max,
                 {
                     peripheralName,
-                    iris.configuration.inputInventory,
-                    iris.configuration.outputInventory,
-                    iris.configuration.turtleInventory,
-                    turtleInventoryRelative,
-                    "top", "left", "right", "back", "front", "bottom",
+                    table.unpack(redstone.getSides())
                 })
             if result.hasSpace then
                 if item.count > 0 then
@@ -573,10 +616,14 @@ local function NewIRIS(logger)
         -- ScanInventory if not stored
         if iris.irisData.inventories[inventoryName] == nil then
             iris.logger.Debug().Str("inventoryName", inventoryName).Str("Inventory is not stored, scanning")
-            local inventory = scanner.ScanInventory(iris, inventoryName)
 
-            iris.irisData.inventories[inventoryName] = inventory
-            iris.isIRISDataDirty = true
+            local inventoryPeripheral = peripheral.wrap(inventoryName)
+            if inventoryPeripheral ~= nil then
+                local inventory = scanner.ScanInventory(iris, inventoryName, inventoryPeripheral)
+
+                iris.irisData.inventories[inventoryName] = inventory
+                iris.isIRISDataDirty = true
+            end
         else
             -- ScanInventory if we don't store an item here or what we store does not make sense.
             if iris.irisData.inventories[inventoryName].items[tostring(slot)] ==
@@ -584,10 +631,14 @@ local function NewIRIS(logger)
                 iris.irisData.inventories[inventoryName].items[tostring(slot)]
                 .count == nil then
                 iris.logger.Debug().Str("inventoryName", inventoryName).Str("slot", slot).Str("Item was not stored in our data, scanning chest")
-                local inventory = scanner.ScanInventory(iris, inventoryName)
 
-                iris.irisData.inventories[inventoryName] = inventory
-                iris.isIRISDataDirty = true
+                local inventoryPeripheral = peripheral.wrap(inventoryName)
+                if inventoryPeripheral ~= nil then
+                    local inventory = scanner.ScanInventory(iris, inventoryName, inventoryPeripheral)
+
+                    iris.irisData.inventories[inventoryName] = inventory
+                    iris.isIRISDataDirty = true
+                end
             else
                 iris.irisData.inventories[inventoryName].items[tostring(slot)]
                     .count = iris.irisData.inventories[inventoryName].items[tostring(
@@ -605,10 +656,14 @@ local function NewIRIS(logger)
         -- ScanInventory if not stored
         if iris.irisData.inventories[inventoryName] == nil then
             iris.logger.Debug().Str("inventoryName", inventoryName).Str("Inventory is not stored, scanning")
-            local inventory = scanner.ScanInventory(iris, inventoryName)
 
-            iris.irisData.inventories[inventoryName] = inventory
-            iris.isIRISDataDirty = true
+            local inventoryPeripheral = peripheral.wrap(inventoryName)
+            if inventoryPeripheral ~= nil then
+                local inventory = scanner.ScanInventory(iris, inventoryName, inventoryPeripheral)
+
+                iris.irisData.inventories[inventoryName] = inventory
+                iris.isIRISDataDirty = true
+            end
         else
             -- ScanInventory if we don't store an item here or what we store does not make sense.
             if iris.irisData.inventories[inventoryName].items[tostring(slot)] ==
@@ -616,10 +671,14 @@ local function NewIRIS(logger)
                 iris.irisData.inventories[inventoryName].items[tostring(slot)]
                 .count == nil then
                 iris.logger.Debug().Str("inventoryName", inventoryName).Str("slot", slot).Str("Item was not stored in our data, scanning chest")
-                local inventory = scanner.ScanInventory(iris, inventoryName)
 
-                iris.irisData.inventories[inventoryName] = inventory
-                iris.isIRISDataDirty = true
+                local inventoryPeripheral = peripheral.wrap(inventoryName)
+                if inventoryPeripheral ~= nil then
+                    local inventory = scanner.ScanInventory(iris, inventoryName, inventoryPeripheral)
+
+                    iris.irisData.inventories[inventoryName] = inventory
+                    iris.isIRISDataDirty = true
+                end
             else
                 iris.irisData.inventories[inventoryName].items[tostring(slot)]
                     .count = iris.irisData.inventories[inventoryName].items[tostring(
