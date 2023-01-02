@@ -132,6 +132,7 @@ local function NewGUI(iris)
         if gui.isBusy then
             term.setBackgroundColour(irisColours.noStorage.colour)
             term.write(" [BUSY]" .. (" "):rep(w - 7))
+            term.setBackgroundColour(irisColours.background.colour)
 
             return
         end
