@@ -477,15 +477,15 @@ local function NewGUI(iris)
         local w, h = term.getSize()
 
         term.setBackgroundColour(irisColours.background.colour)
-        paintutils.drawBox(2, 2, w - 1, h - 1, irisColours.main.colour)
+        paintutils.drawFilledBox(2, 3, w - 1, h - 2, irisColours.main.colour)
 
-        term.setCursorPos(4, 4)
-        term.write(gui.selectedResult.display)
         term.setCursorPos(4, 5)
+        term.write(gui.selectedResult.display)
+        term.setCursorPos(4, 6)
         term.write(gui.selectedResult.name)
         term.setCursorPos(4, 7)
         term.write("Count " .. tostring(gui.selectedResult.count))
-        term.setCursorPos(4, 9)
+        term.setCursorPos(4, 10)
         if gui.selectedResult.nbt then
             term.write("@" .. gui.selectedResult.nbt)
         end
