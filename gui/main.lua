@@ -105,7 +105,7 @@ local function NewGUI(iris)
                 -- The reserved item is no longer in that slot, unreserve it.
                 -- This is likely because someone has just taken it out!
                 if reservedSlot ~= nil then
-                    gui.reservedTurtleSlots[slotId] = nil
+                    gui.reservedTurtleSlots[tostring(slotId)] = nil
                 end
             end
         end
