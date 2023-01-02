@@ -70,14 +70,14 @@ local function NewGUI(iris)
     end
 
     gui.setReserved = function(slot, item, count)
-        gui.reservedTurtleSlots[slot] = { name = iris._getItemName(item), count = count }
+        gui.reservedTurtleSlots[tostring(slot)] = { name = iris._getItemName(item), count = count }
     end
 
     gui.findPullable = function()
         local candidates = {}
 
         for slotId = 1, iris.turtle.size(), 1 do
-            local reservedSlot = gui.reservedTurtleSlots[slotId]
+            local reservedSlot = gui.reservedTurtleSlots[tostring(slotId)]
             local item = turtle.getItemDetail(slotId, true)
             if item then
                 if reservedSlot == nil or iris._getItemName(item) ~= reservedSlot.name then
