@@ -395,7 +395,8 @@ local function NewGUI(iris)
         gui.drawBottomBar(w, h)
 
         local candidates = gui.findPullable()
-        local transferred, missingSpace
+        local transferred = 0
+        local missingSpace = false
 
         if #candidates > 0 then
             transferred, missingSpace = iris._transferItems(iris.internalInventory, candidates)
@@ -514,14 +515,22 @@ local function NewGUI(iris)
                     local emptySlot = gui.findSpace()
                     if emptySlot then
                         local locations = iris.locate(selectedResult.name, selectedResult.nbt)
-                        if #locations > 0 then
-                            local transferred, _ = iris.pullItemFromIRIS(selectedResult.name, selectedResult.nbt,
-                                locations[1].max)
-                            gui.setReserved(emptySlot, selectedResult, transferred)
-                            gui.selectedResult = nil
-                            if transferred > 0 then
-                                gui.changePagination(gui.pageNumber, false)
+                        local max = locations[1].max
+                        local totalTransferred = 0
+
+                        for _, location in pairs(locations) do
+                            if max > 0 then
+                                local transferred, _ = iris.pullItemFromIRIS(selectedResult.name, selectedResult.nbt,
+                                    math.min(max, location.count))
+                                totalTransferred = totalTransferred + transferred
+                                max = max - transferred
                             end
+                        end
+
+                        gui.setReserved(emptySlot, selectedResult, totalTransferred)
+                        gui.selectedResult = nil
+                        if totalTransferred > 0 then
+                            gui.changePagination(gui.pageNumber, false)
                         end
                     end
                 else
