@@ -377,11 +377,13 @@ local function NewIRIS(logger)
 
         for inventoryName, inventoryData in pairs(iris.irisData.inventories) do
             for slotId, item in pairs(inventoryData.items) do
-                if items[item.name] == nil then
-                    items[item.name] = {}
+                local itemName = iris._getItemName(item)
+
+                if items[itemName] == nil then
+                    items[itemName] = {}
                 end
 
-                table.insert(items[item.name], {
+                table.insert(items[itemName], {
                     peripheral = inventoryName,
                     slot = tonumber(slotId),
                     count = item.count,
@@ -395,6 +397,15 @@ local function NewIRIS(logger)
         end
 
         return items
+    end
+
+    -- Returns id for item.
+    iris._getItemName = function(item)
+        if item.nbt then
+            return item.name .. "@" .. item.nbt
+        end
+
+        return item.name
     end
 
     -- IRIS operations

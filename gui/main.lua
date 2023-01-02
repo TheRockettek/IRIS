@@ -239,7 +239,7 @@ local function NewGUI(iris)
                     trim ..
                     (" "):rep(w - #trim - #tostring(result.count) - (padding * 2)) .. result.count .. (" "):rep(padding)
 
-                if gui.displayedResults == gui.selectedResult then
+                if result == gui.selectedResult then
                     tCol = colours.toBlit(irisColours.contrast.colour):rep(w)
                     bCol = colours.toBlit(irisColours.accent.colour):rep(w)
                 else
@@ -317,16 +317,25 @@ local function NewGUI(iris)
 
         local items = iris.flatten()
         for itemName, itemLocations in pairs(items) do
-            if gui.matchQuery(itemName, gui.searchQuery) then
-                local itemCount = 0
-                for _, itemLocation in pairs(itemLocations) do
-                    itemCount = itemCount + itemLocation.count
-                end
+            if #itemLocations > 0 then
+                local location = itemLocations[0]
+                if gui.matchQuery(location, gui.searchQuery) then
+                    local itemCount = 0
+                    for _, itemLocation in pairs(itemLocations) do
+                        itemCount = itemCount + itemLocation.count
+                    end
 
-                table.insert(results, {
-                    name = itemName,
-                    count = itemCount,
-                })
+                    if itemCount > 0 then
+                        table.insert(results, {
+                            name = itemName,
+                            count = itemCount,
+
+                            display = location.display,
+                            nbt = location.nbt,
+                            tags = location.tags,
+                        })
+                    end
+                end
             end
         end
 
@@ -451,7 +460,7 @@ local function NewGUI(iris)
             gui.blinkTimer = os.startTimer(blinkSpeed)
         elseif y >= startY and y <= startY + gui.pageLimit then
             local selectedResult = gui.displayedResults[y - startY + 1]
-            if selectedResult == gui.selectedResult then
+            if selectedResult == gui.selectedResult and selectedResult ~= nil then
                 gui.popup()
                 gui.drawBase()
             else
@@ -464,7 +473,7 @@ local function NewGUI(iris)
     end
 
     gui.drawPopup = function()
-        term.clear()
+        -- term.clear()
 
         local w, h = term.getSize()
 
@@ -500,8 +509,9 @@ local function NewGUI(iris)
         end
     end
 
-    gui.matchQuery = function(itemName, query)
-        return query == "" or itemName:find(query) ~= nil
+    gui.matchQuery = function(item, query)
+        return query == "" or item.name:lower():find(query:lower()) ~= nil or
+            item.display:lower():find(query:lower()) ~= nil
     end
 
     gui.run = function()
