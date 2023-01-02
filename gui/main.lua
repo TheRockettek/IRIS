@@ -439,6 +439,11 @@ local function NewGUI(iris)
         end
 
         iris.logger.Info().Dur("duration", start).Str("transferred", transferred).Msg("Completed pull task")
+
+        -- Try again, we might have more items in the turtle.
+        if transferred > 0 then
+            gui.pullTask()
+        end
     end
 
     gui.calculateUsage = function()
