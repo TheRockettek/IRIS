@@ -545,7 +545,7 @@ local function NewGUI(iris)
                         iris.logger.Info().Str("name", selectedResult.name).Str("nbt", selectedResult.nbt).Str("transferred"
                             , totalTransferred).Dur("duration", start).Msg("Requested items from IRIS")
 
-                        gui.isBusy = true
+                        gui.isBusy = false
                         gui.drawBottomBar(w, h)
 
                         gui.setReserved(emptySlot, selectedResult, totalTransferred)
