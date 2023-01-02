@@ -525,7 +525,12 @@ local function NewGUI(iris)
 
                         local start = os.epoch("utc")
                         local locations = iris.locate(selectedResult.name, selectedResult.nbt)
-                        local max = locations[1].max
+                        local max = 1
+
+                        for _, k in pairs(locations) do
+                            max = k.max
+                            break
+                        end
 
                         iris.logger.Info().Str("name", selectedResult.name).Str("nbt", selectedResult.nbt).Str("max", max)
                             .Msg("Requesting items from IRIS")
