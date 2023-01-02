@@ -36,8 +36,8 @@ end
 
 local function NewGUI(iris)
     local gui = {
-        pageNumber = 1,
-        pageCount = 1,
+        pageNumber = 0,
+        pageCount = 0,
 
         resultQuery = "",
         results = {},
@@ -176,9 +176,13 @@ local function NewGUI(iris)
     end
 
     gui.drawBottomBar = function(w, h)
-        local paginationDisplay = " " ..
-            (" "):rep(#tostring(gui.pageCount) - #tostring(gui.pageNumber)) ..
-            tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount) .. " "
+        local paginationDisplay = ""
+
+        if gui.pageCount > 0 then
+            paginationDisplay = " " ..
+                (" "):rep(#tostring(gui.pageCount) - #tostring(gui.pageNumber)) ..
+                tostring(gui.pageNumber) .. "/" .. tostring(gui.pageCount) .. " "
+        end
 
         term.setTextColour(irisColours.contrast.colour)
 
