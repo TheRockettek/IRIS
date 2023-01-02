@@ -510,6 +510,29 @@ local function NewGUI(iris)
                 elseif paramA == 1 then
                     gui.nextPage()
                 end
+            elseif type == "peripheral" then
+                local _, peripheralType = peripheral.getType(paramA)
+                if peripheralType == "inventory" then
+                    local w, h = term.getSize()
+                    gui.isBusy = true
+                    gui.drawBottomBar(w, h)
+
+                    iris.fullScan()
+
+                    gui.isBusy = false
+                    gui.drawBottomBar(w, h)
+                end
+            elseif type == "peripheral_detatch" then
+                if iris.irisData.inventories[paramA] ~= nil then
+                    local w, h = term.getSize()
+                    gui.isBusy = true
+                    gui.drawBottomBar(w, h)
+
+                    iris.fullScan()
+
+                    gui.isBusy = false
+                    gui.drawBottomBar(w, h)
+                end
             elseif type == events.EventIrisFullScan then
                 gui.calculateUsage()
                 gui.drawBase()
