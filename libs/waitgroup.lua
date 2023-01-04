@@ -36,6 +36,16 @@ local function manager(listener)
 
     assert(type(listener) == "function")
 
+    local function sort(unsorted)
+        local sorted = {}
+        sorted[#sorted + 1] = unsorted[1]
+        for i = 1, #unsorted do
+            table.insert(sorted, unsorted[i])
+        end
+
+        return sorted
+    end
+
     local function resume(thread, event)
         local suc, err = coroutine.resume(thread.coro, table.unpack(event, 1, event.n))
         assert(suc, err, 2)
@@ -49,15 +59,13 @@ local function manager(listener)
             (thread.event == nil or thread.event == name)
     end
 
-    local interface = function(coro, priority, filter)
-        priority = priority or 0
+    local interface = function(coro, filter)
         filter = filter or {}
         if type(filter) == "string" then
             filter = {
                 [filter] = true
             }
         end
-        assert(type(priority) == "number")
         assert(type(filter) == "table")
         if #filter == 0 then
             filter = nil
@@ -72,7 +80,6 @@ local function manager(listener)
             coro = coro,
             queue = {},
             filter = filter,
-            priority = priority,
             enabled = true,
             event = nil
         }
@@ -82,13 +89,6 @@ local function manager(listener)
             end,
             toggle = function(value)
                 internal.enabled = value or not internal.enabled
-            end,
-            getPriority = function()
-                return internal.priority
-            end,
-            setPriority = function(value)
-                assert(type(value) == "number")
-                internal.priority = value
             end,
             remove = function()
                 for i = 1, #threads do
@@ -104,18 +104,11 @@ local function manager(listener)
         return internal.instance
     end
 
-    this.run = function(onDeath)
-        assert(type(onDeath) == "function")
-
-        local halt = false
+    this.run = function()
         local e = {}
-        local initial = {}
-        for i = 1, #threads do
-            initial[i] = threads[i].instance
-        end
 
         while true do
-            local s_threads = threads
+            local s_threads = sort(threads)
             local total = #s_threads
             for j = 1, total do
                 local thread = s_threads[j]
@@ -135,7 +128,6 @@ local function manager(listener)
                     end
                 end
                 if coroutine.status(thread.coro) == "dead" then
-                    local living = {}
                     for k = 1, #threads do
                         if threads[k] == thread then
                             table.remove(threads, k)
@@ -143,13 +135,7 @@ local function manager(listener)
                             break
                         end
                     end
-                    for i = 1, #threads do
-                        living[i] = threads[i].instance
-                    end
-                    local err
-                    err, halt = pcall(onDeath, thread.instance, living, initial)
-                    assert(err, halt, 1)
-                    if halt then
+                    if #threads == 0 then
                         return
                     end
                 end
@@ -164,25 +150,14 @@ local function manager(listener)
         return interface(coroutine.create(func), ...)
     end
 
-    this.group = function(onDeath, ...)
-        assert(type(onDeath) == "function")
+    this.group = function(...)
         local subman = manager(listener)
-        local ii = interface(coroutine.create(function()
-            subman.run(onDeath)
-        end), ...)
+        local ii = interface(...)
         ii.run = subman.run
         ii.thread = subman.thread
         ii.group = subman.group
         return ii
     end
-
-    this.onDeath = {
-        waitForAll = function()
-            return function(_, all)
-                return #all == 0
-            end
-        end
-    }
 
     return this
 end
@@ -190,15 +165,15 @@ end
 local function NewWaitGroup()
     local raisin = manager(os.pullEvent)
     local waitGroup = {
-        group = raisin.group(raisin.onDeath.waitForAll(), 1)
+        group = raisin.group()
     }
 
-    waitGroup.Add = function(func, ...)
-        waitGroup.group.thread(func, ...)
+    waitGroup.Add = function(func)
+        waitGroup.group.thread(func)
     end
 
     waitGroup.Wait = function()
-        raisin.run(raisin.onDeath.waitForAll())
+        raisin.run()
     end
 
     return waitGroup
