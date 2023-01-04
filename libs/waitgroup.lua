@@ -36,22 +36,6 @@ local function manager(listener)
 
     assert(type(listener) == "function")
 
-    local function sort(unsorted)
-        local sorted = {}
-        sorted[#sorted + 1] = unsorted[1]
-        for i = 2, #unsorted do
-            for j = 1, #sorted do
-                if unsorted[i].priority < sorted[j].priority then
-                    table.insert(sorted, j, unsorted[i])
-                    break
-                elseif j == #sorted then
-                    sorted[#sorted + 1] = unsorted[i]
-                end
-            end
-        end
-        return sorted
-    end
-
     local function resume(thread, event)
         local suc, err = coroutine.resume(thread.coro, table.unpack(event, 1, event.n))
         assert(suc, err, 2)
@@ -131,10 +115,9 @@ local function manager(listener)
         end
 
         while true do
-            local s_threads = sort(threads)
-            local total = #s_threads
+            local total = #threads
             for j = 1, total do
-                local thread = s_threads[j]
+                local thread = threads[j]
                 while #thread.queue ~= 0 do
                     if check(thread, thread.queue[1][1]) then
                         thread.event = resume(thread, thread.queue[1])
@@ -169,7 +152,7 @@ local function manager(listener)
                         return
                     end
                 end
-                total = #s_threads
+                total = #threads
             end
             e = table.pack(listener())
         end
