@@ -17,10 +17,9 @@ local function NewWaitGroup()
     }
 
     waitGroup.Add = function(func)
-        local coro = coroutine.create(func)
-        coroutine.resume(coro)
-
-        local thread = { coro = coro }
+        local thread = {
+            coro = coroutine.create(func)
+        }
         table.insert(waitGroup.threads, thread)
     end
 
@@ -29,8 +28,9 @@ local function NewWaitGroup()
             local threads = waitGroup.threads
             for t = 1, #threads do
                 local status = coroutine.status(threads[t].coro)
-                if status == "dead" then
-                    print("DEAD", t)
+                if status == "suspended" then
+                    print(coroutine.resume(threads[t].coro))
+                elseif status == "dead" then
                     table.remove(threads, t)
                     if #threads <= 1 then
                         return
