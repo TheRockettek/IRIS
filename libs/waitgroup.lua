@@ -112,6 +112,8 @@ local function manager(listener)
             local total = #s_threads
             for j = 1, total do
                 local thread = s_threads[j]
+                if not thread then break end
+
                 while #thread.queue ~= 0 do
                     if check(thread, thread.queue[1][1]) then
                         thread.event = resume(thread, thread.queue[1])
@@ -132,7 +134,6 @@ local function manager(listener)
                         if threads[k] == thread then
                             table.remove(threads, k)
                             j = j - 1
-                            break
                         end
                     end
                     if #threads == 0 then
