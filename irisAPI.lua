@@ -647,9 +647,8 @@ local function NewIRIS(logger)
         if iris.irisData.inventories[inventoryName] == nil then
             iris.logger.Debug().Str("inventoryName", inventoryName).Str("Inventory is not stored, scanning")
 
-            local inventoryPeripheral = peripheral.wrap(inventoryName)
-            if inventoryPeripheral ~= nil then
-                scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryPeripheral)
+            local ok = scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryName)
+            if ok then
                 iris.isIRISDataDirty = true
             end
         else
@@ -660,9 +659,8 @@ local function NewIRIS(logger)
                 .count == nil then
                 iris.logger.Debug().Str("inventoryName", inventoryName).Str("slot", slot).Str("Item was not stored in our data, scanning chest")
 
-                local inventoryPeripheral = peripheral.wrap(inventoryName)
-                if inventoryPeripheral ~= nil then
-                    scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryPeripheral)
+                local ok = scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryName)
+                if ok then
                     iris.isIRISDataDirty = true
                 end
             else
@@ -683,22 +681,17 @@ local function NewIRIS(logger)
         if iris.irisData.inventories[inventoryName] == nil then
             iris.logger.Debug().Str("inventoryName", inventoryName).Str("Inventory is not stored, scanning")
 
-            local inventoryPeripheral = peripheral.wrap(inventoryName)
-            if inventoryPeripheral ~= nil then
-                scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryPeripheral)
+            local ok = scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryName)
+            if ok then
                 iris.isIRISDataDirty = true
             end
         else
             -- ScanInventory if we don't store an item here or what we store does not make sense.
-            if iris.irisData.inventories[inventoryName].items[tostring(slot)] ==
-                nil or
-                iris.irisData.inventories[inventoryName].items[tostring(slot)]
-                .count == nil then
+            if iris.irisData.inventories[inventoryName].items[tostring(slot)] == nil or
+                iris.irisData.inventories[inventoryName].items[tostring(slot)].count == nil then
                 iris.logger.Debug().Str("inventoryName", inventoryName).Str("slot", slot).Str("Item was not stored in our data, scanning chest")
-
-                local inventoryPeripheral = peripheral.wrap(inventoryName)
-                if inventoryPeripheral ~= nil then
-                    scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryPeripheral)
+                local ok = scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryName)
+                if ok then
                     iris.isIRISDataDirty = true
                 end
             else

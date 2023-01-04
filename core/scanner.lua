@@ -52,6 +52,8 @@ local function ScanInventory(inventories, wg, iris, name)
     if internalWaitGroup then
         wg.Wait(20)
     end
+
+    return inventorySize > 0
 end
 
 local function ScanAllInventories(iris)
