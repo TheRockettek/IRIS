@@ -24,6 +24,8 @@ local function ScanInventory(inventories, wg, iris, name)
 
     for i = 1, inventorySize, 1 do
         wg.Add(function()
+            iris.logger.Debug().Str("_name", "ScanInventory.<waitGroup>").Str("name", name).Msg("[TINTER] Scanning inventory")
+
             local item = inventoryPeripheral.getItemDetail(i)
 
             if inventories[name] == nil then
@@ -53,6 +55,8 @@ local function ScanInventory(inventories, wg, iris, name)
             else
                 inventories[name].itemMaxCount = inventories[name].itemMaxCount + 64
             end
+
+            iris.logger.Debug().Str("_name", "ScanInventory.<waitGroup>").Str("name", name).Dur("duration", start).Msg("[TINTER] Scanned inventory")
         end)
     end
 
