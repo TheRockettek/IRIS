@@ -50,7 +50,7 @@ local function ScanInventory(inventories, wg, iris, name)
     end
 
     if internalWaitGroup then
-        wg.Wait(54)
+        wg.Wait(20)
     end
 end
 
@@ -68,7 +68,7 @@ local function ScanAllInventories(iris)
             ScanInventory(inventories, wg, iris, name)
         end)
     end
-    wg.Wait(54)
+    wg.Wait(20)
 
     iris.logger.Info().Dur("duration", start).Msg("Finished scanning inventories")
 

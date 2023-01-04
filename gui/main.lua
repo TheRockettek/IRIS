@@ -111,7 +111,7 @@ local function NewGUI(iris)
             end)
         end
 
-        wg.Wait(54)
+        wg.Wait(20)
 
         return candidates
     end
