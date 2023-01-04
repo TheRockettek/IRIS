@@ -13,8 +13,6 @@ local function ScanInventory(inventories, wg, iris, name)
 
     iris.logger.Debug().Str("name", name).Msg("[TINTER] Scanning inventory")
 
-    local start = os.epoch("utc")
-
     local inventorySize = inventoryPeripheral.size()
 
     local internalWaitGroup = wg == nil
@@ -24,8 +22,6 @@ local function ScanInventory(inventories, wg, iris, name)
 
     for i = 1, inventorySize, 1 do
         wg.Add(function()
-            iris.logger.Debug().Str("_name", "ScanInventory.<waitGroup>").Str("name", name).Msg("[TINTER] Scanning inventory")
-
             local item = inventoryPeripheral.getItemDetail(i)
 
             if inventories[name] == nil then
@@ -55,16 +51,12 @@ local function ScanInventory(inventories, wg, iris, name)
             else
                 inventories[name].itemMaxCount = inventories[name].itemMaxCount + 64
             end
-
-            iris.logger.Debug().Str("_name", "ScanInventory.<waitGroup>").Str("name", name).Dur("duration", start).Msg("[TINTER] Scanned inventory")
         end)
     end
 
     if internalWaitGroup then
         wg.Wait()
     end
-
-    iris.logger.Debug().Str("name", name).Dur("duration", start).Str("isBlocking", internalWaitGroup).Msg("[TINTER] Scanned inventory")
 end
 
 local function ScanAllInventories(iris)
