@@ -13,7 +13,7 @@ local function NewWaitGroup()
     end
 
     waitGroup._check = function(thread, name)
-        return coroutine.status(thread.coro) == "suspended" and (thread.ev == nil or thread.ev == name)
+        return coroutine.status(thread.coro) == "suspended" and (thread.event == nil or thread.event == name)
     end
 
     waitGroup._resume = function(thread, event)
@@ -29,17 +29,19 @@ local function NewWaitGroup()
             local total = #waitGroup.threads
             for t = 1, total do
                 local thread = waitGroup.threads[t]
-                if not thread then break end
                 if waitGroup._check(thread, e[1]) then
-                    thread.ev = waitGroup._resume(thread, e)
+                    thread.event = waitGroup.resume(thread, e)
                 end
                 if coroutine.status(thread.coro) == "dead" then
-                    table.remove(waitGroup.threads, t)
-                    total = #waitGroup.threads
-                    t = t - 1
-                    if total == 0 then
-                        return
+                    for k = 1, #waitGroup.threads do
+                        if waitGroup.threads[k] == thread then
+                            table.remove(waitGroup.threads, k)
+                            t = t - 1
+                            break
+                        end
                     end
+                    if #waitGroup.threads == 0 then return end
+                    total = #waitGroup.threads
                 end
             end
             e = table.pack(os.pullEvent())
