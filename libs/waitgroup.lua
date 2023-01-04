@@ -29,6 +29,7 @@ local function NewWaitGroup()
             local total = #waitGroup.threads
             for t = 1, total do
                 local thread = waitGroup.threads[t]
+                if not thread then break end
                 if waitGroup._check(thread, e[1]) then
                     thread.ev = waitGroup._resume(thread, e)
                 end
