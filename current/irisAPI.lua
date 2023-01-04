@@ -1,8 +1,8 @@
-local errors = require "core.errors"
-local logging = require "libs.logging"
-local irisSerialization = require "core.iris_serialization"
-local scanner = require "core.scanner"
-local events = require "core.events"
+local errors = require "current.core.errors"
+local logging = require "current.libs.logging"
+local irisSerialization = require "current.core.iris_serialization"
+local scanner = require "current.core.scanner"
+local events = require "current.core.events"
 
 local VERSION = "0.0.1"
 

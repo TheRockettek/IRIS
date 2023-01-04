@@ -1,6 +1,6 @@
-local events = require "core.events"
-local errors = require "core.errors"
-local waitgroup = require "libs.waitgroup"
+local events = require "current.core.events"
+local errors = require "current.core.errors"
+local waitgroup = require "current.libs.waitgroup"
 -- Colours to use within IRIS gui
 -- original colour to use, r, g, b
 

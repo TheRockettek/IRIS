@@ -1,5 +1,5 @@
-local peripherals = require("core.peripherals")
-local waitgroup   = require("libs.waitgroup")
+local peripherals = require("current.core.peripherals")
+local waitgroup   = require("current.libs.waitgroup")
 
 local function ScanInventory(inventories, wg, iris, name)
     assert(type(inventories) == "table")

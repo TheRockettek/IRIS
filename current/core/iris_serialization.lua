@@ -1,4 +1,4 @@
-local errors = require("core.errors")
+local errors = require("current.core.errors")
 
 local fileVersion = "1"
 
