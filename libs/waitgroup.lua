@@ -42,7 +42,6 @@ local function NewWaitGroup()
                 end
             end
             print(#threads)
-            sleep(0)
         end
     end
 
