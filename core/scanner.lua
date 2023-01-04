@@ -64,7 +64,9 @@ local function ScanAllInventories(iris)
 
     local wg = waitgroup.NewWaitGroup()
     for _, name in pairs(inventoryNames) do
-        ScanInventory(inventories, wg, iris, name)
+        wg.Add(function()
+            ScanInventory(inventories, wg, iris, name)
+        end)
     end
     wg.Wait(54)
 
