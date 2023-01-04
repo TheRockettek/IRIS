@@ -27,7 +27,9 @@ local function NewWaitGroup()
 
         while true do
             local total = #waitGroup.threads
-            for t = 1, total do
+            local t = 0
+            while t < total do
+                t = t + 1
                 local thread = waitGroup.threads[t]
                 if waitGroup._check(thread, e[1]) then
                     thread.event = waitGroup._resume(thread, e)
