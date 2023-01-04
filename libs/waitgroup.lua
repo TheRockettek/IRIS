@@ -28,6 +28,7 @@ local function NewWaitGroup()
             local threads = waitGroup.threads
             for t = 1, #threads do
                 local status = coroutine.status(threads[t].coro)
+                print(t, status)
                 if status == "suspended" then
                     print(coroutine.resume(threads[t].coro))
                 elseif status == "dead" then
