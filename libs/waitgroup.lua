@@ -24,6 +24,7 @@ local function NewWaitGroup()
     end
 
     waitGroup.Wait = function()
+        print("Wait!")
         while true do
             local threads = waitGroup.threads
             for t = 1, #threads do
@@ -32,12 +33,15 @@ local function NewWaitGroup()
                 if status == "suspended" then
                     print(coroutine.resume(threads[t].coro))
                 elseif status == "dead" then
+                    print("Dead " .. t)
                     table.remove(threads, t)
                     if #threads <= 1 then
+                        print("Done :)")
                         return
                     end
                 end
             end
+            print(#threads)
             sleep(0)
         end
     end
