@@ -30,7 +30,7 @@ local function NewWaitGroup()
             for t = 1, total do
                 local thread = waitGroup.threads[t]
                 if waitGroup._check(thread, e[1]) then
-                    thread.event = waitGroup.resume(thread, e)
+                    thread.event = waitGroup._resume(thread, e)
                 end
                 if coroutine.status(thread.coro) == "dead" then
                     for k = 1, #waitGroup.threads do
