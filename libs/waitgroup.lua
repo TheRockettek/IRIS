@@ -30,16 +30,17 @@ local function NewWaitGroup()
             for t = 1, #threads do
                 local thread = threads[t]
                 if thread == nil then break end
+                if waitGroup._check(thread, e[1]) then
+                    thread.ev = waitGroup._resume(thread, e)
+                    e = table.pack(os.pullEvent())
+                    break
+                end
                 if coroutine.status(thread.coro) == "dead" then
                     table.remove(threads, t)
                     if #threads == 0 then
                         return
                     end
                     break
-                end
-                if waitGroup._check(thread, e[1]) then
-                    thread.ev = waitGroup._resume(thread, e)
-                    e = table.pack(os.pullEvent())
                 end
             end
         end
