@@ -115,9 +115,10 @@ local function manager(listener)
         end
 
         while true do
-            local total = #threads
+            local s_threads = threads
+            local total = #s_threads
             for j = 1, total do
-                local thread = threads[j]
+                local thread = s_threads[j]
                 while #thread.queue ~= 0 do
                     if check(thread, thread.queue[1][1]) then
                         thread.event = resume(thread, thread.queue[1])
@@ -152,7 +153,7 @@ local function manager(listener)
                         return
                     end
                 end
-                total = #threads
+                total = #s_threads
             end
             e = table.pack(listener())
         end
