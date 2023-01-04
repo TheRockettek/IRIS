@@ -522,10 +522,9 @@ local function NewIRIS(logger)
 
         iris.logger.Debug().Str("peripheral", peripheralName).Msg("Pushing inventory into IRIS")
 
-        local inventory, err = scanner.ScanInventory(iris, peripheralName, inventoryPeripheral)
-        if err ~= nil then
-            return 0, err
-        end
+        local inventories = {}
+        scanner.ScanInventory(inventories, nil, iris, inventoryPeripheral)
+        local inventory = inventories[inventoryPeripheral]
 
         assert(type(inventory) == "table")
         assert(type(inventory.items) == "table")
@@ -656,9 +655,7 @@ local function NewIRIS(logger)
 
             local inventoryPeripheral = peripheral.wrap(inventoryName)
             if inventoryPeripheral ~= nil then
-                local inventory = scanner.ScanInventory(iris, inventoryName, inventoryPeripheral)
-
-                iris.irisData.inventories[inventoryName] = inventory
+                scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryPeripheral)
                 iris.isIRISDataDirty = true
             end
         else
@@ -671,9 +668,7 @@ local function NewIRIS(logger)
 
                 local inventoryPeripheral = peripheral.wrap(inventoryName)
                 if inventoryPeripheral ~= nil then
-                    local inventory = scanner.ScanInventory(iris, inventoryName, inventoryPeripheral)
-
-                    iris.irisData.inventories[inventoryName] = inventory
+                    scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryPeripheral)
                     iris.isIRISDataDirty = true
                 end
             else
@@ -696,9 +691,7 @@ local function NewIRIS(logger)
 
             local inventoryPeripheral = peripheral.wrap(inventoryName)
             if inventoryPeripheral ~= nil then
-                local inventory = scanner.ScanInventory(iris, inventoryName, inventoryPeripheral)
-
-                iris.irisData.inventories[inventoryName] = inventory
+                scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryPeripheral)
                 iris.isIRISDataDirty = true
             end
         else
@@ -711,9 +704,7 @@ local function NewIRIS(logger)
 
                 local inventoryPeripheral = peripheral.wrap(inventoryName)
                 if inventoryPeripheral ~= nil then
-                    local inventory = scanner.ScanInventory(iris, inventoryName, inventoryPeripheral)
-
-                    iris.irisData.inventories[inventoryName] = inventory
+                    scanner.ScanInventory(iris.irisData.inventories, nil, iris, inventoryPeripheral)
                     iris.isIRISDataDirty = true
                 end
             else
