@@ -36,10 +36,10 @@ local function NewWaitGroup()
                 end
                 if coroutine.status(thread.coro) == "dead" then
                     table.remove(threads, t)
+                    t = t - 1
                     if #threads == 0 then
                         return
                     end
-                    break
                 end
             end
             e = table.pack(os.pullEvent())
