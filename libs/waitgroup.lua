@@ -22,13 +22,13 @@ local function NewWaitGroup()
         return result
     end
 
-    waitGroup.Wait = function()
+    waitGroup.Wait = function(coroutineBurst)
         local e = {}
 
         while true do
             local total = #waitGroup.threads
             local t = 0
-            while t < total do
+            while t < math.min(total, coroutineBurst) do
                 t = t + 1
                 local thread = waitGroup.threads[t]
                 if waitGroup._check(thread, e[1]) then

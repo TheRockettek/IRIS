@@ -46,7 +46,7 @@ local function NewIRIS(logger)
         _getTurtlePeripheral = function()
             for _, k in pairs(redstone.getSides()) do
                 if peripheral.getType(k) == "modem" then
-                    return peripheral.wrap(k).getNameLocal()
+                    return peripheral.call(k, "getNameLocal")
                 end
             end
 
@@ -78,17 +78,11 @@ local function NewIRIS(logger)
     end
 
     iris.turtle.pushItems = function(toName, fromSlot, limit, toSlot)
-        local toPeripheral = peripheral.wrap(toName)
-        check("pushItems", 1, "table", toPeripheral)
-
-        return toPeripheral.pullItems(iris.turtle._getTurtlePeripheral(), fromSlot, limit, toSlot)
+        return peripheral.call(toName, "pullItems", iris.turtle._getTurtlePeripheral(), fromSlot, limit, toSlot)
     end
 
     iris.turtle.pullItems = function(fromName, fromSlot, limit, toSlot)
-        local fromPeripheral = peripheral.wrap(fromName)
-        check("pullItems", 1, "table", fromPeripheral)
-
-        return fromPeripheral.pushItems(iris.turtle._getTurtlePeripheral(), fromSlot, limit, toSlot)
+        return peripheral.call(fromName, "pushItems", iris.turtle._getTurtlePeripheral(), fromSlot, limit, toSlot)
     end
 
     -- Initializes IRIS

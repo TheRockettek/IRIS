@@ -6,14 +6,9 @@ local function ScanInventory(inventories, wg, iris, name)
     assert(type(iris) == "table")
     assert(type(name) == "string")
 
-    local inventoryPeripheral = peripheral.wrap(name)
-    if inventoryPeripheral == nil then
-        return
-    end
-
     iris.logger.Debug().Str("name", name).Msg("[TINTER] Scanning inventory")
 
-    local inventorySize = inventoryPeripheral.size()
+    local inventorySize = peripheral.call(name, "size")
 
     local internalWaitGroup = wg == nil
     if internalWaitGroup then
@@ -22,7 +17,7 @@ local function ScanInventory(inventories, wg, iris, name)
 
     for i = 1, inventorySize, 1 do
         wg.Add(function()
-            local item = inventoryPeripheral.getItemDetail(i)
+            local item = peripheral.call(name, "getItemDetail", i)
 
             if inventories[name] == nil then
                 inventories[name] = {
@@ -55,7 +50,7 @@ local function ScanInventory(inventories, wg, iris, name)
     end
 
     if internalWaitGroup then
-        wg.Wait()
+        wg.Wait(54)
     end
 end
 
@@ -71,7 +66,7 @@ local function ScanAllInventories(iris)
     for _, name in pairs(inventoryNames) do
         ScanInventory(inventories, wg, iris, name)
     end
-    wg.Wait()
+    wg.Wait(54)
 
     iris.logger.Info().Dur("duration", start).Msg("Finished scanning inventories")
 
