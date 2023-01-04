@@ -13,7 +13,7 @@ local function NewWaitGroup()
     end
 
     waitGroup._check = function(thread, name)
-        return thread and coroutine.status(thread.coro) == "suspended" and (thread.ev == nil or thread.ev == name)
+        return coroutine.status(thread.coro) == "suspended" and (thread.ev == nil or thread.ev == name)
     end
 
     waitGroup._resume = function(thread, event)
@@ -29,6 +29,8 @@ local function NewWaitGroup()
             local threads = waitGroup.threads
             for t = 1, #threads do
                 local thread = threads[t]
+                if thread == nil then break end
+
                 if waitGroup._check(thread, e[1]) then
                     thread.ev = waitGroup._resume(thread, e)
                 end
