@@ -1,9 +1,9 @@
 local logging = require "iris.libs.logging"
-local irisAPI = require "iris.iris"
+local core = require "iris.core"
 
 local logger = logging.NewLogger("-", "iris.log")
 logger.setLevel("trace")
 
-local iris = irisAPI.NewIRIS(logger)
+local iris = core.NewIRIS(logger)
 
 iris.init()
