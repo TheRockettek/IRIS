@@ -44,12 +44,12 @@ local function NewIRIS(logger)
 
     this._formatIgnoreList = function(ignoreList)
         if type(ignoreList) == "table" then
-            table.insert(ignoreList, this.turtle._nameLocal)
+            table.insert(ignoreList, this.turtle.getNameLocal())
             return ignoreList
         elseif type(ignoreList) == "string" then
-            return { ignoreList, this.turtle._nameLocal }
+            return { ignoreList, this.turtle.getNameLocal() }
         elseif type(ignoreList) == "nil" then
-            return { this.turtle._nameLocal }
+            return { this.turtle.getNameLocal() }
         else
             error(("Unexpected type for ignoreList. (expected string, table or nil, got %s)"):format(type(ignoreList)))
         end
@@ -377,7 +377,7 @@ local function NewIRIS(logger)
 
         if this.turtle then
             wg.Add(function()
-                this._scanInventory(wg, this.turtle._nameLocal)
+                this._scanInventory(wg, this.turtle.getNameLocal())
             end)
         end
 
@@ -394,7 +394,7 @@ local function NewIRIS(logger)
         utils.expectTable("_scanInventory", "waitgroup", wg, "waitgroup:waitgroup")
 
         local inventorySize
-        if inventoryName == this.turtle._nameLocal then
+        if inventoryName == this.turtle.getNameLocal() then
             inventorySize = this.turtle.size()
         else
             inventorySize = peripheral.call(inventoryName, "size")
