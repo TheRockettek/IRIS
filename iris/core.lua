@@ -344,10 +344,12 @@ local function NewIRIS(logger)
                 wg.Add(function()
                     local item = peripheral.call(inventoryName, "getItemDetail", slotNumber)
                     if item then
-                        this.inventories[inventoryName].SetInventoryItem(slotNumber,
-                            InventoryItem(inventoryName, slotNumber, item))
+                        local inventoryItem = InventoryItem(inventoryName, slotNumber, item)
+                        this.inventories[inventoryName].SetInventoryItem(slotNumber, inventoryItem)
+                        this._setInventoryItem(inventoryName, slotNumber, inventoryItem)
                     else
                         this.inventories[inventoryName].SetInventoryItem(slotNumber, nil)
+                        this._setInventoryItem(inventoryName, slotNumber, nil)
                     end
                 end)
             end

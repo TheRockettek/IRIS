@@ -10,8 +10,6 @@ local function createBinaryTestCase(name, func, ...)
 
     local success, result = pcall(func, ...)
 
-    print(success, result)
-
     assert(success, ("FAIL: %s: %s"):format(name, result))
     assert(result, ("FAIL: %s"):format(name))
     print(("PASS: %s: %s"):format(name, result))
