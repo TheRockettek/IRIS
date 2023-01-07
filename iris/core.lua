@@ -80,7 +80,7 @@ local function NewIRIS(logger)
 
         func.FunctionEnd("candidates", candidates, "missingItems", itemsRemaining)
 
-        return candidates, itemsRemaining
+        return candidates, math.min(0, itemsRemaining)
     end
 
     this.findSpot = function(inventoryItemHash, count, maxCount, ignoreList)
