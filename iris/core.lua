@@ -161,8 +161,12 @@ local function NewIRIS(logger)
             "toInventory", toInventory, "toSlot", toSlot, "count", count)
 
         local inventoryItem
+        local localTurtleName = this.turtle.getNameLocal()
 
-        if fromInventory == this.turtle._type then
+        if fromInventory == this.turtle._type then fromInventory = localTurtleName end
+        if toInventory == this.turtle._type then toInventory = localTurtleName end
+
+        if fromInventory == localTurtleName then
             inventoryItem = this.turtle.getItemDetail(fromSlot)
         else
             inventory = this.inventories[fromInventory]
@@ -174,9 +178,9 @@ local function NewIRIS(logger)
 
         local itemsTransferred
 
-        if fromInventory == this.turtle._type then
+        if fromInventory == localTurtleName then
             itemsTransferred = this.turtle.pushItems(toInventory, fromSlot, count, toSlot)
-        elseif toInventory == this.turtle._type then
+        elseif toInventory == localTurtleName then
             itemsTransferred = this.turtle.pullItems(fromInventory, fromSlot, count, toSlot)
         else
             itemsTransferred = peripheral.call(fromInventory, "pushItems", toInventory, fromSlot, count, toSlot)
@@ -189,7 +193,7 @@ local function NewIRIS(logger)
         local resultInventoryItem
 
         -- TODO: Figure out optimal way of doing this.
-        if toInventory == this.turtle._type then
+        if toInventory == localTurtleName then
             resultInventoryItem = this.turtle.getItemDetail(toSlot)
         else
             resultInventoryItem = peripheral.call(toInventory, "getItemDetail", toSlot)
