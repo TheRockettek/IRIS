@@ -226,11 +226,15 @@ local function NewIRIS(logger)
             if currentSlot ~= nil then
                 irisItems[inventoryItemHash] = nil
 
-                this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = true
+                local itemSummary = this.itemSummary[itemHash]
+                if itemSummary == nil then
+                    itemSummary = inventoryItem
+                else
+                    itemSummary.count = itemSummary.count - currentSlot.count
+                end
 
-                local itemSummary = this.itemSummary[itemHash] or inventoryItem
-                itemSummary.count = itemSummary.count - currentSlot.count
                 this.itemSummary[itemHash] = itemSummary
+                this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = true
 
                 this.usedSlotCount = this.usedSlotCount - 1
                 this.emptySlotCount = this.emptySlotCount + 1
@@ -251,8 +255,13 @@ local function NewIRIS(logger)
                 if countChange ~= 0 then
                     irisItems[inventoryItemHash] = inventoryItem
 
-                    local itemSummary = this.itemSummary[itemHash] or inventoryItem
-                    itemSummary.count = itemSummary.count + countChange
+                    local itemSummary = this.itemSummary[itemHash]
+                    if itemSummary == nil then
+                        itemSummary = inventoryItem
+                    else
+                        itemSummary.count = itemSummary.count + countChange
+                    end
+
                     this.itemSummary[itemHash] = itemSummary
 
                     this.totalItemCount = this.totalItemCount + countChange
@@ -263,11 +272,15 @@ local function NewIRIS(logger)
             else
                 irisItems[inventoryItemHash] = inventoryItem
 
-                this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = nil
+                local itemSummary = this.itemSummary[itemHash]
+                if itemSummary == nil then
+                    itemSummary = inventoryItem
+                else
+                    itemSummary.count = itemSummary.count + inventoryItem.count
+                end
 
-                local itemSummary = this.itemSummary[itemHash] or inventoryItem
-                itemSummary.count = itemSummary.count + inventoryItem.count
                 this.itemSummary[itemHash] = itemSummary
+                this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = nil
 
                 this.usedSlotCount = this.usedSlotCount + 1
                 this.emptySlotCount = this.emptySlotCount - 1

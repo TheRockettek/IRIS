@@ -68,8 +68,13 @@ function Inventory(peripheralName, slotCount)
                 local currentSlotHash = currentSlot.hash()
                 this.emptySlots[tostring(slot)] = true
 
-                local itemSummary = this.itemSummary[currentSlotHash] or inventoryItem
-                itemSummary.count = itemSummary.count - currentSlot.count
+                local itemSummary = this.itemSummary[currentSlotHash]
+                if itemSummary == nil then
+                    itemSummary = inventoryItem
+                else
+                    itemSummary.count = itemSummary.count - currentSlot.count
+                end
+
                 if itemSummary.count == 0 then
                     this.itemSummary[currentSlotHash] = nil
                 else
@@ -93,19 +98,29 @@ function Inventory(peripheralName, slotCount)
 
                 local countChange = inventoryItem.count - currentSlot.count
                 if countChange ~= 0 then
-                    local itemSummary = this.itemSummary[inventoryItemHash] or inventoryItem
-                    itemSummary.count = itemSummary.count + inventoryItem.count
+                    local itemSummary = this.itemSummary[inventoryItemHash]
+                    if itemSummary == nil then
+                        itemSummary = inventoryItem
+                    else
+                        itemSummary.count = itemSummary.count + inventoryItem.count
+                    end
+
                     this.itemSummary[inventoryItemHash] = itemSummary
 
                     this.totalItemCount = this.totalItemCount + countChange
                     this.itemMaxCount = this.itemMaxCount + countChange
                 end
             else
-                this.emptySlots[tostring(slot)] = nil
 
-                local itemSummary = this.itemSummary[inventoryItemHash] or inventoryItem
-                itemSummary.count = itemSummary.count + inventoryItem.count
+                local itemSummary = this.itemSummary[inventoryItemHash]
+                if itemSummary == nil then
+                    itemSummary = inventoryItem
+                else
+                    itemSummary.count = itemSummary.count + inventoryItem.count
+                end
+
                 this.itemSummary[inventoryItemHash] = itemSummary
+                this.emptySlots[tostring(slot)] = nil
 
                 this.usedSlotCount = this.usedSlotCount + 1
                 this.emptySlotCount = this.emptySlotCount - 1
