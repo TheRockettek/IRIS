@@ -70,7 +70,7 @@ function Inventory(peripheralName, slotCount)
 
                 local itemSummary = this.itemSummary[currentSlotHash]
                 if itemSummary == nil then
-                    itemSummary = inventoryItem
+                    itemSummary = utils.deepcopy(inventoryItem)
                 else
                     itemSummary.count = itemSummary.count - currentSlot.count
                 end
@@ -100,7 +100,7 @@ function Inventory(peripheralName, slotCount)
                 if countChange ~= 0 then
                     local itemSummary = this.itemSummary[inventoryItemHash]
                     if itemSummary == nil then
-                        itemSummary = inventoryItem
+                        itemSummary = utils.deepcopy(inventoryItem)
                     else
                         itemSummary.count = itemSummary.count + inventoryItem.count
                     end
@@ -114,7 +114,7 @@ function Inventory(peripheralName, slotCount)
 
                 local itemSummary = this.itemSummary[inventoryItemHash]
                 if itemSummary == nil then
-                    itemSummary = inventoryItem
+                    itemSummary = utils.deepcopy(inventoryItem)
                 else
                     itemSummary.count = itemSummary.count + inventoryItem.count
                 end

@@ -228,7 +228,7 @@ local function NewIRIS(logger)
 
                 local itemSummary = this.itemSummary[itemHash]
                 if itemSummary == nil then
-                    itemSummary = inventoryItem
+                    itemSummary = utils.deepcopy(inventoryItem)
                 else
                     itemSummary.count = itemSummary.count - currentSlot.count
                 end
@@ -257,7 +257,7 @@ local function NewIRIS(logger)
 
                     local itemSummary = this.itemSummary[itemHash]
                     if itemSummary == nil then
-                        itemSummary = inventoryItem
+                        itemSummary = utils.deepcopy(inventoryItem)
                     else
                         itemSummary.count = itemSummary.count + countChange
                     end
@@ -274,7 +274,7 @@ local function NewIRIS(logger)
 
                 local itemSummary = this.itemSummary[itemHash]
                 if itemSummary == nil then
-                    itemSummary = inventoryItem
+                    itemSummary = utils.deepcopy(inventoryItem)
                 else
                     itemSummary.count = itemSummary.count + inventoryItem.count
                 end

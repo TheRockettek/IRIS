@@ -69,6 +69,17 @@ local inventorySlotKey = createTestCase("InventorySlotToKey", { inventoryName ..
     return inventory.InventorySlotToKey(inventoryName, slotNumber)
 end)
 
+createBinaryTestCase("Copy", function()
+    local targetTable = {
+        A = 1
+    }
+
+    local secondaryTable = utils.deepcopy(targetTable)
+    targetTable.A = 2
+
+    return secondaryTable.A ~= targetTable.A
+end)
+
 createTestCase("KeyToInventorySlot", { inventoryName, slotNumber }, function()
     return inventory.KeyToInventorySlot(inventorySlotKey)
 end)
