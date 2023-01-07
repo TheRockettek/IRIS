@@ -228,7 +228,7 @@ local function NewLogger(timeFormat, fileName)
                     msg = msg.Str(results[i], results[i + 1])
                 end
             end
-            msg.Dur(functionStart.stepStart).Send()
+            msg.Dur(functionStart.stepStart).Msg("Function step")
             functionStart.stepStart = now
         end
 
@@ -251,7 +251,7 @@ local function NewLogger(timeFormat, fileName)
                     msg = msg.Str(results[i], results[i + 1])
                 end
             end
-            msg.Dur(functionStart.start).Send()
+            msg.Dur(functionStart.start).Msg("Function end")
         end
 
         local msg = this.newMessage("trace").Str("_name", name)
@@ -263,7 +263,7 @@ local function NewLogger(timeFormat, fileName)
                 msg = msg.Str(args[i], args[i + 1])
             end
         end
-        msg.Send()
+        msg.Msg("Function start")
 
         return functionStart
     end
