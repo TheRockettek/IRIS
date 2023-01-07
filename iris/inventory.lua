@@ -29,10 +29,12 @@ function Inventory(slotCount)
 
     this.SetInventoryItem = function(slot, inventoryItem)
         utils.expect("Inventory.SetInventoryItem", "slot", slot, "number")
-        utils.expectTable("Inventory.SetInventoryItem", "inventoryItem", inventoryItem, "iris:inventory_item")
+        if inventoryItem ~= nil then
+            utils.expectTable("Inventory.SetInventoryItem", "inventoryItem", inventoryItem, "iris:inventory_item")
+        end
 
         local currentSlot = this.slots[tostring(slot)]
-        if inventoryItem.count == 0 then
+        if inventoryItem == nil or inventoryItem.count == 0 then
             if currentSlot ~= nil then
                 this.emptySlots[tostring(slot)] = true
 
