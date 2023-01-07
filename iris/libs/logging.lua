@@ -214,8 +214,12 @@ local function NewLogger(timeFormat, fileName)
             local msg = this.newMessage("trace").Str("_name", name).Str("_step", functionStart.Step).Str("_stepName",
                 stepName)
             if results then
-                for i = 1, #args, 2 do
-                    msg = msg.Str(args[i], args[i + 1])
+                for i = 1, #results, 2 do
+                    if type(results[i + 1]) == "table" then
+                        results[i + 1] = textutils.serialize(results[i + 1],
+                            { compact = false, allow_repetitions = true })
+                    end
+                    msg = msg.Str(results[i], results[i + 1])
                 end
             end
             msg.Dur(functionStart.stepStart).Send()
@@ -228,6 +232,10 @@ local function NewLogger(timeFormat, fileName)
             local msg = this.newMessage("trace").Str("_name", name)
             if results then
                 for i = 1, #results, 2 do
+                    if type(results[i + 1]) == "table" then
+                        results[i + 1] = textutils.serialize(results[i + 1],
+                            { compact = false, allow_repetitions = true })
+                    end
                     msg = msg.Str(results[i], results[i + 1])
                 end
             end
@@ -237,6 +245,9 @@ local function NewLogger(timeFormat, fileName)
         local msg = this.newMessage("trace").Str("_name", name)
         if args then
             for i = 1, #args, 2 do
+                if type(args[i + 1]) == "table" then
+                    args[i + 1] = textutils.serialize(args[i + 1], { compact = false, allow_repetitions = true })
+                end
                 msg = msg.Str(args[i], args[i + 1])
             end
         end
