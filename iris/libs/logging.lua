@@ -61,12 +61,12 @@ local function NewLogger(timeFormat, fileName)
         startEpoch = os.epoch("utc"),
         timeFormat = timeFormat or defaultTimeStamp,
         minimumLevel = -1,
-        fileName = "", -- filename to log to. If not passed, will not log to file.
+        fileName = fileName, -- filename to log to. If not passed, will not log to file.
         silent = false, -- when enabled, will only log to file (if a filename is set)
     }
 
-    if fileName ~= "" and fileName ~= nil then
-        this.file = fs.open(fileName, "wb")
+    if this.fileName ~= "" and this.fileName ~= nil then
+        this.file = fs.open(this.fileName, "wb")
     end
 
     this.setLevel = function(logLevel)

@@ -210,19 +210,21 @@ local function NewIRIS(logger)
         utils.expect("_setInventoryItemMaster", "slot", slot, "number")
         utils.expectTable("_setInventoryItemMaster", "inventoryItem", inventoryItem, "iris:inventory_item")
 
-        local irisInventory = this.inventories[inventoryName]
-        assert(irisInventory)
-
         local inventoryItemHash = inventoryItem.inventoryHash()
         local itemHash = inventoryItem.hash()
 
-        local currentSlot = irisInventory.slots[tostring(slot)]
+        local irisItems = this.items[itemHash]
+        if irisItems == nil then
+            this.items[itemHash] = {}
+            irisItems = this.items[itemHash]
+        end
+
+        assert(irisItems)
+
+        local currentSlot = irisItems[inventoryItemHash]
         if inventoryItem.count == 0 then
             if currentSlot ~= nil then
-                local items = this.items[inventoryItemHash]
-                if items then
-                    items[inventoryItemHash] = nil
-                end
+                irisItems[inventoryItemHash] = nil
 
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = true
 
@@ -248,12 +250,7 @@ local function NewIRIS(logger)
 
                 local countChange = inventoryItem.count - currentSlot.count
                 if countChange ~= 0 then
-                    local items = this.items[inventoryItemHash]
-                    if not items then
-                        this.items[inventoryItemHash] = {}
-                        items = this.items[inventoryItemHash]
-                    end
-                    items[inventoryItemHash] = inventoryItem
+                    irisItems[inventoryItemHash] = inventoryItem
 
                     local summary = this.itemSummary[itemHash]
                     if not summary then
@@ -267,12 +264,7 @@ local function NewIRIS(logger)
                         inventoryItem.Table()).Json("currentSlot", currentSlot.Table()).Msg("Attempt to set an item which is already stored")
                 end
             else
-                local items = this.items[inventoryItemHash]
-                if not items then
-                    this.items[inventoryItemHash] = {}
-                    items = this.items[inventoryItemHash]
-                end
-                items[inventoryItemHash] = inventoryItem
+                irisItems[inventoryItemHash] = inventoryItem
 
                 local summary = this.itemSummary[itemHash]
                 if not summary then
