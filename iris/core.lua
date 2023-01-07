@@ -174,8 +174,10 @@ local function NewIRIS(logger)
 
         local itemsTransferred
 
-        if fromInventory == this.turtle._type or toInventory == this.turtle._type then
+        if fromInventory == this.turtle._type then
             itemsTransferred = this.turtle.pushItems(toInventory, fromSlot, count, toSlot)
+        elseif toInventory == this.turtle._type then
+            itemsTransferred = this.turtle.pullItems(fromInventory, fromSlot, count, toSlot)
         else
             itemsTransferred = peripheral.call(fromInventory, "pushItems", toInventory, fromSlot, count, toSlot)
         end
