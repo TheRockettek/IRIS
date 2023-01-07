@@ -373,15 +373,15 @@ local function NewIRIS(logger)
         local wg = waitgroup.NewWaitGroup()
 
         for _, inventoryName in pairs(inventoryNames) do
-            wg.Add(function()
-                this._scanInventory(wg, inventoryName)
-            end)
+            -- wg.Add(function()
+            this._scanInventory(wg, inventoryName)
+            -- end)
         end
 
         if this.turtle then
-            wg.Add(function()
-                this._scanInventory(wg, this.turtle.getNameLocal())
-            end)
+            -- wg.Add(function()
+            this._scanInventory(wg, this.turtle.getNameLocal())
+            -- end)
         end
 
         wg.Wait()
