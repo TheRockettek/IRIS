@@ -199,6 +199,28 @@ local function NewIRIS(logger)
         return itemsTransferred
     end
 
+    this._registerInventory = function(inventoryName, inventorySize)
+        local func = this.logger.FunctionStart("_setInventoryItem", "inventoryName", inventoryName, "inventorySize",
+            inventorySize)
+
+        utils.expect("_setInventoryItem", "inventoryName", inventoryName, "string")
+        utils.expect("_setInventoryItem", "inventorySize", inventorySize, "number")
+
+        local irisInventory = this.inventories[inventoryName]
+        if not irisInventory then
+            this.inventories[inventoryName] = Inventory(inventoryName, inventorySize)
+            for slotNumber = 1, inventorySize, 1 do
+                this.emptySlots[inventory.InventorySlotToKey(inventoryName, slotNumber)] = true
+                this.emptySlotCount = this.emptySlotCount + 1
+                this.itemMaxCount = this.itemMaxCount + inventory.DefaultInventoryStackSize
+            end
+
+            this.logger.Debug().Str("inventoryName", inventoryName).Msg("Registering inventory")
+        end
+
+        func.FunctionEnd()
+    end
+
     this._setInventoryItem = function(inventoryName, slot, inventoryItem)
         local func = this.logger.FunctionStart("_setInventoryItem", "inventoryName", inventoryName, "slot", slot,
             "inventoryItem", inventoryItem)
@@ -357,9 +379,7 @@ local function NewIRIS(logger)
 
         local inventorySize = peripheral.call(inventoryName, "size")
         if inventorySize then
-            if this.inventories[inventoryName] == nil then
-                this.inventories[inventoryName] = Inventory(inventoryName, inventorySize)
-            end
+            this._registerInventory(inventoryName, inventorySize)
 
             for slotNumber = 1, inventorySize, 1 do
                 wg.Add(function()

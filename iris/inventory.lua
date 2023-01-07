@@ -21,6 +21,13 @@ function Inventory(peripheralName, slotCount)
         itemMaxCount = 0,
     }
 
+    this.emptySlotCount = slotCount
+    this.itemMaxCount = slotCount * this._defaultInventorySlotSize
+
+    for i = 1, slotCount, 1 do
+        this.emptySlots[tostring(i)] = true
+    end
+
     this.Table = function()
         local slotsTable = {}
         for i, k in pairs(this.slots) do
@@ -47,13 +54,6 @@ function Inventory(peripheralName, slotCount)
             totalItemCount = this.totalItemCount,
             itemMaxCount = this.itemMaxCount
         }
-    end
-
-    this.emptySlotCount = slotCount
-    this.itemMaxCount = slotCount * this._defaultInventorySlotSize
-
-    for i = 1, slotCount, 1 do
-        this.emptySlots[tostring(i)] = true
     end
 
     this.SetInventoryItem = function(slot, inventoryItem)
