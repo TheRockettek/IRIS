@@ -1,5 +1,5 @@
-local logging = require "iris.libs.logging"
-local core = require "iris.core"
+local logging = require "libs.logging"
+local core = require "core"
 
 local logger = logging.NewLogger("-", "iris.log")
 logger.setLevel("trace")
