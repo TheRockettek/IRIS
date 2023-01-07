@@ -1,4 +1,4 @@
-local utils = require "utils"
+local utils = require "iris.utils"
 
 DefaultInventorySize = 64
 

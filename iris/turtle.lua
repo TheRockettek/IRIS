@@ -1,4 +1,3 @@
-local structs = require "structs"
 -- Provides inventory-like interface for turtles
 local function NewTurtle()
     local this = {

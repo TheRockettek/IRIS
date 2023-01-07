@@ -1,8 +1,8 @@
-local waitgroup = require("libs.waitgroup")
-local turtle = require("turtle")
-local utils = require("utils")
-local scanner = require("scanner")
-local inventory = require("inventory")
+local waitgroup = require "iris.libs.waitgroup"
+local turtle = require "iris.turtle"
+local utils = require "iris.utils"
+local scanner = require "iris.scanner"
+local inventory = require "iris.inventory"
 
 local VERSION = "0.0.0+next"
 
