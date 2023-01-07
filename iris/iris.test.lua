@@ -8,9 +8,9 @@ local function createBinaryTestCase(name, func, ...)
     assert(type(name) == "string")
     assert(type(func) == "function")
 
-    local success, result = pcall(func, ...)
+    local result = func(...)
 
-    assert(success, ("FAIL: %s: %s"):format(name, result))
+    -- assert(success, ("FAIL: %s: %s"):format(name, result))
     assert(result, ("FAIL: %s"):format(name))
     print(("PASS: %s: %s"):format(name, result))
 
@@ -22,15 +22,17 @@ local function createTestCase(name, expected, func, ...)
     assert(type(expected) == "table")
     assert(type(func) == "function")
 
-    local pcallResults = { pcall(func, ...) }
-    local success = pcallResults[1]
+    local pcallResults = { func(...) }
+    -- local success = pcallResults[1]
 
-    assert(success, ("FAIL: %s: %s"):format(name, pcallResults))
+    local results = pcallResults
 
-    local results = {}
-    for i = 2, #pcallResults, 1 do
-        table.insert(results, pcallResults[i])
-    end
+    -- assert(success, ("FAIL: %s: %s"):format(name, pcallResults))
+
+    -- local results = {}
+    -- for i = 2, #pcallResults, 1 do
+    --     table.insert(results, pcallResults[i])
+    -- end
 
 
     for i, k in pairs(expected) do
