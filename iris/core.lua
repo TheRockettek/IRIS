@@ -218,7 +218,7 @@ local function NewIRIS(logger)
                         ,
                         inventoryItem.hash()))
 
-                local countChange = currentSlot.count - inventoryItem.count
+                local countChange = inventoryItem.count - currentSlot.count
                 if countChange ~= 0 then
                     local items = this.items[inventoryItemHash]
                     if not items then
@@ -232,9 +232,8 @@ local function NewIRIS(logger)
                         this.itemSummary[itemHash] = inventoryItem
                     end
 
-                    this.itemSummary[itemHash].count = this.itemSummary[itemHash].count +
-                        (inventoryItem.count - currentSlot.count)
-                    this.totalItemCount = this.totalItemCount + (inventoryItem.count - currentSlot.count)
+                    this.itemSummary[itemHash].count = this.itemSummary[itemHash].count + countChange
+                    this.totalItemCount = this.totalItemCount + countChange
                 else
                     this.logger.Warn().Str("inventoryName", inventoryName).Str("slot", slot).Json("inventoryItem",
                         inventoryItem).Json("currentSlot", currentSlot).Msg("Attempt to set an item which is already stored")
