@@ -6,4 +6,4 @@ logger.setLevel("trace")
 
 local iris = core.NewIRIS(logger)
 
-iris.init()
+iris.start()
