@@ -229,7 +229,7 @@ local function NewIRIS(logger)
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = true
 
                 local itemSummary = this.itemSummary[itemHash] or inventoryItem
-                itemSummary = itemSummary.count - currentSlot.count
+                itemSummary.count = itemSummary.count - currentSlot.count
                 this.itemSummary[itemHash] = itemSummary
 
                 this.usedSlotCount = this.usedSlotCount - 1
@@ -252,7 +252,7 @@ local function NewIRIS(logger)
                     irisItems[inventoryItemHash] = inventoryItem
 
                     local itemSummary = this.itemSummary[itemHash] or inventoryItem
-                    itemSummary = itemSummary.count + countChange
+                    itemSummary.count = itemSummary.count + countChange
                     this.itemSummary[itemHash] = itemSummary
 
                     this.totalItemCount = this.totalItemCount + countChange
@@ -266,7 +266,7 @@ local function NewIRIS(logger)
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = nil
 
                 local itemSummary = this.itemSummary[itemHash] or inventoryItem
-                itemSummary = itemSummary.count + inventoryItem.count
+                itemSummary.count = itemSummary.count + inventoryItem.count
                 this.itemSummary[itemHash] = itemSummary
 
                 this.usedSlotCount = this.usedSlotCount + 1
