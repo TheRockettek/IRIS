@@ -88,13 +88,12 @@ function Inventory(peripheralName, slotCount)
                         ,
                         inventoryItemHash))
 
-                local countChange = currentSlot.count - inventoryItem.count
+                local countChange = inventoryItem.count - currentSlot.count
                 if countChange ~= 0 then
-                    this.itemSummary[inventoryItemHash] = this.itemSummary[inventoryItemHash] +
-                        (currentSlot.count - inventoryItem.count)
+                    this.itemSummary[inventoryItemHash] = this.itemSummary[inventoryItemHash] + countChange
 
-                    this.totalItemCount = this.totalItemCount + (currentSlot.count - inventoryItem.count)
-                    this.itemMaxCount = this.itemMaxCount + (currentSlot.maxCount - inventoryItem.maxCount)
+                    this.totalItemCount = this.totalItemCount + countChange
+                    this.itemMaxCount = this.itemMaxCount + countChange
                 end
             else
                 this.emptySlots[tostring(slot)] = nil
