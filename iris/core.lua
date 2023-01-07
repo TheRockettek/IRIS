@@ -227,11 +227,7 @@ local function NewIRIS(logger)
                 irisItems[inventoryItemHash] = nil
 
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = true
-
-                local summary = this.itemSummary[itemHash]
-                if summary then
-                    this.itemSummary[itemHash] = this.itemSummary[itemHash] - currentSlot.count
-                end
+                this.itemSummary[itemHash] = (this.itemSummary[itemHash] or inventoryItem).count - currentSlot.count
 
                 this.usedSlotCount = this.usedSlotCount - 1
                 this.emptySlotCount = this.emptySlotCount + 1
@@ -252,12 +248,7 @@ local function NewIRIS(logger)
                 if countChange ~= 0 then
                     irisItems[inventoryItemHash] = inventoryItem
 
-                    local summary = this.itemSummary[itemHash]
-                    if not summary then
-                        this.itemSummary[itemHash] = inventoryItem
-                    end
-
-                    this.itemSummary[itemHash].count = this.itemSummary[itemHash].count + countChange
+                    this.itemSummary[itemHash] = (this.itemSummary[itemHash] or inventoryItem).count + countChange
                     this.totalItemCount = this.totalItemCount + countChange
                 else
                     this.logger.Warn().Str("inventoryName", inventoryName).Str("slot", slot).Json("inventoryItem",
@@ -266,13 +257,7 @@ local function NewIRIS(logger)
             else
                 irisItems[inventoryItemHash] = inventoryItem
 
-                local summary = this.itemSummary[itemHash]
-                if not summary then
-                    this.itemSummary[itemHash] = inventoryItem
-                end
-
-                this.itemSummary[itemHash].count = this.itemSummary[itemHash].count + inventoryItem.count
-                this.totalItemCount = this.totalItemCount + inventoryItem.count
+                this.itemSummary[itemHash] = (this.itemSummary[itemHash] or inventoryItem).count + inventoryItem.count
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = nil
 
                 this.usedSlotCount = this.usedSlotCount + 1
