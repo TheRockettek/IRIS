@@ -34,17 +34,19 @@ function Inventory(slotCount)
         end
 
         local currentSlot = this.slots[tostring(slot)]
+        local inventoryItemHash = inventoryItem.hash()
         if inventoryItem == nil or inventoryItem.count == 0 then
             if currentSlot ~= nil then
+                local currentSlotHash = currentSlot.hash()
                 this.emptySlots[tostring(slot)] = true
 
-                local summary = this.itemSummary[currentSlot.hash()]
+                local summary = this.itemSummary[currentSlotHash]
                 if summary ~= nil then
                     summary = summary - currentSlot.count
                     if summary == 0 then
-                        this.itemSummary[currentSlot.hash()] = nil
+                        this.itemSummary[currentSlotHash] = nil
                     else
-                        this.itemSummary[currentSlot.hash()] = summary
+                        this.itemSummary[currentSlotHash] = summary
                     end
                 end
 
@@ -60,11 +62,11 @@ function Inventory(slotCount)
                 assert(currentSlot.equals(inventoryItem),
                     ("Unexpected slot item. Current item in slot %d is %s, expected %s"):format(slot, currentSlot.hash()
                         ,
-                        inventoryItem.hash()))
+                        inventoryItemHash))
 
                 local countChange = currentSlot.count - inventoryItem.count
                 if countChange ~= 0 then
-                    this.itemSummary[inventoryItem.hash()] = this.itemSummary[inventoryItem.hash()] +
+                    this.itemSummary[inventoryItemHash] = this.itemSummary[inventoryItemHash] +
                         (currentSlot.count - inventoryItem.count)
 
                     this.totalItemCount = this.totalItemCount + (currentSlot.count - inventoryItem.count)
@@ -72,7 +74,7 @@ function Inventory(slotCount)
                 end
             else
                 this.emptySlots[tostring(slot)] = nil
-                this.itemSummary[inventoryItem.hash()] = (this.itemSummary[inventoryItem.hash()] or 0) +
+                this.itemSummary[inventoryItemHash] = (this.itemSummary[inventoryItemHash] or 0) +
                     inventoryItem.count
 
                 this.usedSlotCount = this.usedSlotCount + 1
@@ -119,7 +121,7 @@ function InventoryItem(inventoryName, slot, item)
     end
 
     this.hash = function()
-        return this.name .. "@" .. this.nbt
+        return this.name .. "@" .. (this.nbt or "")
     end
 
     this.inventoryHash = function()
