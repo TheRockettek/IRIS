@@ -183,7 +183,7 @@ local function NewLogger(timeFormat, fileName)
             if object == nil then
                 return loggerMessage.Str(name, "nil")
             end
-            return loggerMessage.Str(name, textutils.serializeJSON(object))
+            return loggerMessage.Str(name, textutils.serializeJSON(object, { compact = false, allow_repetitions = true }))
         end
 
         return loggerMessage

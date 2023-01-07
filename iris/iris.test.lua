@@ -35,17 +35,17 @@ local function createTestCase(name, expected, func, ...)
 
     for i, k in pairs(expected) do
         assert(k == results[i],
-            ("FAIL: %s:\nExpected:\n%s\n\nGot:\n%s"):format(name, textutils.serialize(expected, { compact = false }),
-                textutils.serialize(results, { compact = false })))
+            ("FAIL: %s:\nExpected:\n%s\n\nGot:\n%s"):format(name, textutils.serialize(expected, { compact = false, allow_repetitions = true }),
+                textutils.serialize(results, { compact = false, allow_repetitions = true })))
     end
 
     for i, k in pairs(results) do
         assert(k == expected[i],
-            ("FAIL: %s:\nExpected:\n%s\n\nGot:\n%s"):format(name, textutils.serialize(expected, { compact = false }),
+            ("FAIL: %s:\nExpected:\n%s\n\nGot:\n%s"):format(name, textutils.serialize(expected, { compact = false, allow_repetitions = true }),
                 textutils.serialize(results, { compact = false })))
     end
 
-    print(("PASS: %s\n%s"):format(name, textutils.serialize(results, { compact = false })))
+    print(("PASS: %s\n%s"):format(name, textutils.serialize(results, { compact = false, allow_repetitions = true })))
 
     return table.unpack(results)
 end
