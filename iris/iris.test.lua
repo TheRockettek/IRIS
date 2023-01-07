@@ -302,6 +302,8 @@ createBinaryTestCase("FindSpot", function()
 
     utils.expect("FindEmptySpace", "missingSpaces", missingSpaces, "number")
     utils.expectValue("FindItem", "missingSpaces", missingSpaces, 0)
+
+    return missingSpaces == 0
 end)
 
 createBinaryTestCase("FindTooManySpot", function()
@@ -319,6 +321,8 @@ createBinaryTestCase("FindTooManySpot", function()
 
     utils.expect("FindEmptySpace", "missingSpaces", missingSpaces, "number")
     utils.expectNotValue("FindItem", "missingSpaces", missingSpaces, 0)
+
+    return missingSpaces
 end)
 
 createBinaryTestCase("MoveItemToTurtle", function()
@@ -339,6 +343,8 @@ createBinaryTestCase("MoveItemToTurtle", function()
 
     utils.expectNotValue("MoveItemtoTurtle", "summaryCount", newSummary.count, currentSummary.count)
     utils.expectNotValue("MoveItemtoTurtle", "summaryCount", newSummary.count, currentSummary.count - itemsTransferred)
+
+    return itemsTransferred
 end)
 
 -- Try push 1 item from inventory to turtle
