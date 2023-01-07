@@ -5,6 +5,22 @@ local function expect(functionName, inputName, value, expectedType)
     )
 end
 
+local function expectValue(functionName, inputName, value, expectedValue)
+    assert(
+        value == expectedValue,
+        ("%s: bad value %s (expected %s, got %s)"):format(functionName, inputName, tostring(expectedValue),
+            tostring(value))
+    )
+end
+
+local function expectNotValue(functionName, inputName, value, expectedValue)
+    assert(
+        value ~= expectedValue,
+        ("%s: bad value %s (did not expected %s, got %s)"):format(functionName, inputName, tostring(expectedValue),
+            tostring(value))
+    )
+end
+
 local function expectTable(functionName, inputName, value, expectedType)
     expect(functionName, inputName, value, "table")
     expect(functionName, inputName, value._type, "string")
@@ -20,10 +36,10 @@ end
 local function tableHasValue(table, value)
     for i, k in pairs(table) do
         if k == value then
-            return i
+            return true, i
         end
     end
-    return nil
+    return false, nil
 end
 
 local function flattenKeysForSearch(table)
@@ -65,6 +81,8 @@ end
 return {
     expect = expect,
     expectTable = expectTable,
+    expectValue = expectValue,
+    expectNotValue = expectNotValue,
 
     tableHasKey = tableHasKey,
     tableHasValue = tableHasValue,
