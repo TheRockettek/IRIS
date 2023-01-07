@@ -42,7 +42,21 @@ local function NewIRIS(logger)
         return inventoryCount
     end
 
+    this._formatIgnoreList = function(ignoreList)
+        if type(ignoreList) == "table" then
+            return ignoreList
+        elseif type(ignoreList) == "string" then
+            return { ignoreList }
+        elseif type(ignoreList) == "nil" then
+            return {}
+        else
+            error(("Unexpected type for ignoreList. (expected string, table or nil, got %s)"):format(type(ignoreList)))
+        end
+    end
+
     this.findItem = function(inventoryItemHash, count, ignoreList)
+        ignoreList = this._formatIgnoreList(ignoreList)
+
         local func = this.logger.FunctionStart("findItem", "inventoryItemHash", inventoryItemHash, "count", count,
             "ignoreList", ignoreList)
 
@@ -70,6 +84,8 @@ local function NewIRIS(logger)
     end
 
     this.findSpot = function(inventoryItemHash, count, maxCount, ignoreList)
+        ignoreList = this._formatIgnoreList(ignoreList)
+
         local func = this.logger.FunctionStart("findSpot", "inventoryItemHash", inventoryItemHash, "count", count,
             "maxCount", maxCount, "ignoreList", ignoreList)
 
@@ -115,6 +131,8 @@ local function NewIRIS(logger)
     end
 
     this.findEmptySpace = function(maxSpacesNeeded, ignoreList)
+        ignoreList = this._formatIgnoreList(ignoreList)
+
         local func = this.logger.FunctionStart("findEmptySpace", "maxSpacesNeeded", maxSpacesNeeded, "ignoreList",
             ignoreList)
 
