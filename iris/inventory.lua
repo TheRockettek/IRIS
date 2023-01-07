@@ -27,6 +27,11 @@ function Inventory(peripheralName, slotCount)
             slotsTable[i] = k.Table()
         end
 
+        local summaryTable = {}
+        for i, k in pairs(this.itemSummary) do
+            summaryTable[i] = k.Table()
+        end
+
         return {
             _type = this._type,
             _defaultInventorySlotSize = this._defaultInventorySlotSize,
@@ -35,7 +40,7 @@ function Inventory(peripheralName, slotCount)
 
             slots = slotsTable,
             emptySlots = this.emptySlots,
-            itemSummary = this.itemSummary,
+            itemSummary = summaryTable,
 
             usedSlotCount = this.usedSlotCount,
             emptySlotCount = this.emptySlotCount,
