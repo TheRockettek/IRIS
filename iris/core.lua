@@ -394,7 +394,9 @@ local function NewIRIS(logger)
         utils.expectTable("_scanInventory", "waitgroup", wg, "waitgroup:waitgroup")
 
         local inventorySize
-        if inventoryName == this.turtle.getNameLocal() then
+        local turtleNameLocal = this.turtle.getNameLocal()
+
+        if inventoryName == turtleNameLocal then
             inventorySize = this.turtle.size()
         else
             inventorySize = peripheral.call(inventoryName, "size")
@@ -405,7 +407,12 @@ local function NewIRIS(logger)
 
             for slotNumber = 1, inventorySize, 1 do
                 wg.Add(function()
-                    local item = peripheral.call(inventoryName, "getItemDetail", slotNumber)
+                    local item
+                    if inventoryName == turtleNameLocal then
+                        item = this.turtle.getItemDetail(slotNumber)
+                    else
+                        item = peripheral.call(inventoryName, "getItemDetail", slotNumber)
+                    end
                     if item then
                         this._setInventoryItem(inventoryName, slotNumber, InventoryItem(inventoryName, slotNumber, item))
                     else
