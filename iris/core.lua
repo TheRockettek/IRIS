@@ -343,10 +343,15 @@ local function NewIRIS(logger)
         local inventoryNames = {}
         local peripherals = peripheral.getNames()
 
+        local sides = redstone.getSides()
+        local flatpak = utils.flattenValuesForSearch(sides)
+
         for _, peripheralName in pairs(peripherals) do
-            local _, peripheralType = peripheral.getType(peripheralName)
-            if peripheralType == "inventory" then
-                table.insert(inventoryNames, peripheralName)
+            if not flatpak.find(peripheralName) then
+                local _, peripheralType = peripheral.getType(peripheralName)
+                if peripheralType == "inventory" then
+                    table.insert(inventoryNames, peripheralName)
+                end
             end
         end
 
