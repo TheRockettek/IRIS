@@ -44,12 +44,11 @@ local function NewIRIS(logger)
 
     this._formatIgnoreList = function(ignoreList)
         if type(ignoreList) == "table" then
-            table.insert(ignoreList, this.turtle.getNameLocal())
             return ignoreList
         elseif type(ignoreList) == "string" then
-            return { ignoreList, this.turtle.getNameLocal() }
+            return { ignoreList }
         elseif type(ignoreList) == "nil" then
-            return { this.turtle.getNameLocal() }
+            return {}
         else
             error(("Unexpected type for ignoreList. (expected string, table or nil, got %s)"):format(type(ignoreList)))
         end
