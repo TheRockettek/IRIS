@@ -227,8 +227,8 @@ local function NewLogger(timeFormat, fileName)
             local results = { ... }
             local msg = this.newMessage("trace").Str("_name", name)
             if results then
-                for i = 1, #args, 2 do
-                    msg = msg.Str(args[i], args[i + 1])
+                for i = 1, #results, 2 do
+                    msg = msg.Str(results[i], results[i + 1])
                 end
             end
             msg.Dur(functionStart.start).Send()
