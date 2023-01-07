@@ -288,7 +288,7 @@ createBinaryTestCase("FindSpot", function()
     utils.expect("FindItem", "candidates", candidates, "table")
     utils.expectNotValue("FindItem", "candidates", candidates, {})
 
-    utils.expect("FindEmptySpace", "spaceMissing", willOverflow, "number")
+    utils.expect("FindEmptySpace", "spaceMissing", willOverflow, "boolean")
     if not isTestItemFull then -- If the test item is full, we do not know if space is missing.
         utils.expectValue("FindEmptySpace", "spaceMissing", willOverflow, false)
     end
@@ -311,7 +311,7 @@ createBinaryTestCase("FindTooManySpot", function()
     utils.expect("FindItem", "candidates", candidates, "table")
     utils.expectNotValue("FindItem", "candidates", candidates, {})
 
-    utils.expect("FindEmptySpace", "spaceMissing", willOverflow, "number")
+    utils.expect("FindEmptySpace", "spaceMissing", willOverflow, "boolean")
     utils.expectValue("FindEmptySpace", "spaceMissing", willOverflow, true)
 
     utils.expect("FindEmptySpace", "emptySpaces", emptySpaces, "table")
