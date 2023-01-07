@@ -23,7 +23,6 @@ end
 
 local function expectTable(functionName, inputName, value, expectedType)
     expect(functionName, "value", value, "table")
-    expect(functionName, "value._type", value._type, "string")
     if value._type ~= expectedType then
         error(("%s: bad argument %s (expected %s, got %s)"):format(functionName, inputName, expectedType, value._type))
     end
