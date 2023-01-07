@@ -208,11 +208,11 @@ local function NewIRIS(logger)
     end
 
     this._registerInventory = function(inventoryName, inventorySize)
-        local func = this.logger.FunctionStart("_setInventoryItem", "inventoryName", inventoryName, "inventorySize",
+        local func = this.logger.FunctionStart("_registerInventory", "inventoryName", inventoryName, "inventorySize",
             inventorySize)
 
-        utils.expect("_setInventoryItem", "inventoryName", inventoryName, "string")
-        utils.expect("_setInventoryItem", "inventorySize", inventorySize, "number")
+        utils.expect("_registerInventory", "inventoryName", inventoryName, "string")
+        utils.expect("_registerInventory", "inventorySize", inventorySize, "number")
 
         local irisInventory = this.inventories[inventoryName]
         if not irisInventory then
