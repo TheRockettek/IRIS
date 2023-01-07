@@ -56,7 +56,7 @@ end
 
 local function NewLogger(timeFormat, fileName)
     local this = {
-        _type = "logger:logger_message",
+        _type = "logger:logger",
 
         startEpoch = os.epoch("utc"),
         timeFormat = timeFormat or defaultTimeStamp,
@@ -204,8 +204,8 @@ local function NewLogger(timeFormat, fileName)
             local results = { ... }
             functionStart.step = functionStart.step + 1
             local now = os.epoch("utc")
-            local msg = this.newMessage("trace").Str("_name", name).
-                Str("_step", functionStart.Step).Str("_stepName",stepName)
+            local msg = this.newMessage("trace").Str("_name", name).Str("_step", functionStart.Step).Str("_stepName",
+                stepName)
             if results then
                 for i = 1, #args, 2 do
                     msg = msg.Str(args[i], args[i + 1])
