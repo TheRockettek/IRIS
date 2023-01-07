@@ -7,3 +7,5 @@ logger.setLevel("trace")
 local iris = core.NewIRIS(logger)
 
 iris.start()
+
+-- logging = require "libs.logging"; core = require "core"; logger = logging.NewLogger("-", "iris.log"); logger.setLevel("trace"); iris = core.NewIRIS(logger); iris.start()
