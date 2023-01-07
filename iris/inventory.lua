@@ -94,6 +94,7 @@ function Inventory(peripheralName, slotCount)
                 end
             else
                 this.emptySlots[tostring(slot)] = nil
+                print(this.itemSummary[inventoryItemHash])
                 this.itemSummary[inventoryItemHash] = (this.itemSummary[inventoryItemHash] or inventoryItem).count +
                     inventoryItem.count
 
