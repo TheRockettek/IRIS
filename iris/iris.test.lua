@@ -191,7 +191,7 @@ createBinaryTestCase("ValidateInventories", function()
         end
 
         local emptySlots = inventoryData._slotCount - usedSlots
-        maxItemCount = maxItemCount + inventoryData._defaultInventorySlotSize
+        maxItemCount = maxItemCount + (emptySlots * inventoryData._defaultInventorySlotSize)
 
         utils.expect("ValidateInventories", "usedSlotCount", inventoryData.usedSlotCount, "number")
         utils.expectValue("ValidateInventories", "usedSlotCount", inventoryData.usedSlotCount, usedSlots)
