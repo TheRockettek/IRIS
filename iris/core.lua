@@ -187,13 +187,17 @@ local function NewIRIS(logger)
 
         utils.expect("_setInventoryItem", "inventoryName", inventoryName, "string")
         utils.expect("_setInventoryItem", "slot", slot, "number")
-        utils.expectTable("_setInventoryItem", "inventoryItem", inventoryItem, "iris:inventory_item")
+        if inventoryItem then
+            utils.expectTable("_setInventoryItem", "inventoryItem", inventoryItem, "iris:inventory_item")
+        end
 
         local irisInventory = this.inventories[inventoryName]
         assert(irisInventory)
 
         irisInventory.SetInventoryItem(slot, inventoryItem)
-        this._setInventoryItemMaster(inventoryName, slot, inventoryItem)
+        if inventoryItem then
+            this._setInventoryItemMaster(inventoryName, slot, inventoryItem)
+        end
 
         func.FunctionEnd()
     end
@@ -344,11 +348,8 @@ local function NewIRIS(logger)
                 wg.Add(function()
                     local item = peripheral.call(inventoryName, "getItemDetail", slotNumber)
                     if item then
-                        local inventoryItem = InventoryItem(inventoryName, slotNumber, item)
-                        this.inventories[inventoryName].SetInventoryItem(slotNumber, inventoryItem)
-                        this._setInventoryItem(inventoryName, slotNumber, inventoryItem)
+                        this._setInventoryItem(inventoryName, slotNumber, InventoryItem(inventoryName, slotNumber, item))
                     else
-                        this.inventories[inventoryName].SetInventoryItem(slotNumber, nil)
                         this._setInventoryItem(inventoryName, slotNumber, nil)
                     end
                 end)
