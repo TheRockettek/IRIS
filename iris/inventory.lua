@@ -103,6 +103,7 @@ function Inventory(peripheralName, slotCount)
 
                 this.usedSlotCount = this.usedSlotCount + 1
                 this.emptySlotCount = this.emptySlotCount - 1
+                this.totalItemCount = this.totalItemCount + inventoryItem.count
                 this.itemMaxCount = this.itemMaxCount - this._defaultInventorySlotSize + inventoryItem.maxCount
             end
 
