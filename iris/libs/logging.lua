@@ -190,7 +190,7 @@ local function NewLogger(timeFormat, fileName)
             if object == nil then
                 return loggerMessage.Str(name, "nil")
             end
-            return loggerMessage.Str(name, textutils.serialize(object, { compact = false, allow_repetitions = true }))
+            return loggerMessage.Str(name, serialize(object))
         end
 
         return loggerMessage
@@ -216,14 +216,13 @@ local function NewLogger(timeFormat, fileName)
             if results then
                 for i = 1, #args, 2 do
                     if type(args[i + 1]) == "table" then
-                        args[i + 1] = textutils.serialize(args[i + 1], { compact = false, allow_repetitions = true })
+                        args[i + 1] = serialize(args[i + 1])
                     end
                     msg = msg.Str(args[i], args[i + 1])
                 end
                 for i = 1, #results, 2 do
                     if type(results[i + 1]) == "table" then
-                        results[i + 1] = textutils.serialize(results[i + 1],
-                            { compact = false, allow_repetitions = true })
+                        results[i + 1] = serialize(results[i + 1])
                     end
                     msg = msg.Str(results[i], results[i + 1])
                 end
@@ -239,14 +238,13 @@ local function NewLogger(timeFormat, fileName)
             if results then
                 for i = 1, #args, 2 do
                     if type(args[i + 1]) == "table" then
-                        args[i + 1] = textutils.serialize(args[i + 1], { compact = false, allow_repetitions = true })
+                        args[i + 1] = serialize(args[i + 1])
                     end
                     msg = msg.Str(args[i], args[i + 1])
                 end
                 for i = 1, #results, 2 do
                     if type(results[i + 1]) == "table" then
-                        results[i + 1] = textutils.serialize(results[i + 1],
-                            { compact = false, allow_repetitions = true })
+                        results[i + 1] = serialize(results[i + 1])
                     end
                     msg = msg.Str(results[i], results[i + 1])
                 end
@@ -258,7 +256,7 @@ local function NewLogger(timeFormat, fileName)
         if args then
             for i = 1, #args, 2 do
                 if type(args[i + 1]) == "table" then
-                    args[i + 1] = textutils.serialize(args[i + 1], { compact = false, allow_repetitions = true })
+                    args[i + 1] = serialize(args[i + 1])
                 end
                 msg = msg.Str(args[i], args[i + 1])
             end
@@ -269,6 +267,102 @@ local function NewLogger(timeFormat, fileName)
     end
 
     return this
+end
+
+local g_tLuaKeywords = {
+    ["and"] = true,
+    ["break"] = true,
+    ["do"] = true,
+    ["else"] = true,
+    ["elseif"] = true,
+    ["end"] = true,
+    ["false"] = true,
+    ["for"] = true,
+    ["function"] = true,
+    ["if"] = true,
+    ["in"] = true,
+    ["local"] = true,
+    ["nil"] = true,
+    ["not"] = true,
+    ["or"] = true,
+    ["repeat"] = true,
+    ["return"] = true,
+    ["then"] = true,
+    ["true"] = true,
+    ["until"] = true,
+    ["while"] = true,
+}
+
+local serialize_infinity = math.huge
+
+local function serialize_impl(t, tracking, indent)
+    local sType = type(t)
+    if sType == "table" then
+        if tracking[t] ~= nil then
+            if tracking[t] == false then
+                error("Cannot serialize table with repeated entries", 0)
+            else
+                error("Cannot serialize table with recursive entries", 0)
+            end
+        end
+        tracking[t] = true
+
+        local result
+        if next(t) == nil then
+            -- Empty tables are simple
+            result = "{}"
+        else
+            -- Other tables take more work
+            local open, sub_indent, open_key, close_key, equal, comma = "{", "", "[", "]=", "=", ","
+
+            result = open
+            local seen_keys = {}
+            for k, v in ipairs(t) do
+                seen_keys[k] = true
+                result = result .. sub_indent .. serialize_impl(v, tracking, sub_indent) .. comma
+            end
+            for k, v in pairs(t) do
+                if not seen_keys[k] then
+                    local sEntry
+                    if type(k) == "string" and not g_tLuaKeywords[k] and string.match(k, "^[%a_][%a%d_]*$") then
+                        sEntry = k .. equal .. serialize_impl(v, tracking, sub_indent) .. comma
+                    else
+                        sEntry = open_key ..
+                            serialize_impl(k, tracking, sub_indent) ..
+                            close_key .. serialize_impl(v, tracking, sub_indent) .. comma
+                    end
+                    result = result .. sub_indent .. sEntry
+                end
+            end
+            result = result .. indent .. "}"
+        end
+
+        tracking[t] = nil
+        return result
+
+    elseif sType == "string" then
+        return string.format("%q", t)
+
+    elseif sType == "number" then
+        if t ~= t then --nan
+            return "0/0"
+        elseif t == serialize_infinity then
+            return "1/0"
+        elseif t == -serialize_infinity then
+            return "-1/0"
+        else
+            return tostring(t)
+        end
+
+    elseif sType == "boolean" or sType == "nil" then
+        return tostring(t)
+    end
+end
+
+function serialize(object)
+    local tTracking = {}
+
+    return serialize_impl(object, tTracking, "")
 end
 
 return {
