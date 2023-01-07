@@ -231,7 +231,8 @@ createBinaryTestCase("ValidateInventories", function()
     return true
 end)
 
-local testItemHash, _ = getfirstItem(iris.items)
+local testItemHash, testItem = getfirstItem(iris.items)
+local isTestItemFull = testItem.count == testItem.maxCount
 
 local testItem = createBinaryTestCase("FindItem", function()
     local candidates, itemsRemaining = iris.findItem(testItemHash, 1, nil)
@@ -281,12 +282,64 @@ createBinaryTestCase("FindTooMuchEmptySpace", function()
     return spaceMissing
 end)
 
--- Try find spot with 1 item
--- expect candidates or (emptyspace with willoverflow)
--- Try find spot with excluded candidate
--- expect different result
--- Try find too many spots
--- candidates, expect willoverflow, emptyspaces and missingspaces
+createBinaryTestCase("FindSpot", function()
+    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1, testItem.maxCount, nil)
+
+    utils.expect("FindItem", "candidates", candidates, "table")
+    utils.expectNotValue("FindItem", "candidates", candidates, {})
+
+    utils.expect("FindEmptySpace", "spaceMissing", willOverflow, "number")
+    if not isTestItemFull then -- If the test item is full, we do not know if space is missing.
+        utils.expectValue("FindEmptySpace", "spaceMissing", willOverflow, false)
+    end
+
+    utils.expect("FindEmptySpace", "emptySpaces", emptySpaces, "table")
+    if isTestItemFull then
+        utils.expectNotValue("FindItem", "emptySpaces", emptySpaces, {})
+    else
+        utils.expectValue("FindItem", "emptySpaces", emptySpaces, {})
+    end
+
+    utils.expect("FindEmptySpace", "missingSpaces", missingSpaces, "number")
+    utils.expectValue("FindItem", "missingSpaces", missingSpaces, 0)
+end)
+
+createBinaryTestCase("FindTooManySpot", function()
+    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1000000, testItem.maxCount,
+        nil)
+
+    utils.expect("FindItem", "candidates", candidates, "table")
+    utils.expectNotValue("FindItem", "candidates", candidates, {})
+
+    utils.expect("FindEmptySpace", "spaceMissing", willOverflow, "number")
+    utils.expectValue("FindEmptySpace", "spaceMissing", willOverflow, true)
+
+    utils.expect("FindEmptySpace", "emptySpaces", emptySpaces, "table")
+    utils.expectNotValue("FindItem", "emptySpaces", emptySpaces, {})
+
+    utils.expect("FindEmptySpace", "missingSpaces", missingSpaces, "number")
+    utils.expectNotValue("FindItem", "missingSpaces", missingSpaces, 0)
+end)
+
+createBinaryTestCase("MoveItemToTurtle", function()
+    local itemCount = testItem.count - 1
+    local itemsTransferred = iris.push(testItem._inventoryName, testItem._slot, iris.turtle._type, 1, itemCount)
+
+    local currentSummary = utils.deepcopy(iris.itemSummary[testItemHash])
+
+    utils.expect("MoveItemToTurtle", "itemsTransferred", itemsTransferred, "number")
+    utils.expectValue("MoveItemToTurtle", "itemsTransferred", itemsTransferred, itemsTransferred)
+
+    local newItem = iris.inventories[testItem._inventoryName].slots[tostring(testItem._slot)]
+    assert(newItem)
+
+    utils.expectValue("MoveItemToTurtle", "newItemCount", newItem.count, itemCount)
+
+    local newSummary = iris.itemSummary[testItemHash]
+
+    utils.expectNotValue("MoveItemtoTurtle", "summaryCount", newSummary.count, currentSummary.count)
+    utils.expectNotValue("MoveItemtoTurtle", "summaryCount", newSummary.count, currentSummary.count - itemsTransferred)
+end)
 
 -- Try push 1 item from inventory to turtle
 -- inventories slot has decreased by one
