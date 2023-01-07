@@ -180,6 +180,8 @@ local function NewIRIS(logger)
             itemsTransferred = peripheral.call(fromInventory, "pushItems", toInventory, fromSlot, count, toSlot)
         end
 
+        assert(type(itemsTransferred) == "number")
+
         inventoryItem.count = inventoryItem.count - itemsTransferred
 
         local resultInventoryItem

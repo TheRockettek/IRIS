@@ -332,7 +332,7 @@ createBinaryTestCase("MoveItemToTurtle", function()
     local currentSummary = utils.deepcopy(iris.itemSummary[testItemHash])
 
     utils.expect("MoveItemToTurtle", "itemsTransferred", itemsTransferred, "number")
-    utils.expectValue("MoveItemToTurtle", "itemsTransferred", itemsTransferred, itemsTransferred)
+    utils.expectValue("MoveItemToTurtle", "itemsTransferred", itemsTransferred, itemCount)
 
     local newItem = iris.inventories[testItem._inventoryName].slots[tostring(testItem._slot)]
     assert(newItem)
