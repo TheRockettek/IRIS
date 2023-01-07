@@ -227,7 +227,10 @@ local function NewIRIS(logger)
                 irisItems[inventoryItemHash] = nil
 
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = true
-                this.itemSummary[itemHash] = (this.itemSummary[itemHash] or inventoryItem).count - currentSlot.count
+
+                local itemSummary = this.itemSummary[itemHash] or inventoryItem
+                itemSummary = itemSummary.count - currentSlot.count
+                this.itemSummary[itemHash] = itemSummary
 
                 this.usedSlotCount = this.usedSlotCount - 1
                 this.emptySlotCount = this.emptySlotCount + 1
@@ -248,7 +251,10 @@ local function NewIRIS(logger)
                 if countChange ~= 0 then
                     irisItems[inventoryItemHash] = inventoryItem
 
-                    this.itemSummary[itemHash] = (this.itemSummary[itemHash] or inventoryItem).count + countChange
+                    local itemSummary = this.itemSummary[itemHash] or inventoryItem
+                    itemSummary = itemSummary.count + countChange
+                    this.itemSummary[itemHash] = itemSummary
+
                     this.totalItemCount = this.totalItemCount + countChange
                 else
                     this.logger.Warn().Str("inventoryName", inventoryName).Str("slot", slot).Json("inventoryItem",
@@ -257,8 +263,11 @@ local function NewIRIS(logger)
             else
                 irisItems[inventoryItemHash] = inventoryItem
 
-                this.itemSummary[itemHash] = (this.itemSummary[itemHash] or inventoryItem).count + inventoryItem.count
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = nil
+
+                local itemSummary = this.itemSummary[itemHash] or inventoryItem
+                itemSummary = itemSummary.count + inventoryItem.count
+                this.itemSummary[itemHash] = itemSummary
 
                 this.usedSlotCount = this.usedSlotCount + 1
                 this.emptySlotCount = this.emptySlotCount - 1
