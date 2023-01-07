@@ -235,7 +235,7 @@ local testItemHash, testItem = getfirstItem(iris.items)
 local isTestItemFull = testItem.count == testItem.maxCount
 
 local testItem = createBinaryTestCase("FindItem", function()
-    local candidates, itemsRemaining = iris.findItem(testItemHash, 1, nil)
+    local candidates, itemsRemaining = iris.findItem(testItemHash, 1, { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")
     utils.expectNotValue("FindItem", "candidates", candidates, {})
@@ -247,7 +247,7 @@ local testItem = createBinaryTestCase("FindItem", function()
 end)
 
 createBinaryTestCase("FindTooManyItems", function()
-    local candidates, itemsRemaining = iris.findItem(testItemHash, 1000000, nil)
+    local candidates, itemsRemaining = iris.findItem(testItemHash, 1000000, { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")
     utils.expectNotValue("FindItem", "candidates", candidates, {})
@@ -259,7 +259,7 @@ createBinaryTestCase("FindTooManyItems", function()
 end)
 
 createBinaryTestCase("FindEmptySpace", function()
-    local candidates, spaceMissing = iris.findEmptySpace(1, nil)
+    local candidates, spaceMissing = iris.findEmptySpace(1, { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")
     utils.expectNotValue("FindItem", "candidates", candidates, {})
@@ -271,7 +271,7 @@ createBinaryTestCase("FindEmptySpace", function()
 end)
 
 createBinaryTestCase("FindTooMuchEmptySpace", function()
-    local candidates, spaceMissing = iris.findEmptySpace(1000000, nil)
+    local candidates, spaceMissing = iris.findEmptySpace(1000000, { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")
     utils.expectNotValue("FindItem", "candidates", candidates, {})
@@ -283,7 +283,8 @@ createBinaryTestCase("FindTooMuchEmptySpace", function()
 end)
 
 createBinaryTestCase("FindSpot", function()
-    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1, testItem.maxCount, nil)
+    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1, testItem.maxCount,
+        { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")
     utils.expectNotValue("FindItem", "candidates", candidates, {})
@@ -308,7 +309,7 @@ end)
 
 createBinaryTestCase("FindTooManySpot", function()
     local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1000000, testItem.maxCount,
-        nil)
+        { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")
     utils.expectNotValue("FindItem", "candidates", candidates, {})
