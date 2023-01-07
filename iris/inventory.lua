@@ -34,7 +34,6 @@ function Inventory(slotCount)
         end
 
         local currentSlot = this.slots[tostring(slot)]
-        local inventoryItemHash = inventoryItem.hash()
         if inventoryItem == nil or inventoryItem.count == 0 then
             if currentSlot ~= nil then
                 local currentSlotHash = currentSlot.hash()
@@ -58,6 +57,7 @@ function Inventory(slotCount)
 
             this.slots[tostring(slot)] = nil
         else
+            local inventoryItemHash = inventoryItem.hash()
             if currentSlot ~= nil then
                 assert(currentSlot.equals(inventoryItem),
                     ("Unexpected slot item. Current item in slot %d is %s, expected %s"):format(slot, currentSlot.hash()
