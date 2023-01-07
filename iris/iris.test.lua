@@ -14,7 +14,7 @@ local function createBinaryTestCase(name, func, ...)
 
     assert(success, ("FAIL: %s: %s"):format(name, result))
     assert(result, ("FAIL: %s"):format(name))
-    print(("PASS: %s"):format(name))
+    print(("PASS: %s: %s"):format(name, result))
 
     return result
 end
@@ -47,9 +47,17 @@ local function createTestCase(name, expected, func, ...)
                 textutils.serialize(results, { compact = false })))
     end
 
-    print(("PASS: %s"):format(name))
+    print(("PASS: %s\n%s"):format(name, textutils.serialize(results, { compact = false })))
 
     return table.unpack(results)
+end
+
+local getfirstItem = function(table)
+    for i, k in pairs(table) do
+        return i, k
+    end
+
+    error("table is empty")
 end
 
 local inventoryName = "iris:test_inventory"
@@ -212,15 +220,55 @@ createBinaryTestCase("ValidateInventories", function()
     return true
 end)
 
--- Try scan all inventories
--- inventories has valid items for every record (slot, peripheral, name, count, maxcount)
--- items matches inventories table
--- empty slots matches all empty slots in inventories
--- item summary matches inventories table
--- used slot count matches inventories table
--- empty slot count matches inventories table
--- total item count matches inventories table
--- item max count matches inventories table
+local testItemHash, _ = getfirstItem(iris.items)
+
+local testItem = createBinaryTestCase("FindItem", function()
+    local candidates, itemsRemaining = iris.findItem(testItemHash, 1, nil)
+
+    utils.expect("FindItem", "candidates", candidates, "table")
+    utils.expectNotValue("FindItem", "candidates", candidates, {})
+
+    utils.expect("FindItem", "itemsRemaining", itemsRemaining, "number")
+    utils.expectValue("FindItem", "itemsRemaining", itemsRemaining, 0)
+
+    return candidates[1]
+end)
+
+createBinaryTestCase("FindTooManyItems", function()
+    local candidates, itemsRemaining = iris.findItem(testItemHash, 1000000, nil)
+
+    utils.expect("FindItem", "candidates", candidates, "table")
+    utils.expectNotValue("FindItem", "candidates", candidates, {})
+
+    utils.expect("FindItem", "itemsRemaining", itemsRemaining, "number")
+    utils.expectNotValue("FindItem", "itemsRemaining", itemsRemaining, 0)
+
+    return itemsRemaining
+end)
+
+createBinaryTestCase("FindEmptySpace", function()
+    local candidates, spaceMissing = iris.findEmptySpace(1, nil)
+
+    utils.expect("FindItem", "candidates", candidates, "table")
+    utils.expectNotValue("FindItem", "candidates", candidates, {})
+
+    utils.expect("FindEmptySpace", "spaceMissing", spaceMissing, "number")
+    utils.expectValue("FindEmptySpace", "spaceMissing", spaceMissing, 0)
+
+    return spaceMissing == 0
+end)
+
+createBinaryTestCase("FindTooMuchEmptySpace", function()
+    local candidates, spaceMissing = iris.findEmptySpace(1000000, nil)
+
+    utils.expect("FindItem", "candidates", candidates, "table")
+    utils.expectNotValue("FindItem", "candidates", candidates, {})
+
+    utils.expect("FindEmptySpace", "spaceMissing", spaceMissing, "number")
+    utils.expectNotValue("FindEmptySpace", "spaceMissing", spaceMissing, 0)
+
+    return spaceMissing
+end)
 
 -- Try find spot with 1 item
 -- expect candidates or (emptyspace with willoverflow)

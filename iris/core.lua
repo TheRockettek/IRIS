@@ -42,6 +42,33 @@ local function NewIRIS(logger)
         return inventoryCount
     end
 
+    this.findItem = function(inventoryItemHash, count, ignoreList)
+        local func = this.logger.FunctionStart("findItem", "inventoryItemHash", inventoryItemHash, "count", count,
+            "ignoreList", ignoreList)
+
+        local flatPack = utils.flattenValuesForSearch(ignoreList)
+        local itemsRemaining = count
+
+        local candidates = {}
+
+        local items = this.items[inventoryItemHash]
+        if items then
+            for _, inventoryItem in pairs(items) do
+                if not flatPack.find(inventoryItem._inventoryName) then
+                    table.insert(candidates, inventoryItem)
+                    itemsRemaining = itemsRemaining - inventoryItem.count
+                    if itemsRemaining <= 0 then
+                        break
+                    end
+                end
+            end
+        end
+
+        func.FunctionEnd("candidates", candidates, "missingItems", itemsRemaining)
+
+        return candidates, itemsRemaining
+    end
+
     this.findSpot = function(inventoryItemHash, count, maxCount, ignoreList)
         local func = this.logger.FunctionStart("findSpot", "inventoryItemHash", inventoryItemHash, "count", count,
             "maxCount", maxCount, "ignoreList", ignoreList)
@@ -59,7 +86,7 @@ local function NewIRIS(logger)
             for _, inventoryItem in pairs(items) do
                 if not flatPack.find(inventoryItem._inventoryName) then
                     table.insert(candidates, inventoryItem)
-                    itemsRemaining = itemsRemaining - inventoryItem.count
+                    itemsRemaining = itemsRemaining - (inventoryItem.maxCount - inventoryItem.count)
                     if itemsRemaining <= 0 then
                         break
                     end
@@ -84,12 +111,7 @@ local function NewIRIS(logger)
         func.FunctionEnd("candidates", candidates, "willOverflow", willOverflow, "emptySpaces", emptySpaces,
             "missingSpaces", missingSpaces)
 
-        return {
-            candidates = candidates,
-            willOverflow = willOverflow,
-            emptySpaces = emptySpaces,
-            missingSpaces = missingSpaces
-        }
+        return candidates, willOverflow, emptySpaces, missingSpaces
     end
 
     this.findEmptySpace = function(maxSpacesNeeded, ignoreList)
@@ -163,9 +185,9 @@ local function NewIRIS(logger)
         local func = this.logger.FunctionStart("_setInventoryItem", "inventoryName", inventoryName, "slot", slot,
             "inventoryItem", inventoryItem)
 
-        utils.expect("_addInventoryItem", "inventoryName", inventoryName, "string")
-        utils.expect("_addInventoryItem", "slot", slot, "number")
-        utils.expectTable("_addInventoryItem", "inventoryItem", inventoryItem, "iris:inventory_item")
+        utils.expect("_setInventoryItem", "inventoryName", inventoryName, "string")
+        utils.expect("_setInventoryItem", "slot", slot, "number")
+        utils.expectTable("_setInventoryItem", "inventoryItem", inventoryItem, "iris:inventory_item")
 
         local irisInventory = this.inventories[inventoryName]
         assert(irisInventory)
@@ -180,6 +202,8 @@ local function NewIRIS(logger)
         local func = this.logger.FunctionStart("_setInventoryItemMaster", "inventoryName", inventoryName, "slot", slot,
             "inventoryItem", inventoryItem)
 
+        utils.expect("_setInventoryItemMaster", "inventoryName", inventoryName, "string")
+        utils.expect("_setInventoryItemMaster", "slot", slot, "number")
         utils.expectTable("_setInventoryItemMaster", "inventoryItem", inventoryItem, "iris:inventory_item")
 
         local irisInventory = this.inventories[inventoryName]
