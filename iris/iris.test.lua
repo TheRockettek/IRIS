@@ -35,13 +35,15 @@ local function createTestCase(name, expected, func, ...)
 
     for i, k in pairs(expected) do
         assert(k == results[i],
-            ("FAIL: %s:\nExpected:\n%s\n\nGot:\n%s"):format(name, textutils.serialize(expected, { compact = false, allow_repetitions = true }),
+            ("FAIL: %s:\nExpected:\n%s\n\nGot:\n%s"):format(name,
+                textutils.serialize(expected, { compact = false, allow_repetitions = true }),
                 textutils.serialize(results, { compact = false, allow_repetitions = true })))
     end
 
     for i, k in pairs(results) do
         assert(k == expected[i],
-            ("FAIL: %s:\nExpected:\n%s\n\nGot:\n%s"):format(name, textutils.serialize(expected, { compact = false, allow_repetitions = true }),
+            ("FAIL: %s:\nExpected:\n%s\n\nGot:\n%s"):format(name,
+                textutils.serialize(expected, { compact = false, allow_repetitions = true }),
                 textutils.serialize(results, { compact = false })))
     end
 
@@ -164,7 +166,7 @@ createBinaryTestCase("ValidateInventories", function()
     for _, inventoryData in pairs(iris.inventories) do
         utils.expectTable("ValidateInventories", "inventoryData", inventoryData, "iris:inventory")
 
-        iris.logger.Debug().Json("inventoryData", inventoryData.Table()).Send()
+        iris.logger.Debug().Object("inventoryData", inventoryData.Table()).Send()
 
         utils.expect("ValidateInventories", "_defaultInventorySlotSize", inventoryData._defaultInventorySlotSize,
             "number")

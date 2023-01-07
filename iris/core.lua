@@ -237,7 +237,7 @@ local function NewIRIS(logger)
                 this.totalItemCount = this.totalItemCount - currentSlot.count
                 this.itemMaxCount = this.itemMaxCount + inventory.DefaultInventoryStackSize
             else
-                this.logger.Warn().Str("inventoryName", inventoryName).Str("slot", slot).Json("inventoryItem",
+                this.logger.Warn().Str("inventoryName", inventoryName).Str("slot", slot).Object("inventoryItem",
                     inventoryItem.Table()).Msg("Attempt to set an empty item which is not already in IRIS")
             end
         else
@@ -257,8 +257,8 @@ local function NewIRIS(logger)
 
                     this.totalItemCount = this.totalItemCount + countChange
                 else
-                    this.logger.Warn().Str("inventoryName", inventoryName).Str("slot", slot).Json("inventoryItem",
-                        inventoryItem.Table()).Json("currentSlot", currentSlot.Table()).Msg("Attempt to set an item which is already stored")
+                    this.logger.Warn().Str("inventoryName", inventoryName).Str("slot", slot).Object("inventoryItem",
+                        inventoryItem.Table()).Object("currentSlot", currentSlot.Table()).Msg("Attempt to set an item which is already stored")
                 end
             else
                 irisItems[inventoryItemHash] = inventoryItem
