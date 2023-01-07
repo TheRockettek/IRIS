@@ -409,7 +409,7 @@ local function NewIRIS(logger)
             this._registerInventory(inventoryName, inventorySize)
 
             for slotNumber = 1, inventorySize, 1 do
-                wg.Add(function()
+                -- wg.Add(function()
                     local item
                     if inventoryName == turtleNameLocal then
                         item = this.turtle.getItemDetail(slotNumber)
@@ -421,7 +421,7 @@ local function NewIRIS(logger)
                     else
                         this._setInventoryItem(inventoryName, slotNumber, nil)
                     end
-                end)
+                -- end)
             end
         end
 
