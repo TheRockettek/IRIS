@@ -1,7 +1,7 @@
-local waitgroup = require "iris.libs.waitgroup"
-local turtle = require "iris.turtle"
-local utils = require "iris.utils"
-local inventory = require "iris.inventory"
+local waitgroup = require "libs.waitgroup"
+local turtle = require "turtle"
+local utils = require "utils"
+local inventory = require "inventory"
 
 local VERSION = "0.0.0+next"
 
@@ -38,6 +38,8 @@ local function NewIRIS(logger)
         local inventoryCount = this._scanAllInventories()
 
         func.FunctionEnd("inventoryCount", inventoryCount)
+
+        return inventoryCount
     end
 
     this.findSpot = function(inventoryItemHash, count, maxCount, ignoreList)
@@ -204,7 +206,7 @@ local function NewIRIS(logger)
                 this.usedSlotCount = this.usedSlotCount - 1
                 this.emptySlotCount = this.emptySlotCount + 1
                 this.totalItemCount = this.totalItemCount - currentSlot.count
-                this.itemMaxCount = this.itemMaxCount + inventory.DefaultInventorySize
+                this.itemMaxCount = this.itemMaxCount + inventory.DefaultInventoryStackSize
             else
                 this.logger.Warn().Str("inventoryName", inventoryName).Str("slot", slot).Json("inventoryItem",
                     inventoryItem).Msg("Attempt to set an empty item which is not already in IRIS")
@@ -257,7 +259,7 @@ local function NewIRIS(logger)
                 this.usedSlotCount = this.usedSlotCount + 1
                 this.emptySlotCount = this.emptySlotCount - 1
                 this.totalItemCount = this.totalItemCount + inventoryItem.count
-                this.itemMaxCount = this.itemMaxCount - inventory.DefaultInventorySize + inventoryItem.maxCount
+                this.itemMaxCount = this.itemMaxCount - inventory.DefaultInventoryStackSize + inventoryItem.maxCount
             end
         end
 
@@ -312,7 +314,7 @@ local function NewIRIS(logger)
         local inventorySize = peripheral.call(inventoryName, "size")
         if inventorySize then
             if this.inventories[inventoryName] == nil then
-                this.inventories[inventoryName] = Inventory(inventorySize)
+                this.inventories[inventoryName] = Inventory(inventoryName, inventorySize)
             end
 
             for slotNumber = 1, inventorySize, 1 do

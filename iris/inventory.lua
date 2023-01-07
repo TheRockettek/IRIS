@@ -1,14 +1,15 @@
-local utils = require "iris.utils"
+local utils = require "utils"
 
-DefaultInventorySize = 64
+DefaultInventoryStackSize = 64
 
-function Inventory(slotCount)
+function Inventory(peripheralName, slotCount)
     utils.expect("Inventory.<init>", "slotCount", slotCount, "number")
 
     local this = {
         _type = "iris:inventory",
-        _defaultInventorySlotSize = DefaultInventorySize,
-        _peripheralName = nil,
+        _defaultInventorySlotSize = DefaultInventoryStackSize,
+        _peripheralName = peripheralName,
+        _slotCount = slotCount,
 
         slots = {},
         emptySlots = {},
@@ -19,6 +20,29 @@ function Inventory(slotCount)
         totalItemCount = 0,
         itemMaxCount = 0,
     }
+
+    this.Table = function()
+        local slotsTable = {}
+        for i, k in pairs(this.slots) do
+            slotsTable[i] = k.Table()
+        end
+
+        return {
+            _type = this._type,
+            _defaultInventorySlotSize = this._defaultInventorySlotSize,
+            _peripheralName = this._peripheralName,
+            _slotCount = this._slotCount,
+
+            slots = slotsTable,
+            emptySlots = this.emptySlots,
+            itemSummary = this.itemSummary,
+
+            usedSlotCount = this.usedSlotCount,
+            emptySlotCount = this.emptySlotCount,
+            totalItemCount = this.totalItemCount,
+            itemMaxCount = this.itemMaxCount
+        }
+    end
 
     this.emptySlotCount = slotCount
     this.itemMaxCount = slotCount * this._defaultInventorySlotSize
@@ -107,6 +131,21 @@ function InventoryItem(inventoryName, slot, item)
         tags = item.tags,
     }
 
+    this.Table = function()
+        return {
+            _type = this._type,
+            _inventoryName = this._inventoryName,
+            _slot = this._slot,
+
+            name = this.name,
+            count = this.count,
+            displayName = this.displayName,
+            maxCount = this.maxCount,
+            nbt = this.nbt,
+            tags = this.tags
+        }
+    end
+
     this.equals = function(inventoryItem)
         utils.expectTable("InventoryItem.Equals", "inventoryItem", inventoryItem, "iris:inventory_item")
 
@@ -149,5 +188,5 @@ return {
     InventorySlotToKey = InventorySlotToKey,
     KeyToInventorySlot = KeyToInventorySlot,
 
-    DefaultInventorySize = DefaultInventorySize
+    DefaultInventoryStackSize = DefaultInventoryStackSize
 }
