@@ -1,7 +1,6 @@
 local waitgroup = require "iris.libs.waitgroup"
 local turtle = require "iris.turtle"
 local utils = require "iris.utils"
-local scanner = require "iris.scanner"
 local inventory = require "iris.inventory"
 
 local VERSION = "0.0.0+next"
@@ -36,7 +35,7 @@ local function NewIRIS(logger)
     this.scanInventories = function()
         local func = this.logger.FunctionStart("scanInventories")
 
-        local inventoryCount = scanner.ScanAllInventories(this)
+        local inventoryCount = this._scanAllInventories()
 
         func.FunctionEnd("inventoryCount", inventoryCount)
     end
