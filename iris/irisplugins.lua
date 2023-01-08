@@ -9,16 +9,12 @@ function IRISPluginManager(iris)
         _type = "iris:plugin_manager",
 
         plugins = {},
-        blockingPlugins = {},
     }
 
     this.ListPlugins = function()
         local pluginNames = {}
 
         for i, plugin in pairs(this.plugins) do
-            pluginNames[i] = plugin.isLoaded
-        end
-        for i, plugin in pairs(this.blockingPlugins) do
             pluginNames[i] = plugin.isLoaded
         end
 
@@ -56,7 +52,8 @@ function IRISPluginManager(iris)
                 local existingPlugin = this.plugins[pluginName]
                 if existingPlugin then
                     if existingPlugin.isLoaded then
-                        iris.logger.Warn().Str("pluginNane", pluginName).Msg("A plugin with this name already is loaded")
+                        iris.logger.Warn().Str("pluginNane", pluginName)
+                            .Msg("A plugin with this name already is loaded")
                         return false
                     end
                 end
@@ -79,7 +76,8 @@ function IRISPluginManager(iris)
     this._secureCall = function(plugin, funcName, func)
         local success, result = pcall(func)
         if not success then
-            iris.logger.Warn().Str("plugin", plugin.pluginInfo.name).Err(result).Str("type", funcName).Msg("Plugin asserted error")
+            iris.logger.Warn().Str("plugin", plugin.pluginInfo.name).Err(result).Str("type", funcName).Msg(
+                "Plugin asserted error")
         end
     end
 
@@ -107,14 +105,18 @@ function IRISPluginManager(iris)
         local func = iris.logger.FunctionStart("OnIRISLoad")
 
         for _, plugin in pairs(this.plugins) do
-            if plugin.plugin.OnIRISLoad then
-                this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad)
+            if not plugin.isBlocking then
+                if plugin.plugin.OnIRISLoad then
+                    this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad)
+                end
             end
         end
 
-        for _, plugin in pairs(this.blockingPlugins) do
-            if plugin.plugin.OnIRISLoad then
-                this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad)
+        for _, plugin in pairs(this.plugins) do
+            if plugin.isBlocking then
+                if plugin.plugin.OnIRISLoad then
+                    this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad)
+                end
             end
         end
 
@@ -125,14 +127,18 @@ function IRISPluginManager(iris)
         local func = iris.logger.FunctionStart("OnIRISStart")
 
         for _, plugin in pairs(this.plugins) do
-            if plugin.plugin.OnIRISStart then
-                this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart)
+            if not plugin.isBlocking then
+                if plugin.plugin.OnIRISStart then
+                    this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart)
+                end
             end
         end
 
-        for _, plugin in pairs(this.blockingPlugins) do
-            if plugin.plugin.OnIRISStart then
-                this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart)
+        for _, plugin in pairs(this.plugins) do
+            if plugin.isBlocking then
+                if plugin.plugin.OnIRISStart then
+                    this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart)
+                end
             end
         end
 
@@ -148,7 +154,7 @@ function IRISPluginManager(iris)
             end
         end
 
-        for _, plugin in pairs(this.blockingPlugins) do
+        for _, plugin in pairs(this.plugins) do
             if plugin.plugin.OnIRISUnload then
                 this._secureCall(plugin, "OnIRISUnload", plugin.plugin.OnIRISUnload)
             end
@@ -168,9 +174,10 @@ function IRISPluginContainer(fileName)
         _module = nil,
         pluginInfo = nil,
         plugin = nil,
+        isBlocking = false,
 
         isLoaded = false,
-        error = nil,
+        error = nil
     }
 
     this._loadPlugin = function(filename)
@@ -191,6 +198,7 @@ function IRISPluginContainer(fileName)
 
         this._module = importResult
         this.pluginInfo = this._module.PluginInfo
+        this.isBlocking = this.pluginInfo.isBlocking or false
 
         local setupSuccess, setupResult = pcall(this._module.Setup, iris)
         this.plugin = setupResult

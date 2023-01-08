@@ -94,16 +94,12 @@ function GUIPluginManager(gui)
         _type = "iris_gui:plugin_manager",
 
         plugins = {},
-        blockingPlugins = {},
     }
 
     this.ListPlugins = function()
         local pluginNames = {}
 
         for i, plugin in pairs(this.plugins) do
-            pluginNames[i] = plugin.isLoaded
-        end
-        for i, plugin in pairs(this.blockingPlugins) do
             pluginNames[i] = plugin.isLoaded
         end
 
@@ -192,14 +188,18 @@ function GUIPluginManager(gui)
         local func = gui.logger.FunctionStart("OnGUILoad")
 
         for _, plugin in pairs(this.plugins) do
-            if plugin.plugin.OnGUILoad then
-                this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad)
+            if not plugin.isBlocking then
+                if plugin.plugin.OnGUILoad then
+                    this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad)
+                end
             end
         end
 
-        for _, plugin in pairs(this.blockingPlugins) do
-            if plugin.plugin.OnGUILoad then
-                this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad)
+        for _, plugin in pairs(this.plugins) do
+            if plugin.isBlocking then
+                if plugin.plugin.OnGUILoad then
+                    this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad)
+                end
             end
         end
 
@@ -210,14 +210,18 @@ function GUIPluginManager(gui)
         local func = gui.logger.FunctionStart("OnGUIStart")
 
         for _, plugin in pairs(this.plugins) do
-            if plugin.plugin.OnGUIStart then
-                this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart)
+            if not plugin.isBlocking then
+                if plugin.plugin.OnGUIStart then
+                    this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart)
+                end
             end
         end
 
-        for _, plugin in pairs(this.blockingPlugins) do
-            if plugin.plugin.OnGUIStart then
-                this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart)
+        for _, plugin in pairs(this.plugins) do
+            if plugin.isBlocking then
+                if plugin.plugin.OnGUIStart then
+                    this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart)
+                end
             end
         end
 
@@ -228,14 +232,18 @@ function GUIPluginManager(gui)
         local func = gui.logger.FunctionStart("OnGUIUnload")
 
         for _, plugin in pairs(this.plugins) do
-            if plugin.plugin.OnGUIUnload then
-                this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload)
+            if not plugin.isBlocking then
+                if plugin.plugin.OnGUIUnload then
+                    this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload)
+                end
             end
         end
 
-        for _, plugin in pairs(this.blockingPlugins) do
-            if plugin.plugin.OnGUIUnload then
-                this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload)
+        for _, plugin in pairs(this.plugins) do
+            if plugin.isBlocking then
+                if plugin.plugin.OnGUIUnload then
+                    this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload)
+                end
             end
         end
 
@@ -253,6 +261,7 @@ function GUIPluginContainer(fileName)
         _module = nil,
         pluginInfo = nil,
         plugin = nil,
+        isBlocking = false,
 
         isLoaded = false,
         error = nil,
@@ -276,6 +285,7 @@ function GUIPluginContainer(fileName)
 
         this._module = importResult
         this.pluginInfo = this._module.PluginInfo
+        this.isBlocking = this.pluginInfo.isBlocking or false
 
         local setupSuccess, setupResult = pcall(this._module.Setup, gui)
         this.plugin = setupResult
