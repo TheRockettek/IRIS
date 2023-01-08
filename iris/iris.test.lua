@@ -335,16 +335,13 @@ local turtleSlotId = 1
 
 createBinaryTestCase("MoveItemToTurtle", function()
     local currentSummary = utils.deepcopy(iris.itemSummary[testItemHash])
-    print(testItem.count)
     local itemsTransferred = iris.push(testItem._inventoryName, testItem._slot, iris.turtle._type, turtleSlotId,
         moveCount)
-    print(testItem.count)
 
     utils.expect("MoveItemToTurtle", "itemsTransferred", itemsTransferred, "number")
     utils.expectNotValue("MoveItemToTurtle", "itemsTransferred", itemsTransferred, 0)
 
     local newItem = iris.inventories[testItem._inventoryName].slots[tostring(testItem._slot)]
-    print(newItem.count)
 
     utils.expectTable("MoveItemToTurtle", "newItem", newItem, "iris:inventory_item")
     utils.expectValue("MoveItemToTurtle", "newItemCount", newItem.count, testItem.count - itemsTransferred)
@@ -357,22 +354,19 @@ end)
 
 createBinaryTestCase("MoveItemFromTurtle", function()
     local currentSummary = utils.deepcopy(iris.itemSummary[testItemHash])
-    print(testItem.count)
     local itemsTransferred = iris.push(iris.turtle._type, turtleSlotId, testItem._inventoryName, testItem._slot,
         moveCount)
-    print(testItem.count)
 
-    utils.expect("MoveItemToTurtle", "itemsTransferred", itemsTransferred, "number")
-    utils.expectNotValue("MoveItemToTurtle", "itemsTransferred", itemsTransferred, 0)
+    utils.expect("MoveItemFromTurtle", "itemsTransferred", itemsTransferred, "number")
+    utils.expectNotValue("MoveItemFromTurtle", "itemsTransferred", itemsTransferred, 0)
 
     local newItem = iris.inventories[testItem._inventoryName].slots[tostring(testItem._slot)]
-    print(newItem.count)
 
-    utils.expectTable("MoveItemToTurtle", "newItem", newItem, "iris:inventory_item")
-    utils.expectValue("MoveItemToTurtle", "newItemCount", newItem.count, testItem.count + itemsTransferred)
+    utils.expectTable("MoveItemFromTurtle", "newItem", newItem, "iris:inventory_item")
+    utils.expectValue("MoveItemFromTurtle", "newItemCount", newItem.count, testItem.count)
 
     local newSummary = iris.itemSummary[testItemHash]
-    utils.expectValue("MoveItemtoTurtle", "summaryCount", newSummary.count, currentSummary.count + itemsTransferred)
+    utils.expectValue("MoveItemFromTurtle", "summaryCount", newSummary.count, currentSummary.count + itemsTransferred)
 
     return itemsTransferred
 end)
