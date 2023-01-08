@@ -304,9 +304,9 @@ createBinaryTestCase("FindSpot", function()
 
     utils.expect("FindEmptySpace", "emptySpaces", emptySpaces, "table")
     if isTestItemFull then
-        utils.expectNotValue("FindItem", "emptySpaces", emptySpaces, {})
+        utils.expectNotValue("FindItem", "emptySpaces", #emptySpaces, 0)
     else
-        utils.expectValue("FindItem", "emptySpaces", emptySpaces, {})
+        utils.expectValue("FindItem", "emptySpaces", #emptySpaces, 0)
     end
 
     utils.expect("FindEmptySpace", "missingSpaces", missingSpaces, "number")
