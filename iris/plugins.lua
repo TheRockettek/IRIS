@@ -67,12 +67,12 @@ function PluginManager(iris)
             else
                 iris.logger.Warn().Str("localFileName", localFileName).Err(err).Msg("Failed to load plugin")
 
-                return true
+                return false
             end
         else
             iris.logger.Warn().Str("localFileName", localFileName).Msg("Could not locate plugin")
 
-            return true
+            return false
         end
     end
 
@@ -177,7 +177,7 @@ function PluginContainer(fileName)
         local importSuccess, importResult = pcall(require, this._fileName)
         if importSuccess then
             this.error = importResult
-            return false
+            return false, importResult
         end
 
         this._module = importResult
@@ -189,7 +189,7 @@ function PluginContainer(fileName)
 
         if not setupSuccess then
             this.error = setupResult
-            return false
+            return false, setupResult
         else
             local typeSuccess, typeError = pcall(utils.expect, "LoadPlugin", "PluginInfo", this.pluginInfo, "table")
             if typeSuccess then
@@ -199,13 +199,13 @@ function PluginContainer(fileName)
                         "string")
                     if typeSuccess then
                         this.error = nil
-                        return true
+                        return true, nil
                     end
                 end
             end
 
             this.error = typeError
-            return false
+            return false, typeError
         end
     end
 
