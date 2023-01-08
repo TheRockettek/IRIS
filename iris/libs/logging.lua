@@ -63,6 +63,7 @@ local function NewLogger(timeFormat, fileName)
         minimumLevel = -1,
         fileName = fileName, -- filename to log to. If not passed, will not log to file.
         silent = false, -- when enabled, will only log to file (if a filename is set)
+        variables = {},
     }
 
     if this.fileName ~= "" and this.fileName ~= nil then

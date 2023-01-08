@@ -182,6 +182,7 @@ function PluginContainer(fileName)
 
         this._module = importResult
         this.pluginInfo = this._module.PluginInfo
+
         local setupSuccess, setupResult = pcall(this._module.Setup, iris)
         this.plugin = setupResult
 
