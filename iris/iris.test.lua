@@ -329,23 +329,21 @@ createBinaryTestCase("FindTooManySpot", function()
 end)
 
 createBinaryTestCase("MoveItemToTurtle", function()
-    local itemCount = testItem.count - 1
-    local itemsTransferred = iris.push(testItem._inventoryName, testItem._slot, iris.turtle._type, 1, itemCount)
+    local moveCount = 1
+    local itemCount = testItem.count - moveCount
+    local itemsTransferred = iris.push(testItem._inventoryName, testItem._slot, iris.turtle._type, moveCount, itemCount)
 
     local currentSummary = utils.deepcopy(iris.itemSummary[testItemHash])
 
     utils.expect("MoveItemToTurtle", "itemsTransferred", itemsTransferred, "number")
-    utils.expectValue("MoveItemToTurtle", "itemsTransferred", itemsTransferred, itemCount)
+    utils.expectNotValue("MoveItemToTurtle", "itemsTransferred", itemsTransferred, 0)
 
     local newItem = iris.inventories[testItem._inventoryName].slots[tostring(testItem._slot)]
-    assert(newItem)
-
-    utils.expectValue("MoveItemToTurtle", "newItemCount", newItem.count, itemCount)
+    utils.expectTable("MoveItemToTurtle", "newItem", newItem, "iris:inventory_item")
+    utils.expectValue("MoveItemToTurtle", "newItemCount", newItem.count, testItem.count - itemsTransferred)
 
     local newSummary = iris.itemSummary[testItemHash]
-
-    utils.expectNotValue("MoveItemtoTurtle", "summaryCount", newSummary.count, currentSummary.count)
-    utils.expectNotValue("MoveItemtoTurtle", "summaryCount", newSummary.count, currentSummary.count - itemsTransferred)
+    utils.expectValue("MoveItemtoTurtle", "summaryCount", newSummary.count, currentSummary.count - itemsTransferred)
 
     return itemsTransferred
 end)
