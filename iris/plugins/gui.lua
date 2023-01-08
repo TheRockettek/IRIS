@@ -1,3 +1,5 @@
+local utils = require "utils"
+
 local pluginDirectory = "gui_plugins"
 
 local PluginInfo = {
