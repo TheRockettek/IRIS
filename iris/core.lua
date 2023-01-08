@@ -4,7 +4,7 @@ local utils     = require "utils"
 local inventory = require "inventory"
 local plugins   = require "plugins"
 
-local VERSION = "0.0.0+next"
+local VERSION = "1.0.0"
 
 local function NewIRIS(logger)
     utils.expectTable("NewIRIS", "logger", logger, "logger:logger")
