@@ -32,7 +32,7 @@ function PluginManager(iris)
         if fs.exists(localFolderName) then
             if fs.isDir(localFolderName) then
                 local list = fs.list(localFolderName)
-                for _, fileName in list do
+                for _, fileName in pairs(list) do
                     this.LoadPlugin(fileName)
                 end
             else
