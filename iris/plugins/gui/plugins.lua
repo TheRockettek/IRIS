@@ -173,9 +173,18 @@ function PluginContainer(fileName)
         error = nil,
     }
 
+    this._loadPlugin = function(filename)
+        local result, err = loadfile(filename, nil, _ENV)
+        if result then
+            return result()
+        else
+            error(err)
+        end
+    end
+
     this.LoadPlugin = function(gui)
-        local importSuccess, importResult = pcall(dofile, this._fileName)
-        if importSuccess then
+        local importSuccess, importResult = pcall(this._loadPlugin, this._fileName)
+        if not importSuccess then
             this.error = importResult
             return false, importResult
         end

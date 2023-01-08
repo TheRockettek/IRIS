@@ -1,4 +1,5 @@
 local plugins = require "plugins"
+
 local PluginInfo = {
     -- Unique plugin name
     name = "gui",
