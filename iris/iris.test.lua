@@ -330,8 +330,7 @@ end)
 
 createBinaryTestCase("MoveItemToTurtle", function()
     local moveCount = 1
-    local itemCount = testItem.count - moveCount
-    local itemsTransferred = iris.push(testItem._inventoryName, testItem._slot, iris.turtle._type, moveCount, itemCount)
+    local itemsTransferred = iris.push(testItem._inventoryName, testItem._slot, iris.turtle._type, 1, moveCount)
 
     local currentSummary = utils.deepcopy(iris.itemSummary[testItemHash])
 
