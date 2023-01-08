@@ -24,8 +24,8 @@ local function Setup(iris)
         -- This is mandatory. This lets IRIS know it is a plugin.
         _type = "iris:plugin",
 
-        -- We set a custom logger which adds _plugin=... to all our messages.
-        logger = iris.logger.Str("_plugin", PluginInfo.name)
+        -- TODO: custom logger which adds _plugin=... to all our messages.
+        logger = iris.logger
     }
 
     -- OnPluginLoad is called when IRIS is starting to load your plugin.
