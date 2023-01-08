@@ -356,6 +356,10 @@ local function serialize_impl(t, tracking, indent)
 
     elseif sType == "boolean" or sType == "nil" then
         return tostring(t)
+
+    else
+        return tostring(t)
+
     end
 end
 
