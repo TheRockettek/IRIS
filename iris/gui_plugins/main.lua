@@ -4,7 +4,7 @@ local PluginInfo = {
     description = "This plugin provides the graphical interface for IRIS",
     author = "TheRockettek",
     version = "0.0.0",
-    isBlocking = false,
+    isBlocking = true,
 }
 
 local function Setup(gui)
