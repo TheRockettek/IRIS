@@ -42,9 +42,9 @@ local function Setup(gui)
     this.OnGUILoad = function()
         -- Change palette to theme.
         if term.setPaletteColour then
-            for _, k in pairs(this.palette) do
+            for i, k in pairs(this.palette) do
                 if k.colour and k.hex then
-                    k.default = term.getPaletteColour(k.colour)
+                    this.palette[i].default = term.getPaletteColour(k.colour)
                     term.setPaletteColour(k.colour, k.hex)
                 end
             end
@@ -67,7 +67,7 @@ local function Setup(gui)
         if term.setPaletteColour then
             for _, k in pairs(this.palette) do
                 if k.colour and k.default then
-                    term.setPaletteColour(k.colour, k.default)
+                    term.setPaletteColour(k.colour, table.unpack(k.default))
                 end
             end
         end
