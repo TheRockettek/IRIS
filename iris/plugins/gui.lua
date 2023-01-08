@@ -1,4 +1,4 @@
-local plugins = require "plugins"
+local guiPlugins = require "gui.guiplugins"
 
 local PluginInfo = {
     -- Unique plugin name
@@ -33,7 +33,7 @@ local function NewIRISGUI(iris)
         registeredEvents = {},
     }
 
-    this.pluginManager = plugins.NewPluginManager(this)
+    this.pluginManager = guiPlugins.GUIPluginManager(this)
 
     -- Plugin manager code is located at bottom, to ensure IRIS GUI functions are defined.
 

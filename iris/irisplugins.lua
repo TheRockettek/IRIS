@@ -1,12 +1,12 @@
 local utils = require "utils"
 
-local pluginDirectory = "gui_plugins"
+local pluginDirectory = "plugins"
 
-function PluginManager(gui)
-    utils.expectTable("NewPluginManager", "gui", gui, "iris_gui:controller")
+function IRISPluginManager(iris)
+    utils.expectTable("IRISPluginManager", "iris", iris, "iris:controller")
 
     local this = {
-        _type = "iris_gui:plugin_manager",
+        _type = "iris:plugin_manager",
 
         plugins = {},
         blockingPlugins = {},
@@ -26,7 +26,7 @@ function PluginManager(gui)
     end
 
     this.LoadAllPlugins = function()
-        local func = gui.logger.FunctionStart("LoadAllPlugins")
+        local func = iris.logger.FunctionStart("LoadAllPlugins")
 
         local localFolderName = fs.combine(shell.dir(), pluginDirectory)
         if fs.exists(localFolderName) then
@@ -36,10 +36,10 @@ function PluginManager(gui)
                     this.LoadPlugin(fileName)
                 end
             else
-                gui.logger.Warn().Str("localFolderName", localFolderName).Msg("Plugin folder is not a directory")
+                iris.logger.Warn().Str("localFolderName", localFolderName).Msg("Plugin folder is not a directory")
             end
         else
-            gui.logger.Warn().Str("localFolderName", localFolderName).Msg("Plugin folder does not eixst")
+            iris.logger.Warn().Str("localFolderName", localFolderName).Msg("Plugin folder does not eixst")
         end
 
         func.FunctionEnd()
@@ -48,29 +48,29 @@ function PluginManager(gui)
     this.LoadPlugin = function(fileName)
         local localFileName = fs.combine(shell.dir(), pluginDirectory, fileName)
         if fs.exists(localFileName) then
-            local container = PluginContainer(localFileName)
-            local success, err = container.LoadPlugin(gui)
+            local container = IRISPluginContainer(localFileName)
+            local success, err = container.LoadPlugin(iris)
             if success then
                 local pluginName = container.pluginInfo.name
 
                 local existingPlugin = this.plugins[pluginName]
                 if existingPlugin then
                     if existingPlugin.isLoaded then
-                        gui.logger.Warn().Str("pluginNane", pluginName).Msg("A plugin with this name already is loaded")
+                        iris.logger.Warn().Str("pluginNane", pluginName).Msg("A plugin with this name already is loaded")
                         return false
                     end
                 end
 
                 this.plugins[pluginName] = container
-                gui.logger.Info().Str("localFileName", localFileName).Msg("Loaded plugin")
+                iris.logger.Info().Str("localFileName", localFileName).Msg("Loaded plugin")
                 return true
             else
-                gui.logger.Warn().Str("localFileName", localFileName).Err(err).Msg("Failed to load plugin")
+                iris.logger.Warn().Str("localFileName", localFileName).Err(err).Msg("Failed to load plugin")
 
                 return false
             end
         else
-            gui.logger.Warn().Str("localFileName", localFileName).Msg("Could not locate plugin")
+            iris.logger.Warn().Str("localFileName", localFileName).Msg("Could not locate plugin")
 
             return false
         end
@@ -79,7 +79,7 @@ function PluginManager(gui)
     this._secureCall = function(plugin, funcName, func)
         local success, result = pcall(func)
         if not success then
-            gui.logger.Warn().Str("plugin", plugin.pluginInfo.name).Err(result).Str("type", funcName).Msg("Plugin asserted error")
+            iris.logger.Warn().Str("plugin", plugin.pluginInfo.name).Err(result).Str("type", funcName).Msg("Plugin asserted error")
         end
     end
 
@@ -103,54 +103,54 @@ function PluginManager(gui)
         return this.LoadPlugin(plugin._fileName)
     end
 
-    this.OnGUILoad = function()
-        local func = gui.logger.FunctionStart("OnGUILoad")
+    this.OnIRISLoad = function()
+        local func = iris.logger.FunctionStart("OnIRISLoad")
 
         for _, plugin in pairs(this.plugins) do
-            if plugin.plugin.OnGUILoad then
-                this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad)
+            if plugin.plugin.OnIRISLoad then
+                this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad)
             end
         end
 
         for _, plugin in pairs(this.blockingPlugins) do
-            if plugin.plugin.OnGUILoad then
-                this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad)
+            if plugin.plugin.OnIRISLoad then
+                this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad)
             end
         end
 
         func.FunctionEnd()
     end
 
-    this.OnGUIStart = function()
-        local func = gui.logger.FunctionStart("OnGUIStart")
+    this.OnIRISStart = function()
+        local func = iris.logger.FunctionStart("OnIRISStart")
 
         for _, plugin in pairs(this.plugins) do
-            if plugin.plugin.OnGUIStart then
-                this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart)
+            if plugin.plugin.OnIRISStart then
+                this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart)
             end
         end
 
         for _, plugin in pairs(this.blockingPlugins) do
-            if plugin.plugin.OnGUIStart then
-                this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart)
+            if plugin.plugin.OnIRISStart then
+                this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart)
             end
         end
 
         func.FunctionEnd()
     end
 
-    this.OnGUIUnload = function()
-        local func = gui.logger.FunctionStart("OnGUIUnload")
+    this.OnIRISUnload = function()
+        local func = iris.logger.FunctionStart("OnIRISUnload")
 
         for _, plugin in pairs(this.plugins) do
-            if plugin.plugin.OnGUIUnload then
-                this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload)
+            if plugin.plugin.OnIRISUnload then
+                this._secureCall(plugin, "OnIRISUnload", plugin.plugin.OnIRISUnload)
             end
         end
 
         for _, plugin in pairs(this.blockingPlugins) do
-            if plugin.plugin.OnGUIUnload then
-                this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload)
+            if plugin.plugin.OnIRISUnload then
+                this._secureCall(plugin, "OnIRISUnload", plugin.plugin.OnIRISUnload)
             end
         end
 
@@ -160,9 +160,9 @@ function PluginManager(gui)
     return this
 end
 
-function PluginContainer(fileName)
+function IRISPluginContainer(fileName)
     local this = {
-        _type = "iris_gui:plugin_container",
+        _type = "iris:plugin_container",
         _fileName = fileName,
 
         _module = nil,
@@ -182,7 +182,7 @@ function PluginContainer(fileName)
         end
     end
 
-    this.LoadPlugin = function(gui)
+    this.LoadPlugin = function(iris)
         local importSuccess, importResult = pcall(this._loadPlugin, this._fileName)
         if not importSuccess then
             this.error = importResult
@@ -192,7 +192,7 @@ function PluginContainer(fileName)
         this._module = importResult
         this.pluginInfo = this._module.PluginInfo
 
-        local setupSuccess, setupResult = pcall(this._module.Setup, gui)
+        local setupSuccess, setupResult = pcall(this._module.Setup, iris)
         this.plugin = setupResult
 
         this.isLoaded = setupSuccess
@@ -203,7 +203,7 @@ function PluginContainer(fileName)
         else
             local typeSuccess, typeError = pcall(utils.expect, "LoadPlugin", "PluginInfo", this.pluginInfo, "table")
             if typeSuccess then
-                typeSuccess, typeError = pcall(utils.expectTable, "LoadPlugin", "Plugin", this.plugin, "iris_gui:plugin")
+                typeSuccess, typeError = pcall(utils.expectTable, "LoadPlugin", "Plugin", this.plugin, "iris:plugin")
                 if typeSuccess then
                     typeSuccess, typeError = pcall(utils.expect, "LoadPlugin", "PluginName", this.pluginInfo.name,
                         "string")
@@ -233,6 +233,6 @@ function PluginContainer(fileName)
 end
 
 return {
-    NewPluginManager = PluginManager,
-    NewPluginContainer = PluginContainer
+    IRISPluginManager = IRISPluginManager,
+    IRISPluginContainer = IRISPluginContainer
 }

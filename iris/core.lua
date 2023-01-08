@@ -2,7 +2,7 @@ local waitgroup = require "libs.waitgroup"
 local turtle    = require "turtle"
 local utils     = require "utils"
 local inventory = require "inventory"
-local plugins   = require "plugins"
+local irisPlugins   = require "irisplugins"
 
 local VERSION = "1.0.0"
 
@@ -28,7 +28,7 @@ local function NewIRIS(logger)
         itemMaxCount = 0,
     }
 
-    this.pluginManager = plugins.NewPluginManager(this)
+    this.pluginManager = irisPlugins.IRISPluginManager(this)
 
     -- Plugin manager code is located at bottom, to ensure IRIS functions are defined.
 
