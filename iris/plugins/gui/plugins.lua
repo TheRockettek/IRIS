@@ -108,13 +108,13 @@ function PluginManager(gui)
 
         for _, plugin in pairs(this.plugins) do
             if plugin.plugin.OnGUILoad then
-                this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad())
+                this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad)
             end
         end
 
         for _, plugin in pairs(this.blockingPlugins) do
             if plugin.plugin.OnGUILoad then
-                this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad())
+                this._secureCall(plugin, "OnGUILoad", plugin.plugin.OnGUILoad)
             end
         end
 
@@ -126,13 +126,13 @@ function PluginManager(gui)
 
         for _, plugin in pairs(this.plugins) do
             if plugin.plugin.OnGUIStart then
-                this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart())
+                this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart)
             end
         end
 
         for _, plugin in pairs(this.blockingPlugins) do
             if plugin.plugin.OnGUIStart then
-                this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart())
+                this._secureCall(plugin, "OnGUIStart", plugin.plugin.OnGUIStart)
             end
         end
 
@@ -144,13 +144,13 @@ function PluginManager(gui)
 
         for _, plugin in pairs(this.plugins) do
             if plugin.plugin.OnGUIUnload then
-                this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload())
+                this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload)
             end
         end
 
         for _, plugin in pairs(this.blockingPlugins) do
             if plugin.plugin.OnGUIUnload then
-                this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload())
+                this._secureCall(plugin, "OnGUIUnload", plugin.plugin.OnGUIUnload)
             end
         end
 

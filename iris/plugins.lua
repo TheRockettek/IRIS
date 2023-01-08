@@ -108,13 +108,13 @@ function PluginManager(iris)
 
         for _, plugin in pairs(this.plugins) do
             if plugin.plugin.OnIRISLoad then
-                this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad())
+                this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad)
             end
         end
 
         for _, plugin in pairs(this.blockingPlugins) do
             if plugin.plugin.OnIRISLoad then
-                this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad())
+                this._secureCall(plugin, "OnIRISLoad", plugin.plugin.OnIRISLoad)
             end
         end
 
@@ -126,13 +126,13 @@ function PluginManager(iris)
 
         for _, plugin in pairs(this.plugins) do
             if plugin.plugin.OnIRISStart then
-                this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart())
+                this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart)
             end
         end
 
         for _, plugin in pairs(this.blockingPlugins) do
             if plugin.plugin.OnIRISStart then
-                this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart())
+                this._secureCall(plugin, "OnIRISStart", plugin.plugin.OnIRISStart)
             end
         end
 
@@ -144,13 +144,13 @@ function PluginManager(iris)
 
         for _, plugin in pairs(this.plugins) do
             if plugin.plugin.OnIRISUnload then
-                this._secureCall(plugin, "OnIRISUnload", plugin.plugin.OnIRISUnload())
+                this._secureCall(plugin, "OnIRISUnload", plugin.plugin.OnIRISUnload)
             end
         end
 
         for _, plugin in pairs(this.blockingPlugins) do
             if plugin.plugin.OnIRISUnload then
-                this._secureCall(plugin, "OnIRISUnload", plugin.plugin.OnIRISUnload())
+                this._secureCall(plugin, "OnIRISUnload", plugin.plugin.OnIRISUnload)
             end
         end
 
