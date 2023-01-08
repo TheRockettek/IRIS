@@ -44,7 +44,7 @@ local function Setup(gui)
         if term.setPaletteColour then
             for i, k in pairs(this.palette) do
                 if k.colour and k.hex then
-                    this.palette[i].default = term.getPaletteColour(k.colour)
+                    this.palette[i].default = table.pack(term.getPaletteColour(k.colour))
                     term.setPaletteColour(k.colour, k.hex)
                 end
             end
