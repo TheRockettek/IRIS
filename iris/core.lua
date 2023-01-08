@@ -171,7 +171,7 @@ local function NewIRIS(logger)
         else
             local inventoryData = this.inventories[fromInventory]
             assert(inventoryData)
-            inventoryItem = inventoryData.slots[tostring(fromSlot)]
+            inventoryItem = utils.deepcopy(inventoryData.slots[tostring(fromSlot)])
         end
 
         assert(inventoryItem)
