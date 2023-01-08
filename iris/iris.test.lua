@@ -56,7 +56,9 @@ end
 
 local getfirstItem = function(table)
     for i, k in pairs(table) do
-        return i, k
+        if k.maxCount > 1 then
+            return i, k
+        end
     end
 
     error("table is empty")
