@@ -236,7 +236,7 @@ end)
 local testItemHash, testItem = getfirstItem(iris.items)
 local isTestItemFull = testItem.count == testItem.maxCount
 
-local testItem = createBinaryTestCase("FindItem", function()
+local testItemResult = createBinaryTestCase("FindItem", function()
     local candidates, itemsRemaining = iris.findItem(testItemHash, 1, { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")
@@ -247,6 +247,8 @@ local testItem = createBinaryTestCase("FindItem", function()
 
     return candidates[1]
 end)
+
+testItem = utils.deepcopy(testItemResult)
 
 createBinaryTestCase("FindTooManyItems", function()
     local candidates, itemsRemaining = iris.findItem(testItemHash, 1000000, { iris.turtle.getNameLocal() })
