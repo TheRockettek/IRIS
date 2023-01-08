@@ -337,7 +337,9 @@ createBinaryTestCase("MoveItemToTurtle", function()
     utils.expect("MoveItemToTurtle", "itemsTransferred", itemsTransferred, "number")
     utils.expectNotValue("MoveItemToTurtle", "itemsTransferred", itemsTransferred, 0)
 
+    print(testItem._inventoryName .. " " .. testItem._slot)
     local newItem = iris.inventories[testItem._inventoryName].slots[tostring(testItem._slot)]
+    print(newItem)
     utils.expectTable("MoveItemToTurtle", "newItem", newItem, "iris:inventory_item")
     utils.expectValue("MoveItemToTurtle", "newItemCount", newItem.count, testItem.count - itemsTransferred)
 
