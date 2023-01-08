@@ -167,7 +167,7 @@ local function NewIRIS(logger)
         if toInventory == this.turtle._type then toInventory = localTurtleName end
 
         if fromInventory == localTurtleName then
-            inventoryItem = this.turtle.getItemDetail(fromSlot)
+            inventoryItem = inventory.InventoryItem(localTurtleName, fromSlot, this.turtle.getItemDetail(fromSlot))
         else
             local inventoryData = this.inventories[fromInventory]
             assert(inventoryData)
