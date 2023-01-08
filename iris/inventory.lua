@@ -171,11 +171,7 @@ function InventoryItem(inventoryName, slot, item)
     this.equals = function(inventoryItem)
         utils.expectTable("InventoryItem.Equals", "inventoryItem", inventoryItem, "iris:inventory_item")
 
-        print(inventoryItem.name, this.name, inventoryItem.count, this.count, inventoryItem.displayName, this.displayName
-            , inventoryItem.nbt, this.nbt)
-
         return this.name == inventoryItem.name and
-            this.count == inventoryItem.count and
             this.displayName == inventoryItem.displayName and
             this.nbt == inventoryItem.nbt
     end
