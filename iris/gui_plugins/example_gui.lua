@@ -24,6 +24,8 @@ local function Setup(gui)
         -- This is mandatory. This lets IRIS GUI know it is a plugin.
         _type = "iris_gui:plugin",
 
+        iris = gui.iris,
+
         -- TODO: custom logger which adds _plugin=... to all our messages.
         logger = gui.logger
     }

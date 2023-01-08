@@ -15,6 +15,7 @@ local function NewIRISGUI(iris)
     local this = {
         _type = "iris_gui:controller",
 
+        iris = iris,
         logger = iris.logger,
 
         pluginManager = nil,

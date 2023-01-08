@@ -11,11 +11,44 @@ local function Setup(gui)
     local this = {
         _type = "iris_gui:plugin",
 
-        logger = gui.logger
+        iris = gui.iris,
+        logger = gui.logger,
+
+        palette = {
+            primary   = { colour = colours.black, hex = 0x062144 },
+            secondary = { colour = colours.gray, hex = 0x0A3875 },
+            tertiary  = { colour = colours.lightGray, hex = 0x09346B },
+            text      = { colour = colours.white, hex = 0xFFFFFF },
+        },
+    }
+
+    this.theme = {
+        titleText = this.palette.text.colour,
+        headerBackground = this.palette.primary.colour,
+        headerText = this.palette.text.colour,
+        tabBackground = this.palette.secondary.colour,
+        tabText = this.palette.text.colour,
+
+        scrollBackground = 0,
+        scrollBar = 0,
+
+        tableHeaderBackground = 0,
+        tableHeaderText = 0,
+
+        tableBodyBackground = 0,
+        tableBodyText = 0,
     }
 
     this.OnGUILoad = function()
-        -- TODO: Load theme
+        -- Change palette to theme.
+        if term.setPaletteColour then
+            for _, k in pairs(this.palette) do
+                if k.colour and k.hex then
+                    k.default = term.getPaletteColour(k.colour)
+                    term.setPaletteColour(k.colour, k.hex)
+                end
+            end
+        end
     end
 
     this.OnGUIStart = function()
@@ -25,16 +58,19 @@ local function Setup(gui)
         term.write("GUI Example!")
 
         term.setCursorPos(1, 4)
-        gui.listenToEvent("*", function(...)
-            local args = { ... }
-            for i, k in pairs(args) do
-                print(i, k)
-            end
-        end)
+
+        os.pullEvent()
     end
 
     this.OnGUIUnload = function()
-        -- TODO: Go back to original palette
+        -- Reset palette.
+        if term.setPaletteColour then
+            for _, k in pairs(this.palette) do
+                if k.colour and k.default then
+                    term.setPaletteColour(k.colour, k.default)
+                end
+            end
+        end
 
         term.clear()
     end
