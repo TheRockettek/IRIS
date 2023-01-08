@@ -38,7 +38,9 @@ local function NewIRIS(logger)
 
         this.logger.Info().Msg("IRIS has started")
         this.pluginManager.OnIRISStart()
+    end
 
+    this.close = function()
         this.logger.Info().Msg("IRIS is unloading")
         this.pluginManager.OnIRISUnload()
     end
