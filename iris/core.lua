@@ -1,7 +1,8 @@
 local waitgroup = require "libs.waitgroup"
-local turtle = require "turtle"
-local utils = require "utils"
+local turtle    = require "turtle"
+local utils     = require "utils"
 local inventory = require "inventory"
+local plugins   = require "plugins"
 
 local VERSION = "0.0.0+next"
 
@@ -15,6 +16,7 @@ local function NewIRIS(logger)
         logger = logger,
 
         inventories = {},
+        pluginManager = nil,
 
         items = {},
         emptySlots = {},
@@ -26,10 +28,19 @@ local function NewIRIS(logger)
         itemMaxCount = 0,
     }
 
+    this.pluginManager = plugins.NewPluginManager(this)
+
+    -- Plugin manager code is located at bottom, to ensure IRIS functions are defined.
+
     this.start = function()
         this.logger.Info().Str("VERSION", VERSION).Msg("IRIS is starting...")
-
         this.scanInventories()
+
+        this.logger.Info().Msg("IRIS has started")
+        this.pluginManager.OnIRISStart()
+
+        this.logger.Info().Msg("IRIS is unloading")
+        this.pluginManager.OnIRISUnload()
     end
 
     this.scanInventories = function()
@@ -217,7 +228,7 @@ local function NewIRIS(logger)
 
         local irisInventory = this.inventories[inventoryName]
         if not irisInventory then
-            this.inventories[inventoryName] = Inventory(inventoryName, inventorySize)
+            this.inventories[inventoryName] = inventory.Inventory(inventoryName, inventorySize)
             for slotNumber = 1, inventorySize, 1 do
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slotNumber)] = true
                 this.emptySlotCount = this.emptySlotCount + 1
@@ -425,7 +436,8 @@ local function NewIRIS(logger)
                         item = peripheral.call(inventoryName, "getItemDetail", slotNumber)
                     end
                     if item then
-                        this._setInventoryItem(inventoryName, slotNumber, InventoryItem(inventoryName, slotNumber, item))
+                        this._setInventoryItem(inventoryName, slotNumber,
+                            inventory.InventoryItem(inventoryName, slotNumber, item))
                     else
                         this._setInventoryItem(inventoryName, slotNumber, nil)
                     end
@@ -437,6 +449,9 @@ local function NewIRIS(logger)
 
         return inventorySize
     end
+
+    this.pluginManager.LoadAllPlugins()
+    this.pluginManager.OnIRISLoad()
 
     return this
 end

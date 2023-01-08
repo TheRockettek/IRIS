@@ -77,7 +77,7 @@ local function NewLogger(timeFormat, fileName)
         this.minimumLevel = levels[logLevel].level
     end
 
-    this.newMessage = function(logLevel)
+    this.newMessage = function(logLevel, variables)
         if not tableContainsKey(levels, logLevel) then
             error("invalid log level passed: " .. tostring(logLevel))
         end
@@ -87,7 +87,7 @@ local function NewLogger(timeFormat, fileName)
 
             logger = this,
             level = levels[logLevel],
-            variables = {},
+            variables = variables or {},
             message = "",
             error = "",
         }
@@ -196,11 +196,18 @@ local function NewLogger(timeFormat, fileName)
         return loggerMessage
     end
 
-    this.Trace = function() return this.newMessage("trace") end
-    this.Debug = function() return this.newMessage("debug") end
-    this.Info = function() return this.newMessage("info") end
-    this.Warn = function() return this.newMessage("warn") end
-    this.Panic = function() return this.newMessage("panic") end
+    this.Trace = function() return this.newMessage("trace", this.variables) end
+    this.Debug = function() return this.newMessage("debug", this.variables) end
+    this.Info = function() return this.newMessage("info", this.variables) end
+    this.Warn = function() return this.newMessage("warn", this.variables) end
+    this.Panic = function() return this.newMessage("panic", this.variables) end
+
+    this.Str = function(name, value)
+        local thisCopy = this
+        table.insert(thisCopy.variables, { name = tostring(name), value = tostring(value) })
+
+        return thisCopy
+    end
 
     this.FunctionStart = function(name, ...)
         local args = { ... }
