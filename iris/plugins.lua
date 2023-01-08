@@ -174,7 +174,7 @@ function PluginContainer(fileName)
     }
 
     this.LoadPlugin = function(iris)
-        local importSuccess, importResult = pcall(require, this._fileName)
+        local importSuccess, importResult = pcall(dofile, this._fileName)
         if importSuccess then
             this.error = importResult
             return false, importResult

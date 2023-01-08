@@ -63,7 +63,6 @@ local function NewLogger(timeFormat, fileName)
         minimumLevel = -1,
         fileName = fileName, -- filename to log to. If not passed, will not log to file.
         silent = false, -- when enabled, will only log to file (if a filename is set)
-        variables = {},
     }
 
     if this.fileName ~= "" and this.fileName ~= nil then
@@ -78,7 +77,7 @@ local function NewLogger(timeFormat, fileName)
         this.minimumLevel = levels[logLevel].level
     end
 
-    this.newMessage = function(logLevel, variables)
+    this.newMessage = function(logLevel)
         if not tableContainsKey(levels, logLevel) then
             error("invalid log level passed: " .. tostring(logLevel))
         end
@@ -88,7 +87,7 @@ local function NewLogger(timeFormat, fileName)
 
             logger = this,
             level = levels[logLevel],
-            variables = variables or {},
+            variables = {},
             message = "",
             error = "",
         }
@@ -197,18 +196,11 @@ local function NewLogger(timeFormat, fileName)
         return loggerMessage
     end
 
-    this.Trace = function() return this.newMessage("trace", this.variables) end
-    this.Debug = function() return this.newMessage("debug", this.variables) end
-    this.Info = function() return this.newMessage("info", this.variables) end
-    this.Warn = function() return this.newMessage("warn", this.variables) end
-    this.Panic = function() return this.newMessage("panic", this.variables) end
-
-    this.Str = function(name, value)
-        local thisCopy = this
-        table.insert(thisCopy.variables, { name = tostring(name), value = tostring(value) })
-
-        return thisCopy
-    end
+    this.Trace = function() return this.newMessage("trace") end
+    this.Debug = function() return this.newMessage("debug") end
+    this.Info = function() return this.newMessage("info") end
+    this.Warn = function() return this.newMessage("warn") end
+    this.Panic = function() return this.newMessage("panic") end
 
     this.FunctionStart = function(name, ...)
         local args = { ... }
