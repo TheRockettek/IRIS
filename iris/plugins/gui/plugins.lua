@@ -49,7 +49,7 @@ function PluginManager(gui)
         local localFileName = fs.combine(shell.dir(), pluginDirectory, fileName)
         if fs.exists(localFileName) then
             local container = PluginContainer(localFileName)
-            local success, err = container.LoadPlugin()
+            local success, err = container.LoadPlugin(gui)
             if success then
                 local pluginName = container.pluginInfo.name
 
