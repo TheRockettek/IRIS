@@ -56,7 +56,7 @@ end
 
 local getfirstItem = function(table)
     for i, k in pairs(table) do
-        if k.maxCount > 1 then
+        if not k.maxCount or k.maxCount > 1 then
             return i, k
         end
     end
@@ -235,7 +235,9 @@ createBinaryTestCase("ValidateInventories", function()
     return true
 end)
 
-local testItemHash, testItem = getfirstItem(iris.items)
+local testItemHash, testItems = getfirstItem(iris.items)
+local _, testItem = getfirstItem(testItems)
+
 local isTestItemFull = testItem.count == testItem.maxCount
 
 local testItemResult = createBinaryTestCase("FindItem", function()
