@@ -196,7 +196,8 @@ local function NewIRIS(logger)
         if toInventory == localTurtleName then
             resultInventoryItem = inventory.InventoryItem(toInventory, toSlot, this.turtle.getItemDetail(toSlot))
         else
-            resultInventoryItem = inventory.InventoryItem(toInventory, toSlot, peripheral.call(toInventory, "getItemDetail", toSlot))
+            resultInventoryItem = inventory.InventoryItem(toInventory, toSlot,
+                peripheral.call(toInventory, "getItemDetail", toSlot))
         end
 
         this._setInventoryItem(toInventory, toSlot, resultInventoryItem)
@@ -260,6 +261,7 @@ local function NewIRIS(logger)
 
         local inventoryItemHash = inventoryItem.inventoryHash()
         local itemHash = inventoryItem.hash()
+        local isTurtleInventory = inventoryName == this.turtle._getNameLocal()
 
         local irisItems = this.items[itemHash]
         if irisItems == nil then
@@ -274,14 +276,16 @@ local function NewIRIS(logger)
             if currentSlot ~= nil then
                 irisItems[inventoryItemHash] = nil
 
-                local itemSummary = this.itemSummary[itemHash]
-                if itemSummary == nil then
-                    itemSummary = utils.deepcopy(inventoryItem)
-                else
-                    itemSummary.count = itemSummary.count - currentSlot.count
+                if not isTurtleInventory then
+                    local itemSummary = this.itemSummary[itemHash]
+                    if itemSummary == nil then
+                        itemSummary = utils.deepcopy(inventoryItem)
+                    else
+                        itemSummary.count = itemSummary.count - currentSlot.count
+                    end
+                    this.itemSummary[itemHash] = itemSummary
                 end
 
-                this.itemSummary[itemHash] = itemSummary
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = true
 
                 this.usedSlotCount = this.usedSlotCount - 1
@@ -295,20 +299,23 @@ local function NewIRIS(logger)
         else
             if currentSlot ~= nil then
                 assert(currentSlot.equals(inventoryItem),
-                    ("Unexpected slot item. Current item in slot %d is %s, expected %s"):format(slot, currentSlot.hash(), inventoryItem.hash()))
+                    ("Unexpected slot item. Current item in slot %d is %s, expected %s"):format(slot, currentSlot.hash()
+                        , inventoryItem.hash()))
 
                 local countChange = inventoryItem.count - currentSlot.count
                 if countChange ~= 0 then
                     irisItems[inventoryItemHash] = inventoryItem
 
-                    local itemSummary = this.itemSummary[itemHash]
-                    if itemSummary == nil then
-                        itemSummary = utils.deepcopy(inventoryItem)
-                    else
-                        itemSummary.count = itemSummary.count + countChange
-                    end
+                    if not isTurtleInventory then
+                        local itemSummary = this.itemSummary[itemHash]
+                        if itemSummary == nil then
+                            itemSummary = utils.deepcopy(inventoryItem)
+                        else
+                            itemSummary.count = itemSummary.count + countChange
+                        end
 
-                    this.itemSummary[itemHash] = itemSummary
+                        this.itemSummary[itemHash] = itemSummary
+                    end
 
                     this.totalItemCount = this.totalItemCount + countChange
                 else
@@ -318,14 +325,17 @@ local function NewIRIS(logger)
             else
                 irisItems[inventoryItemHash] = inventoryItem
 
-                local itemSummary = this.itemSummary[itemHash]
-                if itemSummary == nil then
-                    itemSummary = utils.deepcopy(inventoryItem)
-                else
-                    itemSummary.count = itemSummary.count + inventoryItem.count
+                if not isTurtleInventory then
+                    local itemSummary = this.itemSummary[itemHash]
+                    if itemSummary == nil then
+                        itemSummary = utils.deepcopy(inventoryItem)
+                    else
+                        itemSummary.count = itemSummary.count + inventoryItem.count
+                    end
+
+                    this.itemSummary[itemHash] = itemSummary
                 end
 
-                this.itemSummary[itemHash] = itemSummary
                 this.emptySlots[inventory.InventorySlotToKey(inventoryName, slot)] = nil
 
                 this.usedSlotCount = this.usedSlotCount + 1
