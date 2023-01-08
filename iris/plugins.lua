@@ -3,7 +3,7 @@ local utils = require "utils"
 local pluginDirectory = "plugins"
 
 function PluginManager(iris)
-    utils.expect("NewPluginManager", "iris", iris, "iris:controller")
+    utils.expectTable("NewPluginManager", "iris", iris, "iris:controller")
 
     local this = {
         _type = "iris:plugin_manager",
