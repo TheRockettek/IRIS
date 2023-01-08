@@ -194,9 +194,9 @@ local function NewIRIS(logger)
 
         -- TODO: Figure out optimal way of doing this.
         if toInventory == localTurtleName then
-            resultInventoryItem = this.turtle.getItemDetail(toSlot)
+            resultInventoryItem = InventoryItem(toInventory, toSlot, this.turtle.getItemDetail(toSlot))
         else
-            resultInventoryItem = peripheral.call(toInventory, "getItemDetail", toSlot)
+            resultInventoryItem = InventoryItem(toInventory, toSlot, peripheral.call(toInventory, "getItemDetail", toSlot))
         end
 
         this._setInventoryItem(toInventory, toSlot, resultInventoryItem)
