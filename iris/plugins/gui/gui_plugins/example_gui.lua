@@ -31,27 +31,27 @@ local function Setup(gui)
     -- OnPluginLoad is called when IRIS GUI is starting to load your plugin.
     -- This will be called after Setup, but before OnGUILoad.
     this.OnPluginLoad = function()
-        this.logger.Msg("OnPluginLoad")
+        this.logger.Info().Msg("OnPluginLoad")
     end
 
     -- OnPluginUnload is called when a plugin is being unloaded. This
     -- is called when a user decides to unload your plugin.
     this.OnPluginUnload = function()
-        this.logger.Msg("OnPluginUnload")
+        this.logger.Info().Msg("OnPluginUnload")
     end
 
     -- OnGUILoad is called when IRIS GUI has loaded all plugins and starts
     -- any internal routines. This is also called when a user
     -- decides to enable your plugin manually.
     this.OnGUILoad = function()
-        this.logger.Msg("OnGUILoad")
+        this.logger.Info().Msg("OnGUILoad")
     end
 
     -- OnGUIStart is called when IRIS GUI has loaded all plugins and
     -- completed all internal routines. This is also called when
     -- a user decides to enable your plugin manually.
     this.OnGUIStart = function()
-        this.logger.Msg("OnGUIStart")
+        this.logger.Info().Msg("OnGUIStart")
     end
 
     -- OnGUILoad is called when IRIS GUI is unloading the plugin.
@@ -60,7 +60,7 @@ local function Setup(gui)
     -- If you are overwriting an event, it is recommend you now
     -- set the original event.
     this.OnGUIUnload = function()
-        this.logger.Msg("OnGUIUnload")
+        this.logger.Info().Msg("OnGUIUnload")
     end
 
     return this

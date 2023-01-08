@@ -31,27 +31,27 @@ local function Setup(iris)
     -- OnPluginLoad is called when IRIS is starting to load your plugin.
     -- This will be called after Setup, but before OnIRISLoad.
     this.OnPluginLoad = function()
-        this.logger.Msg("OnPluginLoad")
+        this.logger.Info().Msg("OnPluginLoad")
     end
 
     -- OnPluginUnload is called when a plugin is being unloaded. This
     -- is called when a user decides to unload your plugin.
     this.OnPluginUnload = function()
-        this.logger.Msg("OnPluginUnload")
+        this.logger.Info().Msg("OnPluginUnload")
     end
 
     -- OnIRISLoad is called when IRIS has loaded all plugins and starts
     -- any internal routines. This is also called when a user
     -- decides to enable your plugin manually.
     this.OnIRISLoad = function()
-        this.logger.Msg("OnIRISLoad")
+        this.logger.Info().Msg("OnIRISLoad")
     end
 
     -- OnIRISStart is called when IRIS has loaded all plugins and
     -- completed all internal routines. This is also called when
     -- a user decides to enable your plugin manually.
     this.OnIRISStart = function()
-        this.logger.Msg("OnIRISStart")
+        this.logger.Info().Msg("OnIRISStart")
     end
 
     -- OnIRISLoad is called when IRIS is unloading the plugin.
@@ -60,7 +60,7 @@ local function Setup(iris)
     -- If you are overwriting an event, it is recommend you now
     -- set the original event.
     this.OnIRISUnload = function()
-        this.logger.Msg("OnIRISUnload")
+        this.logger.Info().Msg("OnIRISUnload")
     end
 
     return this
