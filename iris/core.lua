@@ -169,9 +169,9 @@ local function NewIRIS(logger)
         if fromInventory == localTurtleName then
             inventoryItem = this.turtle.getItemDetail(fromSlot)
         else
-            inventory = this.inventories[fromInventory]
-            assert(inventory)
-            inventoryItem = inventory.slots[tostring(fromSlot)]
+            local inventoryData = this.inventories[fromInventory]
+            assert(inventoryData)
+            inventoryItem = inventoryData.slots[tostring(fromSlot)]
         end
 
         assert(inventoryItem)
@@ -194,9 +194,9 @@ local function NewIRIS(logger)
 
         -- TODO: Figure out optimal way of doing this.
         if toInventory == localTurtleName then
-            resultInventoryItem = InventoryItem(toInventory, toSlot, this.turtle.getItemDetail(toSlot))
+            resultInventoryItem = inventory.InventoryItem(toInventory, toSlot, this.turtle.getItemDetail(toSlot))
         else
-            resultInventoryItem = InventoryItem(toInventory, toSlot, peripheral.call(toInventory, "getItemDetail", toSlot))
+            resultInventoryItem = inventory.InventoryItem(toInventory, toSlot, peripheral.call(toInventory, "getItemDetail", toSlot))
         end
 
         this._setInventoryItem(toInventory, toSlot, resultInventoryItem)
