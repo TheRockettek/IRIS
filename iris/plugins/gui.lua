@@ -60,15 +60,22 @@ local function NewIRISGUI(iris)
 
             local eventData = table.unpack(pullEventRawData, 2)
 
-            local event = this.registeredEvents[eventType]
+            local event = this.registeredEvents["*"]
             if event then
                 for _, k in pairs(event) do
-                    k(eventData)
+                    pcall(k, eventType, eventData)
+                end
+            end
+
+            event = this.registeredEvents[eventType]
+            if event then
+                for _, k in pairs(event) do
+                    pcall(k, eventData)
                 end
             end
         end
 
-        this.pluginManager.OnIRISUnload()
+        this.pluginManager.OnGUIUnload()
     end
 
     this.pluginManager.LoadAllPlugins()
@@ -76,6 +83,8 @@ local function NewIRISGUI(iris)
 
     return this
 end
+
+-- GUI Plugin loading
 
 function GUIPluginManager(gui)
     utils.expectTable("NewPluginManager", "gui", gui, "iris_gui:controller")
