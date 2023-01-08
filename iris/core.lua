@@ -295,9 +295,7 @@ local function NewIRIS(logger)
         else
             if currentSlot ~= nil then
                 assert(currentSlot.equals(inventoryItem),
-                    ("Unexpected slot item. Current item in slot %d is %s, expected %s"):format(slot, currentSlot.hash()
-                        ,
-                        inventoryItem.hash()))
+                    ("Unexpected slot item. Current item in slot %d is %s, expected %s"):format(slot, currentSlot.hash(), inventoryItem.hash()))
 
                 local countChange = inventoryItem.count - currentSlot.count
                 if countChange ~= 0 then
