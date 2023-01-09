@@ -127,6 +127,7 @@ local function Setup(gui)
         -- We want to stop the logger from printing messages.
         this.iris.logger.silent = true
 
+        term.setBackgroundColour(this.theme.tableBodyBackground.colour)
         term.clear()
 
         local w, h = term.getSize()
