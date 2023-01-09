@@ -59,19 +59,17 @@ local function NewIRISGUI(iris)
                 break
             end
 
-            local eventData = table.unpack(pullEventRawData, 2)
-
             local event = this.registeredEvents["*"]
             if event then
                 for _, k in pairs(event) do
-                    pcall(k, eventType, eventData)
+                    pcall(k, eventType, table.unpack(pullEventRawData, 2))
                 end
             end
 
             event = this.registeredEvents[eventType]
             if event then
                 for _, k in pairs(event) do
-                    pcall(k, eventData)
+                    pcall(k, table.unpack(pullEventRawData, 2))
                 end
             end
         end
