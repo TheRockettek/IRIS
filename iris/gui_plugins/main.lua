@@ -88,7 +88,7 @@ local function Setup(gui)
             name = name,
             func = onClickFunc,
         })
-        return #this.tabs - 1
+        return #this.tabs
     end
 
     -- Register tabs
