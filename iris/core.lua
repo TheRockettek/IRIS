@@ -123,9 +123,9 @@ local function NewIRIS(logger)
 
         local err
         if this.isAtlasDirty then
-            local file = fs.open(fileLocation, "wb")
             local success, result = pcall(textutils.serialize, this.atlas, { compact = true, allow_repetitions = true })
             if success then
+                local file = fs.open(fileLocation, "wb")
                 success, result = pcall(file.write, result)
                 if success then
                     file.close()
