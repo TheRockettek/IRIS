@@ -75,7 +75,6 @@ local function Setup(gui)
     -- Main GUI actions
 
     this.tabs = {}
-    this.selectedTab = 1
 
     this.isDropdownVisible = false
     this.isSearching = false
@@ -89,6 +88,7 @@ local function Setup(gui)
             name = name,
             func = onClickFunc,
         })
+        return #this.tabs - 1
     end
 
     -- Register tabs
@@ -102,6 +102,8 @@ local function Setup(gui)
     this._tabIndexItems = this.addTab("Items", function(tabId) this.selectedTab = tabId; this._drawPage() end)
     this._tabIndexInventory = this.addTab("Inv.", function(tabId) this.selectedTab = tabId; this._drawPage() end)
     this._tabIndexTasks = this.addTab("Tasks", function(tabId) this.selectedTab = tabId; this._drawPage() end)
+
+    this.selectedTab = this._tabIndexItems
 
     this._drawHeader = function()
         local w, h = term.getSize()
@@ -121,11 +123,11 @@ local function Setup(gui)
         displayText = displayText .. (" "):rep(w - #displayText)
 
         local backgroundBlit = ""
-        for i, k in pairs(this.tabLabels) do
+        for i, k in pairs(this.tabs) do
             if this.selectedTab == i then
-                backgroundBlit = backgroundBlit .. this.theme.selectedTabBackground.blit:rep(2 + #k)
+                backgroundBlit = backgroundBlit .. this.theme.selectedTabBackground.blit:rep(2 + #k.name)
             else
-                backgroundBlit = backgroundBlit .. this.theme.headerBackground.blit:rep(2 + #k)
+                backgroundBlit = backgroundBlit .. this.theme.headerBackground.blit:rep(2 + #k.name)
             end
         end
         backgroundBlit = backgroundBlit:sub(1, w)
