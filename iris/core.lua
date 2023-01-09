@@ -509,7 +509,8 @@ local function NewIRIS(logger)
             end
 
             for slotNumber, itemStub in pairs(inventoryList) do
-                this._setInventoryItem(itemStub, slotNumber, inventory.InventoryItem(inventoryName, slotNumber, itemStub))
+                this._setInventoryItem(inventoryName, slotNumber,
+                    inventory.InventoryItem(inventoryName, slotNumber, itemStub))
             end
         end
 
