@@ -1,11 +1,11 @@
 local levels = {
     trace = {
-        colour = colours.lightGrey,
+        colour = colours.purple,
         label = "TRC",
         level = -1,
     },
     debug = {
-        colour = colours.orange,
+        colour = colours.lightGrey,
         label = "DBG",
         level = 0,
     },
@@ -15,9 +15,15 @@ local levels = {
         level = 1,
     },
     warn = {
-        colour = colours.red,
+        colour = colours.orange,
         label = "WRN",
         level = 2,
+
+    },
+    error = {
+        colour = colours.red,
+        label = "ERR",
+        level = 3,
 
     },
     panic = {
@@ -200,6 +206,7 @@ local function NewLogger(timeFormat, fileName)
     this.Debug = function() return this.newMessage("debug") end
     this.Info = function() return this.newMessage("info") end
     this.Warn = function() return this.newMessage("warn") end
+    this.Error = function() return this.newMessage("error") end
     this.Panic = function() return this.newMessage("panic") end
 
     this.FunctionStart = function(name, ...)
