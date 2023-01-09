@@ -147,10 +147,6 @@ function InventoryItem(inventoryName, slot, item)
 
         name = item.name,
         count = item.count,
-        displayName = item.displayName,
-        maxCount = item.maxCount,
-        nbt = item.nbt,
-        tags = item.tags,
     }
 
     this.Table = function()
@@ -160,11 +156,7 @@ function InventoryItem(inventoryName, slot, item)
             _slot = this._slot,
 
             name = this.name,
-            count = this.count,
-            displayName = this.displayName,
-            maxCount = this.maxCount,
-            nbt = this.nbt,
-            tags = this.tags
+            count = this.count
         }
     end
 
@@ -191,6 +183,32 @@ function InventoryItem(inventoryName, slot, item)
     return this
 end
 
+function AtlasEntry(item)
+    utils.expect("AtlasEntry.<init>", "item", item, "table")
+
+    local this = {
+        _type = "iris:atlas_entry",
+
+        name = item.name,
+        displayName = item.displayName,
+        maxCount = item.maxCount,
+        nbt = item.nbt,
+        tags = item.tags,
+    }
+
+    this.Table = function()
+        return {
+            _type = this._type,
+
+            name = this.name,
+            displayName = this.displayName,
+            maxCount = this.maxCount,
+            nbt = this.nbt,
+            tags = this.tags
+        }
+    end
+end
+
 function InventorySlotToKey(inventoryName, slot)
     return inventoryName .. "|" .. tostring(slot)
 end
@@ -205,6 +223,7 @@ end
 return {
     Inventory = Inventory,
     InventoryItem = InventoryItem,
+    AtlasEntry = AtlasEntry,
 
     InventorySlotToKey = InventorySlotToKey,
     KeyToInventorySlot = KeyToInventorySlot,

@@ -1,8 +1,8 @@
-local waitgroup = require "libs.waitgroup"
-local turtle    = require "turtle"
-local utils     = require "utils"
-local inventory = require "inventory"
-local irisPlugins   = require "irisplugins"
+local waitgroup   = require "libs.waitgroup"
+local turtle      = require "turtle"
+local utils       = require "utils"
+local inventory   = require "inventory"
+local irisPlugins = require "irisplugins"
 
 local VERSION = "1.0.0"
 
@@ -18,6 +18,7 @@ local function NewIRIS(logger)
         inventories = {},
         pluginManager = nil,
 
+        atlas = {},
         items = {},
         emptySlots = {},
         itemSummary = {},
@@ -243,6 +244,43 @@ local function NewIRIS(logger)
         func.FunctionEnd()
     end
 
+    this.getFromAtlas = function(inventoryItem)
+        -- TODO
+        local maxCount = 0
+        local displayName = 0
+        local tags = 0
+        return maxCount, tags
+    end
+
+    this._ensureAtlas = function(inventoryItem)
+        local func = this.logger.FunctionStart("_ensureAtlas", "inventoryItem", inventoryItem)
+
+        utils.expectTable("_ensureAtlas", "inventoryItem", inventoryItem, "iris:inventory_item")
+
+        local inventoryItemHash = inventoryItem.hash()
+        local atlasEntry = this.atlas[inventoryItemHash]
+        if not atlasEntry then
+            local inventoryName = inventoryItem._inventoryName
+            local slotNumber = inventoryItem._slotCount
+
+            local item
+            if inventoryName == this.turtle._getNameLocal() then
+                item = this.turtle.getItemDetail(slotNumber)
+            else
+                item = peripheral.call(inventoryName, "getItemDetail", slotNumber)
+            end
+
+            if item then
+                this.atlas[inventoryItemHash] = AtlasEntry(item)
+            else
+                this.logger.Warn().Str("inventoryName", inventoryName).Str("slotNumber", slotNumber).Str("hash",
+                    inventoryItemHash).Msg("Could not locate item detail in slot to add to atlas")
+            end
+        end
+
+        func.FunctionEnd()
+    end
+
     this._setInventoryItem = function(inventoryName, slot, inventoryItem)
         local func = this.logger.FunctionStart("_setInventoryItem", "inventoryName", inventoryName, "slot", slot,
             "inventoryItem", inventoryItem)
@@ -251,6 +289,7 @@ local function NewIRIS(logger)
         utils.expect("_setInventoryItem", "slot", slot, "number")
         if inventoryItem then
             utils.expectTable("_setInventoryItem", "inventoryItem", inventoryItem, "iris:inventory_item")
+            this._ensureAtlas(inventoryItem)
         end
 
         local irisInventory = this.inventories[inventoryName]
@@ -418,32 +457,44 @@ local function NewIRIS(logger)
         utils.expectTable("_scanInventory", "waitgroup", wg, "waitgroup:waitgroup")
 
         local inventorySize
+        local inventoryList
+
         local turtleNameLocal = this.turtle.getNameLocal()
 
         if inventoryName == turtleNameLocal then
             inventorySize = this.turtle.size()
+            inventoryList = this.turtle.list()
         else
             inventorySize = peripheral.call(inventoryName, "size")
+            inventoryList = peripheral.call(inventoryName, "list")
         end
 
         if inventorySize then
             this._registerInventory(inventoryName, inventorySize)
 
+            -- for slotNumber = 1, inventorySize, 1 do
+            --     wg.Add(function()
+            --         local item
+            --         if inventoryName == turtleNameLocal then
+            --             item = this.turtle.getItemDetail(slotNumber)
+            --         else
+            --             item = peripheral.call(inventoryName, "getItemDetail", slotNumber)
+            --         end
+            --         if item then
+            --             this._setInventoryItem(inventoryName, slotNumber,
+            --                 inventory.InventoryItem(inventoryName, slotNumber, item))
+            --         else
+            --             this._setInventoryItem(inventoryName, slotNumber, nil)
+            --         end
+            --     end)
+            -- end
+
             for slotNumber = 1, inventorySize, 1 do
-                wg.Add(function()
-                    local item
-                    if inventoryName == turtleNameLocal then
-                        item = this.turtle.getItemDetail(slotNumber)
-                    else
-                        item = peripheral.call(inventoryName, "getItemDetail", slotNumber)
-                    end
-                    if item then
-                        this._setInventoryItem(inventoryName, slotNumber,
-                            inventory.InventoryItem(inventoryName, slotNumber, item))
-                    else
-                        this._setInventoryItem(inventoryName, slotNumber, nil)
-                    end
-                end)
+                this._setInventoryItem(inventoryName, slotNumber, nil)
+            end
+
+            for slotNumber, itemStub in pairs(inventoryList) do
+                this._setInventoryItem(itemStub, slotNumber, inventory.InventoryItem(inventoryName, slotNumber, itemStub))
             end
         end
 
