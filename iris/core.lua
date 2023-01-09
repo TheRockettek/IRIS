@@ -249,6 +249,8 @@ local function NewIRIS(logger)
     end
 
     this.getFromAtlas = function(inventoryItem)
+        local func = this.logger.FunctionStart("getFromAtlas", "inventoryItem", inventoryItem)
+
         local atlasEntry = this.atlas[inventoryItem.hash()]
         if not atlasEntry then
             local result = this.ensureAtlas(inventoryItem)
@@ -256,9 +258,11 @@ local function NewIRIS(logger)
                 atlasEntry = result
             else
                 this.logger.Warn().Str("inventoryName", inventoryItem._inventoryName).Str("slotNumber",
-                    inventoryItem._slotCount).Str("hash", inventoryItem.hash()).Msg("Could not get item from atlas or ensure")
+                    inventoryItem._slot).Str("hash", inventoryItem.hash()).Msg("Could not get item from atlas or ensure")
             end
         end
+
+        func.FunctionEnd("atlasEntry", atlasEntry)
 
         return atlasEntry
     end
@@ -269,8 +273,8 @@ local function NewIRIS(logger)
         utils.expectTable("ensureAtlas", "inventoryItem", inventoryItem, "iris:inventory_item")
 
         local inventoryItemHash = inventoryItem.hash()
-        local atlasEntry = this.atlas[inventoryItemHash]
 
+        local atlasEntry = this.atlas[inventoryItemHash]
         if not atlasEntry then
             local inventoryName = inventoryItem._inventoryName
             local slotNumber = inventoryItem._slot
@@ -294,7 +298,7 @@ local function NewIRIS(logger)
             end
         end
 
-        func.FunctionEnd()
+        func.FunctionEnd("atlasEntry", atlasEntry)
 
         return atlasEntry
     end
