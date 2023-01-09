@@ -5,6 +5,10 @@ local irisPlugins = require "irisplugins"
 
 local VERSION = "1.0.0"
 
+-- Atlas specific config
+local atlasFileLocation = "iris.atlas" -- Location of atlas on disk
+local atlasTTL = 86400 -- Time (in seconds) that an item will persist on the atlas
+
 local function NewIRIS(logger)
     utils.expectTable("NewIRIS", "logger", logger, "logger:logger")
 
@@ -18,6 +22,8 @@ local function NewIRIS(logger)
         pluginManager = nil,
 
         atlas = {},
+        isAtlasDirty = false,
+
         items = {},
         emptySlots = {},
         itemSummary = {},
@@ -34,7 +40,12 @@ local function NewIRIS(logger)
 
     this.start = function()
         this.logger.Info().Str("VERSION", VERSION).Msg("IRIS is starting...")
+
+        this.loadAtlas(atlasFileLocation)
         this.scanInventories()
+        this.saveAtlas(atlasFileLocation)
+
+        -- TODO background task to auto save. Maybe plugin?
 
         this.logger.Info().Msg("IRIS has started")
         this.pluginManager.OnIRISStart()
@@ -43,16 +54,6 @@ local function NewIRIS(logger)
     this.close = function()
         this.logger.Info().Msg("IRIS is unloading")
         this.pluginManager.OnIRISUnload()
-    end
-
-    this.scanInventories = function()
-        local func = this.logger.FunctionStart("scanInventories")
-
-        local inventoryCount = this._scanAllInventories()
-
-        func.FunctionEnd("inventoryCount", inventoryCount)
-
-        return inventoryCount
     end
 
     this._formatIgnoreList = function(ignoreList)
@@ -65,6 +66,95 @@ local function NewIRIS(logger)
         else
             error(("Unexpected type for ignoreList. (expected string, table or nil, got %s)"):format(type(ignoreList)))
         end
+    end
+
+    this._cleanAtlas = function()
+        local now = os.epoch("utc")
+        local func = this.logger.FunctionStart("_clenaAtlas")
+
+        local cleaned = 0
+
+        for i, k in pairs(this.atlas) do
+            if k.lastSeen and (now - k.lastSeen) > atlasTTL then
+                this.atlas[i] = nil
+                cleaned = cleaned + 1
+            end
+        end
+
+        func.FunctionEnd("cleaned", cleaned)
+    end
+
+    this.loadAtlas = function(fileLocation)
+        local func = this.logger.FunctionStart("loadAtlas", "fileLocation", fileLocation)
+
+        local err
+        local newAtlas = {}
+
+        if fs.exists(fileLocation) then
+            local file = fs.open(fileLocation, "rb")
+            local content = file.readAll()
+            local dSuccess, dResult = pcall(textutils.unserialize, content)
+            if dSuccess then
+                for atlasKey, atlasEntry in pairs(dResult) do
+                    local eSuccess, eResult = pcall(utils.expectTable, "loadAtlas", "atlas_entry", atlasEntry,
+                        "iris:atlas_entry")
+                    if eSuccess then
+                        newAtlas[atlasKey] = atlasEntry
+                    else
+                        this.logger.Warn().Str("atlasKey", atlasKey).Str("entryType", atlasEntry._type).Msg("Atlas value was unexpected type. Ignoring")
+                    end
+                end
+            else
+                this.logger.Error().Err(dResult).Msg("Failed to deserialize atlas file")
+                err = dResult
+            end
+        else
+            this.logger.Warn().Msg("Atlas could not be found. This may just be a fresh install.")
+            err = "File does not exist"
+        end
+
+        func.FunctionEnd("#newAtlas", newAtlas, "err", err)
+
+        return newAtlas, err
+    end
+
+    this.saveAtlas = function(fileLocation)
+        local func = this.logger.FunctionStart("saveAtlas", "fileLocation", fileLocation)
+
+        local err
+        if this.isAtlasDirty then
+            local file = fs.open(fileLocation, "wb")
+            local success, result = pcall(textutils.serialize, this.atlas, { compact = true, allow_repetitions = true })
+            if success then
+                success, result = pcall(file.write, result)
+                if success then
+                    file.close()
+                    this.isAtlasDirty = false
+                else
+                    this.logger.Error().Err(result).Msg("Failed to write to file")
+                    err = result
+                end
+            else
+                this.logger.Error().Err(result).Msg("Failed to serialize atlas file")
+                err = result
+            end
+        else
+            this.logger.Info().Msg("Skipping save atlas as the data has not changed since the last save")
+        end
+
+        func.FunctionEnd("error", err)
+
+        return err
+    end
+
+    this.scanInventories = function()
+        local func = this.logger.FunctionStart("scanInventories")
+
+        local inventoryCount = this._scanAllInventories()
+
+        func.FunctionEnd("inventoryCount", inventoryCount)
+
+        return inventoryCount
     end
 
     this.findItem = function(inventoryItemHash, count, ignoreList)
@@ -260,6 +350,9 @@ local function NewIRIS(logger)
                     inventoryItem._slot).Str("hash", inventoryItem.hash()).Msg("Could not get item from atlas or ensure")
             end
         end
+
+        atlasEntry.lastSeen = os.epoch("utc")
+        this.isAtlasDirty = true
 
         func.FunctionEnd("atlasEntry", atlasEntry)
 

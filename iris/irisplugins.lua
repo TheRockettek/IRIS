@@ -62,12 +62,12 @@ function IRISPluginManager(iris)
                 iris.logger.Info().Str("localFileName", localFileName).Msg("Loaded plugin")
                 return true
             else
-                iris.logger.Warn().Str("localFileName", localFileName).Err(err).Msg("Failed to load plugin")
+                iris.logger.Error().Str("localFileName", localFileName).Err(err).Msg("Failed to load plugin")
 
                 return false
             end
         else
-            iris.logger.Warn().Str("localFileName", localFileName).Msg("Could not locate plugin")
+            iris.logger.Error().Str("localFileName", localFileName).Msg("Could not locate plugin")
 
             return false
         end
@@ -76,7 +76,7 @@ function IRISPluginManager(iris)
     this._secureCall = function(plugin, funcName, func)
         local success, result = pcall(func)
         if not success then
-            iris.logger.Warn().Str("plugin", plugin.pluginInfo.name).Err(result).Str("type", funcName).Msg(
+            iris.logger.Error().Str("plugin", plugin.pluginInfo.name).Err(result).Str("type", funcName).Msg(
                 "Plugin asserted error")
         end
     end

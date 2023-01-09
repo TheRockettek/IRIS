@@ -196,6 +196,8 @@ function AtlasEntry(item)
         maxCount = item.maxCount,
         nbt = item.nbt,
         tags = item.tags,
+
+        lastSeen = os.epoch("utc"),
     }
 
     this.Table = function()

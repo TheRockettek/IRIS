@@ -190,7 +190,7 @@ local function NewLogger(timeFormat, fileName)
             if object == nil then
                 return loggerMessage.Str(name, "nil")
             end
-            return loggerMessage.Str(name, serialize(object))
+            return loggerMessage.Str(name, Serialize(object))
         end
 
         return loggerMessage
@@ -216,7 +216,7 @@ local function NewLogger(timeFormat, fileName)
             if results then
                 for i = 1, #results, 2 do
                     if type(results[i + 1]) == "table" then
-                        results[i + 1] = serialize(results[i + 1])
+                        results[i + 1] = Serialize(results[i + 1])
                     end
                     msg = msg.Str(results[i], results[i + 1])
                 end
@@ -232,7 +232,7 @@ local function NewLogger(timeFormat, fileName)
             if results then
                 for i = 1, #results, 2 do
                     if type(results[i + 1]) == "table" then
-                        results[i + 1] = serialize(results[i + 1])
+                        results[i + 1] = Serialize(results[i + 1])
                     end
                     msg = msg.Str(results[i], results[i + 1])
                 end
@@ -244,7 +244,7 @@ local function NewLogger(timeFormat, fileName)
         if args then
             for i = 1, #args, 2 do
                 if type(args[i + 1]) == "table" then
-                    args[i + 1] = serialize(args[i + 1])
+                    args[i + 1] = Serialize(args[i + 1])
                 end
                 msg = msg.Str(args[i], args[i + 1])
             end
@@ -351,7 +351,7 @@ local function serialize_impl(t, tracking, indent)
     end
 end
 
-function serialize(object)
+function Serialize(object)
     local tTracking = {}
 
     return serialize_impl(object, tTracking, "")
@@ -359,5 +359,5 @@ end
 
 return {
     Logger = NewLogger(),
-    NewLogger = NewLogger
+    NewLogger = NewLogger,
 }
