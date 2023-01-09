@@ -105,6 +105,14 @@ local function Setup(gui)
 
     this.selectedTab = this._tabIndexItems
 
+    this._onSearchSelect = function()
+        this.isSearching = true
+    end
+
+    this._onSearchUnselect = function()
+        this.isSearching = false
+    end
+
     this._drawHeader = function()
         local w, h = term.getSize()
 
@@ -131,7 +139,11 @@ local function Setup(gui)
             end
         end
         backgroundBlit = backgroundBlit:sub(1, w)
-        backgroundBlit = backgroundBlit .. this.theme.headerBackground.blit:rep(w - #backgroundBlit)
+        if this.isSearching then
+            backgroundBlit = backgroundBlit .. this.theme.selectedTabBackground.blit:rep(w - #backgroundBlit)
+        else
+            backgroundBlit = backgroundBlit .. this.theme.headerBackground.blit:rep(w - #backgroundBlit)
+        end
 
         local blitText = (" "):rep(w)
         local textBlit = this.theme.headerText.blit:rep(w)
@@ -163,7 +175,22 @@ local function Setup(gui)
         term.setCursorPos(1, 5)
 
         gui.listenToEvent("mouse_click", function(x, y)
-            print(x, y)
+            if y >= 1 and y <= 3 then -- Heading click
+                local xOffset = 0
+                for _, k in pairs(this.tabs) do
+                    local tabWidth = 2 + #k.name
+                    if x >= xOffset and x <= xOffset + tabWidth then
+                        k.func()
+                        return
+                    end
+                    xOffset = xOffset + tabWidth
+                end
+                if x > xOffset then
+                    this._onSearchSelect()
+                    return
+                end
+                this._onSearchUnselect()
+            end
         end)
     end
 
