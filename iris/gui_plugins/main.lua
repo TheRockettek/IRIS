@@ -114,9 +114,9 @@ local function Setup(gui)
         end
 
         if this.searchQuery == "" then
-            displayText = displayText .. this.searchTextDefault
+            displayText = displayText .. " " .. this.searchTextDefault
         else
-            displayText = displayText .. this.displaySearchQuery
+            displayText = displayText .. " " .. this.displaySearchQuery
         end
 
         displayText = displayText:sub(1, w - 1)
