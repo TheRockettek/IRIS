@@ -108,7 +108,7 @@ local function Setup(gui)
 
         local displayText
         for _, k in pairs(this.tabs) do
-            displayText = displayText + " " .. k.name .. " "
+            displayText = displayText .. " " .. k.name .. " "
         end
         if this.searchQuery == "" then
             displayText = displayText .. this.searchTextDefault
