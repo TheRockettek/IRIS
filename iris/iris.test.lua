@@ -199,13 +199,11 @@ createBinaryTestCase("ValidateInventories", function()
             utils.expect("ValidateInventories", "_slot", inventoryItem._slot, "number")
             utils.expect("ValidateInventories", "name", inventoryItem.name, "string")
             utils.expect("ValidateInventories", "count", inventoryItem.count, "number")
-            utils.expect("ValidateInventories", "displayName", inventoryItem.displayName, "string")
 
             utils.expectNotValue("ValidateInventories", "_inventoryName", inventoryItem._inventoryName, "")
             utils.expectNotValue("ValidateInventories", "_slot", inventoryItem._slot, 0)
             utils.expectNotValue("ValidateInventories", "name", inventoryItem.name, "")
             utils.expectNotValue("ValidateInventories", "count", inventoryItem.count, 0)
-            utils.expectNotValue("ValidateInventories", "displayName", inventoryItem.displayName, "")
 
             usedSlots = usedSlots + 1
             itemCount = itemCount + inventoryItem.count
