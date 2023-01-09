@@ -209,6 +209,8 @@ function AtlasEntry(item)
             tags = this.tags
         }
     end
+
+    return this
 end
 
 function InventorySlotToKey(inventoryName, slot)
