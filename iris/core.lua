@@ -7,7 +7,7 @@ local VERSION = "1.0.0"
 
 -- Atlas specific config
 local atlasFileLocation = "iris.atlas" -- Location of atlas on disk
-local atlasTTL = 86400 -- Time (in seconds) that an item will persist on the atlas
+local atlasTTL = 86400000 -- Time (in milliseconds) that an item will persist on the atlas. This defaults to a day.
 
 local function NewIRIS(logger)
     utils.expectTable("NewIRIS", "logger", logger, "logger:logger")
@@ -101,7 +101,7 @@ local function NewIRIS(logger)
                     if eSuccess then
                         newAtlas[atlasKey] = atlasEntry
                     else
-                        this.logger.Warn().Str("atlasKey", atlasKey).Str("entryType", atlasEntry._type).Msg("Atlas value was unexpected type. Ignoring")
+                        this.logger.Warn().Err(eResult).Str("atlasKey", atlasKey).Str("entryType", atlasEntry._type).Msg("Atlas value was unexpected type. Ignoring")
                     end
                 end
             else
@@ -123,6 +123,8 @@ local function NewIRIS(logger)
 
         local err
         if this.isAtlasDirty then
+            this._cleanAtlas()
+
             local success, result = pcall(textutils.serialize, this.atlas, { compact = true, allow_repetitions = true })
             if success then
                 local file = fs.open(fileLocation, "wb")
