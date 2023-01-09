@@ -342,7 +342,7 @@ local function NewIRIS(logger)
         local func = this.logger.FunctionStart("getFromAtlas", "inventoryItem", inventoryItem)
 
         local atlasEntry = this.atlas[inventoryItem.hash()]
-        if not atlasEntry then
+        if not atlasEntry or (atlasEntry.lastSeen and (os.epoch("utc") - atlasEntry.lastSeen) > atlasTTL) then
             local result = this.ensureAtlas(inventoryItem)
             if result then
                 atlasEntry = result
@@ -368,7 +368,7 @@ local function NewIRIS(logger)
         local inventoryItemHash = inventoryItem.hash()
 
         local atlasEntry = this.atlas[inventoryItemHash]
-        if not atlasEntry then
+        if not atlasEntry or (atlasEntry.lastSeen and (os.epoch("utc") - atlasEntry.lastSeen) > atlasTTL) then
             local inventoryName = inventoryItem._inventoryName
             local slotNumber = inventoryItem._slot
 
