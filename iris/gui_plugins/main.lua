@@ -28,17 +28,17 @@ local function Setup(gui)
 
     this.theme = {
         titleText = this.palette.text,
-        selectedTabBackground = this.palette.secondary,
+        selectedTabBackground = this.palette.tertiary,
         headerBackground = this.palette.primary,
         headerText = this.palette.text,
 
-        scrollBackground = this.palette.tertiary,
-        scrollBar = this.palette.secondary,
+        scrollBackground = this.palette.secondary,
+        scrollBar = this.palette.primary,
 
-        tableHeaderBackground = this.palette.tertiary,
+        tableHeaderBackground = this.palette.secondary,
         tableHeaderText = this.palette.text,
 
-        tableBodyBackground = this.palette.secondary,
+        tableBodyBackground = this.palette.tertiary,
         tableBodyText = this.palette.text,
     }
 
@@ -83,6 +83,7 @@ local function Setup(gui)
 
     this.isSearching = false
     this.searchQuery = ""
+    this.displaySearchQuery = ""
 
     this._drawHeader = function()
         local w, h = term.getSize()
@@ -91,12 +92,10 @@ local function Setup(gui)
         if this.searchQuery == "" then
             displayText = displayText .. "Search..."
         else
-            displayText = displayText .. this.searchQuery
+            displayText = displayText .. this.displaySearchQuery
         end
         displayText = displayText:sub(1, w - 1)
         displayText = displayText .. (" "):rep(w - #displayText)
-
-        local hasTableHeaderBelow = (this.selectedTab == this._tabIndexItems)
 
         local backgroundBlit = ""
         for i, k in pairs(this.tabLabels) do
@@ -109,18 +108,15 @@ local function Setup(gui)
         backgroundBlit = backgroundBlit:sub(1, w)
         backgroundBlit = backgroundBlit .. this.theme.headerBackground.blit:rep(w - #backgroundBlit)
 
+        local blitText = (" "):rep(w)
+        local textBlit = this.theme.headerText.blit:rep(w)
+
         term.setCursorPos(1, 1)
-        term.blit((" "):rep(w), this.theme.headerText.blit:rep(w), backgroundBlit)
-
+        term.blit(blitText, textBlit, backgroundBlit)
         term.setCursorPos(1, 2)
-        term.blit(displayText, this.theme.headerText.blit:rep(w), backgroundBlit)
-
+        term.blit(displayText, textBlit, backgroundBlit)
         term.setCursorPos(1, 3)
-        if hasTableHeaderBelow then
-            term.blit(("\143"):rep(w), backgroundBlit, this.theme.tableHeaderBackground.blit:rep(w))
-        else
-            term.blit(("\143"):rep(w), backgroundBlit, this.theme.tableBodyBackground.blit:rep(w))
-        end
+        term.blit(blitText, textBlit, backgroundBlit)
     end
 
     this.OnGUIStart = function()
