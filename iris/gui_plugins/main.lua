@@ -32,14 +32,14 @@ local function Setup(gui)
         headerBackground = this.palette.primary,
         headerText = this.palette.text,
 
-        scrollBackground = 0,
-        scrollBar = 0,
+        scrollBackground = this.palette.tertiary,
+        scrollBar = this.palette.secondary,
 
-        tableHeaderBackground = 0,
-        tableHeaderText = 0,
+        tableHeaderBackground = this.palette.tertiary,
+        tableHeaderText = this.palette.text,
 
-        tableBodyBackground = 0,
-        tableBodyText = 0,
+        tableBodyBackground = this.palette.secondary,
+        tableBodyText = this.palette.text,
     }
 
     this.OnGUILoad = function()
