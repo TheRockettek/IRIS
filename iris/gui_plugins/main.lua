@@ -186,7 +186,6 @@ local function Setup(gui)
                             tab.func(tabId)
                             this._onSearchUnselect()
                             this._drawHeader();
-                            break
                         end
                         xOffset = xOffset + tabWidth
                     end
