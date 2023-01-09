@@ -73,24 +73,41 @@ local function Setup(gui)
 
     -- Main GUI actions
 
-    this._tabIndexSummary = 1
-    this._tabIndexItems = 2
-    this._tabIndexInventories = 3
-    this._tabIndexTasks = 4
+    this.tabs = {}
+    this.selectedTab = 1
 
-    this.selectedTab = this._tabIndexSummary
-    this.tabLabels = { "IRIS", "Items", "Inv.", "Tasks" }
-
+    this.isDropdownVisible = false
     this.isSearching = false
+
+    this.searchTextDefault = "Search..."
     this.searchQuery = ""
     this.displaySearchQuery = ""
+
+    this._tabItems = 1
+
+    this.addTab = function(name, onClickFunc)
+        table.insert(this.tabs, {
+            name = name,
+            func = onClickFunc,
+        })
+    end
+
+    -- Register tabs
+
+    this._tabIndexIRIS = this.addTab("IRIS", function(tabId) this.isDropdownVisible = not this.isDropdownVisible; if this.isDropdownVisible then this._drawDropdown() else this._drawPage() end end)
+    this._tabIndexItems = this.addTab("Items", function(tabId) this.selectedTab = tabId; this._drawPage() end)
+    this._tabIndexInventory = this.addTab("Inv.", function(tabId) this.selectedTab = tabId; this._drawPage() end)
+    this._tabIndexTasks = this.addTab("Tasks", function(tabId) this.selectedTab = tabId; this._drawPage() end)
 
     this._drawHeader = function()
         local w, h = term.getSize()
 
-        local displayText = " " .. table.concat(this.tabLabels, "  ") .. "  "
+        local displayText
+        for _, k in ipairs(this.tabs) do
+            displayText = displayText + " " .. k.name .. " "
+        end
         if this.searchQuery == "" then
-            displayText = displayText .. "Search..."
+            displayText = displayText .. this.searchTextDefault
         else
             displayText = displayText .. this.displaySearchQuery
         end
@@ -117,6 +134,12 @@ local function Setup(gui)
         term.blit(displayText, textBlit, backgroundBlit)
         term.setCursorPos(1, 3)
         term.blit(blitText, textBlit, backgroundBlit)
+    end
+
+    this._drawPage = function()
+    end
+
+    this._drawDropdown = function()
     end
 
     this.OnGUIStart = function()
