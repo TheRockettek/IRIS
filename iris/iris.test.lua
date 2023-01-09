@@ -319,7 +319,8 @@ createBinaryTestCase("FindSpot", function()
 end)
 
 createBinaryTestCase("FindTooManySpot", function()
-    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1000000, atlasEntry.maxCount,
+    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1000000, atlasEntry.maxCount
+        ,
         { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")

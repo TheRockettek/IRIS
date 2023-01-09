@@ -271,7 +271,10 @@ local function NewIRIS(logger)
 
         if not atlasEntry then
             local inventoryName = inventoryItem._inventoryName
-            local slotNumber = inventoryItem._slotCount
+            local slotNumber = inventoryItem._slot
+
+            assert(inventoryName)
+            assert(slotNumber)
 
             local item
             if inventoryName == this.turtle._getNameLocal() then
