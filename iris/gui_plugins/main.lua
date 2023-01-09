@@ -178,7 +178,7 @@ local function Setup(gui)
             if mouseType == 1 then
                 this.logger.Debug().Str("X", x).Str("Y", y).Msg("Mouse click")
                 if y >= 1 and y <= 3 then -- Heading click
-                    local xOffset = 0
+                    local xOffset = 1
                     for _, k in pairs(this.tabs) do
                         local tabWidth = 2 + #k.name
                         this.logger.Debug().Str("tw", tabWidth).Str("offset", xOffset).Str("xc", x >= xOffset).Str("xb",
