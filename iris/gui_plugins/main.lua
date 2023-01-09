@@ -106,15 +106,17 @@ local function Setup(gui)
     this._drawHeader = function()
         local w, h = term.getSize()
 
-        local displayText
+        local displayText = ""
         for _, k in pairs(this.tabs) do
             displayText = displayText .. " " .. k.name .. " "
         end
+
         if this.searchQuery == "" then
             displayText = displayText .. this.searchTextDefault
         else
             displayText = displayText .. this.displaySearchQuery
         end
+
         displayText = displayText:sub(1, w - 1)
         displayText = displayText .. (" "):rep(w - #displayText)
 
