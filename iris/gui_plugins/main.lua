@@ -107,7 +107,7 @@ local function Setup(gui)
             end
         end
         backgroundBlit = backgroundBlit:sub(1, w)
-        backgroundBlit = backgroundBlit .. (" "):rep(w - #backgroundBlit)
+        backgroundBlit = backgroundBlit .. this.theme.headerBackground.blit:rep(w - #backgroundBlit)
 
         term.setCursorPos(1, 1)
         term.blit((" "):rep(w), this.theme.headerText.blit:rep(w), backgroundBlit)
@@ -129,8 +129,11 @@ local function Setup(gui)
 
         term.clear()
 
+        local w, h = term.getSize()
         this._drawHeader()
-        term.setCursorPos(1, 4)
+
+        paintutils.drawBox(1, 5, w, 5, this.theme.tableHeaderBackground.colour)
+        term.setCursorPos(1, 6)
 
         gui.listenToEvent("mouse_click", function(x, y)
             print(x, y)
