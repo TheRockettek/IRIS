@@ -117,7 +117,7 @@ local function NewIRIS(logger)
                 if not flatPack.find(inventoryItem._inventoryName) then
                     table.insert(candidates, inventoryItem)
 
-                    local atlasEntry = this._getFromAtlas(inventoryItem)
+                    local atlasEntry = this.getFromAtlas(inventoryItem)
                     itemsRemaining = itemsRemaining - (atlasEntry.maxCount - inventoryItem.count)
                     if itemsRemaining <= 0 then
                         break
@@ -249,7 +249,7 @@ local function NewIRIS(logger)
     this.getFromAtlas = function(inventoryItem)
         local atlasEntry = this.atlas[inventoryItem.hash()]
         if not atlasEntry then
-            local result = this._ensureAtlas(inventoryItem)
+            local result = this.ensureAtlas(inventoryItem)
             if result then
                 atlasEntry = result
             else
@@ -261,10 +261,10 @@ local function NewIRIS(logger)
         return atlasEntry
     end
 
-    this._ensureAtlas = function(inventoryItem)
-        local func = this.logger.FunctionStart("_ensureAtlas", "inventoryItem", inventoryItem)
+    this.ensureAtlas = function(inventoryItem)
+        local func = this.logger.FunctionStart("ensureAtlas", "inventoryItem", inventoryItem)
 
-        utils.expectTable("_ensureAtlas", "inventoryItem", inventoryItem, "iris:inventory_item")
+        utils.expectTable("ensureAtlas", "inventoryItem", inventoryItem, "iris:inventory_item")
 
         local inventoryItemHash = inventoryItem.hash()
         local atlasEntry = this.atlas[inventoryItemHash]
@@ -305,7 +305,7 @@ local function NewIRIS(logger)
         utils.expect("_setInventoryItem", "slot", slot, "number")
         if inventoryItem then
             utils.expectTable("_setInventoryItem", "inventoryItem", inventoryItem, "iris:inventory_item")
-            this._ensureAtlas(inventoryItem)
+            this.ensureAtlas(inventoryItem)
         end
 
         local irisInventory = this.inventories[inventoryName]
@@ -410,7 +410,7 @@ local function NewIRIS(logger)
                 this.emptySlotCount = this.emptySlotCount - 1
                 this.totalItemCount = this.totalItemCount + inventoryItem.count
 
-                local atlasEntry = this._getFromAtlas(inventoryItem)
+                local atlasEntry = this.getFromAtlas(inventoryItem)
                 this.itemMaxCount = this.itemMaxCount - inventory.DefaultInventoryStackSize + atlasEntry.maxCount
             end
         end

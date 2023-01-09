@@ -56,7 +56,7 @@ end
 
 local getfirstItem = function(iris, table)
     for i, k in pairs(table) do
-        local atlasEntry = iris._getFromAtlas(k)
+        local atlasEntry = iris.getFromAtlas(k)
         if not atlasEntry.maxCount or atlasEntry.maxCount > 1 then
             return i, k
         end
@@ -210,7 +210,7 @@ createBinaryTestCase("ValidateInventories", function()
             usedSlots = usedSlots + 1
             itemCount = itemCount + inventoryItem.count
 
-            local atlasEntry = iris._getFromAtlas(inventoryItem)
+            local atlasEntry = iris.getFromAtlas(inventoryItem)
             maxItemCount = maxItemCount + atlasEntry.maxCount
         end
 
@@ -240,7 +240,7 @@ local testItemHash, testItems = getfirstItem(iris, iris.items)
 local _, testItem = getfirstItem(iris, testItems)
 
 
-local atlasEntry = iris._getFromAtlas(testItem)
+local atlasEntry = iris.getFromAtlas(testItem)
 local isTestItemFull = testItem.count == atlasEntry.maxCount
 
 local testItemResult = createBinaryTestCase("FindItem", function()
