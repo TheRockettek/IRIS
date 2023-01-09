@@ -2,7 +2,7 @@ local logging = require "libs.logging"
 local core = require "core"
 
 local logger = logging.NewLogger("-", "iris.log")
-logger.setLevel("info")
+logger.setLevel("debug")
 
 local iris = core.NewIRIS(logger)
 

@@ -175,10 +175,13 @@ local function Setup(gui)
         term.setCursorPos(1, 5)
 
         gui.listenToEvent("mouse_click", function(x, y)
+            this.logger.Debug().Msg("X", x).Msg("Y", y).Msg("Mouse click")
             if y >= 1 and y <= 3 then -- Heading click
                 local xOffset = 0
                 for _, k in pairs(this.tabs) do
                     local tabWidth = 2 + #k.name
+                    this.logger.Debug().Msg("tw", tabWidth).Msg("offset", xOffset).Msg("xc", x >= xOffset).Msg("xb",
+                        x <= xOffset + tabWidth).Msg("Mouse click")
                     if x >= xOffset and x <= xOffset + tabWidth then
                         k.func()
                         return
