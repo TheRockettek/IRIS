@@ -16,8 +16,8 @@ local function Setup(gui)
 
         palette = {
             primary   = { colour = colours.black, hex = 0x062144 },
-            secondary = { colour = colours.gray, hex = 0x0A3875 },
-            tertiary  = { colour = colours.lightGray, hex = 0x09346B },
+            secondary = { colour = colours.grey, hex = 0x0A3875 },
+            tertiary  = { colour = colours.lightGrey, hex = 0x09346B },
             text      = { colour = colours.white, hex = 0xFFFFFF },
         },
     }
