@@ -27,10 +27,10 @@ local function Setup(gui)
     end
 
     this.theme = {
-        titleText = this.palette.text.colour,
-        selectedTabBackground = this.palette.secondary.colour,
-        headerBackground = this.palette.primary.colour,
-        headerText = this.palette.text.colour,
+        titleText = this.palette.text,
+        selectedTabBackground = this.palette.secondary,
+        headerBackground = this.palette.primary,
+        headerText = this.palette.text,
 
         scrollBackground = 0,
         scrollBar = 0,
@@ -55,7 +55,7 @@ local function Setup(gui)
     end
 
     this.OnGUIUnload = function()
-        this.iris.logging.silent = false
+        this.iris.logger.silent = true
 
         -- Reset palette.
         if term.setPaletteColour then
@@ -121,11 +121,12 @@ local function Setup(gui)
         else
             term.blit(("\143"):rep(w), this.theme.headerText.blit:rep(w), backgroundBlit)
         end
-
     end
 
     this.OnGUIStart = function()
+        -- We want to stop the logger from printing messages.
         this.iris.logger.silent = true
+
         term.clear()
 
         this._drawHeader()
