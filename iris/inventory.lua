@@ -84,7 +84,9 @@ function Inventory(peripheralName, slotCount)
                 this.usedSlotCount = this.usedSlotCount - 1
                 this.emptySlotCount = this.emptySlotCount + 1
                 this.totalItemCount = this.totalItemCount - currentSlot.count
-                this.itemMaxCount = this.itemMaxCount - currentSlot.maxCount + this._defaultInventorySlotSize
+
+                local atlasEntry = this._getFromAtlas(currentSlot)
+                this.itemMaxCount = this.itemMaxCount - atlasEntry.maxCount + this._defaultInventorySlotSize
             end
 
             this.slots[tostring(slot)] = nil
@@ -125,7 +127,9 @@ function Inventory(peripheralName, slotCount)
                 this.usedSlotCount = this.usedSlotCount + 1
                 this.emptySlotCount = this.emptySlotCount - 1
                 this.totalItemCount = this.totalItemCount + inventoryItem.count
-                this.itemMaxCount = this.itemMaxCount - this._defaultInventorySlotSize + inventoryItem.maxCount
+
+                local atlasEntry = this._getFromAtlas(inventoryItem)
+                this.itemMaxCount = this.itemMaxCount - this._defaultInventorySlotSize + atlasEntry.maxCount
             end
 
             this.slots[tostring(slot)] = inventoryItem

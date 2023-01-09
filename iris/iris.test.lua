@@ -54,9 +54,10 @@ local function createTestCase(name, expected, func, ...)
     return table.unpack(results)
 end
 
-local getfirstItem = function(table)
+local getfirstItem = function(iris, table)
     for i, k in pairs(table) do
-        if not k.maxCount or k.maxCount > 1 then
+        local atlasEntry = iris._getFromAtlas(k)
+        if not atlasEntry.maxCount or atlasEntry.maxCount > 1 then
             return i, k
         end
     end
@@ -199,18 +200,18 @@ createBinaryTestCase("ValidateInventories", function()
             utils.expect("ValidateInventories", "name", inventoryItem.name, "string")
             utils.expect("ValidateInventories", "count", inventoryItem.count, "number")
             utils.expect("ValidateInventories", "displayName", inventoryItem.displayName, "string")
-            utils.expect("ValidateInventories", "maxCount", inventoryItem.maxCount, "number")
 
             utils.expectNotValue("ValidateInventories", "_inventoryName", inventoryItem._inventoryName, "")
             utils.expectNotValue("ValidateInventories", "_slot", inventoryItem._slot, 0)
             utils.expectNotValue("ValidateInventories", "name", inventoryItem.name, "")
             utils.expectNotValue("ValidateInventories", "count", inventoryItem.count, 0)
             utils.expectNotValue("ValidateInventories", "displayName", inventoryItem.displayName, "")
-            utils.expectNotValue("ValidateInventories", "maxCount", inventoryItem.maxCount, 0)
 
             usedSlots = usedSlots + 1
             itemCount = itemCount + inventoryItem.count
-            maxItemCount = maxItemCount + inventoryItem.maxCount
+
+            local atlasEntry = iris._getFromAtlas(inventoryItem)
+            maxItemCount = maxItemCount + atlasEntry.maxCount
         end
 
         local emptySlots = inventoryData._slotCount - usedSlots
@@ -235,10 +236,12 @@ createBinaryTestCase("ValidateInventories", function()
     return true
 end)
 
-local testItemHash, testItems = getfirstItem(iris.items)
-local _, testItem = getfirstItem(testItems)
+local testItemHash, testItems = getfirstItem(iris, iris.items)
+local _, testItem = getfirstItem(iris, testItems)
 
-local isTestItemFull = testItem.count == testItem.maxCount
+
+local atlasEntry = iris._getFromAtlas(testItem)
+local isTestItemFull = testItem.count == atlasEntry.maxCount
 
 local testItemResult = createBinaryTestCase("FindItem", function()
     local candidates, itemsRemaining = iris.findItem(testItemHash, 1, { iris.turtle.getNameLocal() })
@@ -291,7 +294,7 @@ createBinaryTestCase("FindTooMuchEmptySpace", function()
 end)
 
 createBinaryTestCase("FindSpot", function()
-    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1, testItem.maxCount,
+    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1, atlasEntry.maxCount,
         { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")
@@ -316,7 +319,7 @@ createBinaryTestCase("FindSpot", function()
 end)
 
 createBinaryTestCase("FindTooManySpot", function()
-    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1000000, testItem.maxCount,
+    local candidates, willOverflow, emptySpaces, missingSpaces = iris.findSpot(testItemHash, 1000000, atlasEntry.maxCount,
         { iris.turtle.getNameLocal() })
 
     utils.expect("FindItem", "candidates", candidates, "table")

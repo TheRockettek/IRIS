@@ -116,7 +116,9 @@ local function NewIRIS(logger)
             for _, inventoryItem in pairs(items) do
                 if not flatPack.find(inventoryItem._inventoryName) then
                     table.insert(candidates, inventoryItem)
-                    itemsRemaining = itemsRemaining - (inventoryItem.maxCount - inventoryItem.count)
+
+                    local atlasEntry = this._getFromAtlas(inventoryItem)
+                    itemsRemaining = itemsRemaining - (atlasEntry.maxCount - inventoryItem.count)
                     if itemsRemaining <= 0 then
                         break
                     end
@@ -245,11 +247,18 @@ local function NewIRIS(logger)
     end
 
     this.getFromAtlas = function(inventoryItem)
-        -- TODO
-        local maxCount = 0
-        local displayName = 0
-        local tags = 0
-        return maxCount, tags
+        local atlasEntry = this.atlas[inventoryItem.hash()]
+        if not atlasEntry then
+            local result = this._ensureAtlas(inventoryItem)
+            if result then
+                atlasEntry = result
+            else
+                this.logger.Warn().Str("inventoryName", inventoryItem._inventoryName).Str("slotNumber",
+                    inventoryItem._slotCount).Str("hash", inventoryItem.hash()).Msg("Could not get item from atlas or ensure")
+            end
+        end
+
+        return atlasEntry
     end
 
     this._ensureAtlas = function(inventoryItem)
@@ -259,6 +268,7 @@ local function NewIRIS(logger)
 
         local inventoryItemHash = inventoryItem.hash()
         local atlasEntry = this.atlas[inventoryItemHash]
+
         if not atlasEntry then
             local inventoryName = inventoryItem._inventoryName
             local slotNumber = inventoryItem._slotCount
@@ -271,7 +281,8 @@ local function NewIRIS(logger)
             end
 
             if item then
-                this.atlas[inventoryItemHash] = AtlasEntry(item)
+                atlasEntry = AtlasEntry(item)
+                this.atlas[inventoryItemHash] = atlasEntry
             else
                 this.logger.Warn().Str("inventoryName", inventoryName).Str("slotNumber", slotNumber).Str("hash",
                     inventoryItemHash).Msg("Could not locate item detail in slot to add to atlas")
@@ -279,6 +290,8 @@ local function NewIRIS(logger)
         end
 
         func.FunctionEnd()
+
+        return atlasEntry
     end
 
     this._setInventoryItem = function(inventoryName, slot, inventoryItem)
@@ -393,7 +406,9 @@ local function NewIRIS(logger)
                 this.usedSlotCount = this.usedSlotCount + 1
                 this.emptySlotCount = this.emptySlotCount - 1
                 this.totalItemCount = this.totalItemCount + inventoryItem.count
-                this.itemMaxCount = this.itemMaxCount - inventory.DefaultInventoryStackSize + inventoryItem.maxCount
+
+                local atlasEntry = this._getFromAtlas(inventoryItem)
+                this.itemMaxCount = this.itemMaxCount - inventory.DefaultInventoryStackSize + atlasEntry.maxCount
             end
         end
 
