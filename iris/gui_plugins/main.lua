@@ -174,27 +174,29 @@ local function Setup(gui)
 
         term.setCursorPos(1, 5)
 
-        gui.listenToEvent("mouse_click", function(x, y)
-            this.logger.Debug().Str("X", x).Str("Y", y).Msg("Mouse click")
-            if y >= 1 and y <= 3 then -- Heading click
-                local xOffset = 0
-                for _, k in pairs(this.tabs) do
-                    local tabWidth = 2 + #k.name
-                    this.logger.Debug().Str("tw", tabWidth).Str("offset", xOffset).Str("xc", x >= xOffset).Str("xb",
-                        x <= xOffset + tabWidth).Msg("Mouse click")
-                    if x >= xOffset and x <= xOffset + tabWidth then
-                        k.func()
+        gui.listenToEvent("mouse_click", function(mouseType, x, y)
+            if mouseType == 1 then
+                this.logger.Debug().Str("X", x).Str("Y", y).Msg("Mouse click")
+                if y >= 1 and y <= 3 then -- Heading click
+                    local xOffset = 0
+                    for _, k in pairs(this.tabs) do
+                        local tabWidth = 2 + #k.name
+                        this.logger.Debug().Str("tw", tabWidth).Str("offset", xOffset).Str("xc", x >= xOffset).Str("xb",
+                            x <= xOffset + tabWidth).Msg("Mouse click")
+                        if x >= xOffset and x <= xOffset + tabWidth then
+                            k.func()
+                            this._drawHeader();
+                            return
+                        end
+                        xOffset = xOffset + tabWidth
+                    end
+                    if x > xOffset then
+                        this._onSearchSelect()
                         this._drawHeader();
                         return
                     end
-                    xOffset = xOffset + tabWidth
+                    this._onSearchUnselect()
                 end
-                if x > xOffset then
-                    this._onSearchSelect()
-                    this._drawHeader();
-                    return
-                end
-                this._onSearchUnselect()
             end
         end)
     end
