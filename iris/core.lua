@@ -216,8 +216,10 @@ local function NewIRIS(logger)
                 peripheral.call(toInventory, "getItemDetail", toSlot))
         end
 
-        this._setInventoryItem(toInventory, toSlot, resultInventoryItem)
-        this._setInventoryItem(fromInventory, fromSlot, inventoryItem)
+        local atlasEntry = this.getFromAtlas(resultInventoryItem)
+
+        this._setInventoryItem(toInventory, toSlot, resultInventoryItem, atlasEntry)
+        this._setInventoryItem(fromInventory, fromSlot, inventoryItem, atlasEntry)
 
         func.FunctionEnd("itemsTransferred", itemsTransferred)
 
@@ -297,7 +299,7 @@ local function NewIRIS(logger)
         return atlasEntry
     end
 
-    this._setInventoryItem = function(inventoryName, slot, inventoryItem)
+    this._setInventoryItem = function(inventoryName, slot, inventoryItem, atlasEntry)
         local func = this.logger.FunctionStart("_setInventoryItem", "inventoryName", inventoryName, "slot", slot,
             "inventoryItem", inventoryItem)
 
@@ -311,15 +313,15 @@ local function NewIRIS(logger)
         local irisInventory = this.inventories[inventoryName]
         assert(irisInventory)
 
-        irisInventory.SetInventoryItem(slot, inventoryItem)
+        irisInventory.SetInventoryItem(slot, inventoryItem, atlasEntry)
         if inventoryItem then
-            this._setInventoryItemMaster(inventoryName, slot, inventoryItem)
+            this._setInventoryItemMaster(inventoryName, slot, inventoryItem, atlasEntry)
         end
 
         func.FunctionEnd()
     end
 
-    this._setInventoryItemMaster = function(inventoryName, slot, inventoryItem)
+    this._setInventoryItemMaster = function(inventoryName, slot, inventoryItem, atlasEntry)
         local func = this.logger.FunctionStart("_setInventoryItemMaster", "inventoryName", inventoryName, "slot", slot,
             "inventoryItem", inventoryItem)
 
@@ -410,7 +412,6 @@ local function NewIRIS(logger)
                 this.emptySlotCount = this.emptySlotCount - 1
                 this.totalItemCount = this.totalItemCount + inventoryItem.count
 
-                local atlasEntry = this.getFromAtlas(inventoryItem)
                 this.itemMaxCount = this.itemMaxCount - inventory.DefaultInventoryStackSize + atlasEntry.maxCount
             end
         end
@@ -508,12 +509,13 @@ local function NewIRIS(logger)
             -- end
 
             for slotNumber = 1, inventorySize, 1 do
-                this._setInventoryItem(inventoryName, slotNumber, nil)
+                this._setInventoryItem(inventoryName, slotNumber, nil, nil)
             end
 
             for slotNumber, itemStub in pairs(inventoryList) do
-                this._setInventoryItem(inventoryName, slotNumber,
-                    inventory.InventoryItem(inventoryName, slotNumber, itemStub))
+                local inventoryItem = inventory.InventoryItem(inventoryName, slotNumber, itemStub)
+                local atlasEntry = this.getFromAtlas(inventoryItem)
+                this._setInventoryItem(inventoryName, slotNumber, inventoryItem, atlasEntry)
             end
         end
 
