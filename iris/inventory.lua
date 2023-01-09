@@ -200,18 +200,6 @@ function AtlasEntry(item)
         lastSeen = os.epoch("utc"),
     }
 
-    this.Table = function()
-        return {
-            _type = this._type,
-
-            name = this.name,
-            displayName = this.displayName,
-            maxCount = this.maxCount,
-            nbt = this.nbt,
-            tags = this.tags
-        }
-    end
-
     return this
 end
 
