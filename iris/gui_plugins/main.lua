@@ -79,7 +79,7 @@ local function Setup(gui)
     this._tabIndexTasks = 4
 
     this.selectedTab = this._tabIndexSummary
-    this.tabLabels = { "IRIS ", "Items", "Inventories", "Tasks" }
+    this.tabLabels = { "IRIS", "Items", "Inv.", "Tasks" }
 
     this.isSearching = false
     this.searchQuery = ""
@@ -133,7 +133,6 @@ local function Setup(gui)
         local w, h = term.getSize()
         this._drawHeader()
 
-        paintutils.drawBox(1, 4, w, 4, this.theme.tableHeaderBackground.colour)
         term.setCursorPos(1, 5)
 
         gui.listenToEvent("mouse_click", function(x, y)
