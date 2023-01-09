@@ -22,12 +22,15 @@ local function Setup(gui)
         },
     }
 
+    for i, k in pairs(this.palette) do
+        this.palette[i].blit = colours.toBlit(k.colour)
+    end
+
     this.theme = {
         titleText = this.palette.text.colour,
+        selectedTabBackground = this.palette.secondary.colour,
         headerBackground = this.palette.primary.colour,
         headerText = this.palette.text.colour,
-        tabBackground = this.palette.secondary.colour,
-        tabText = this.palette.text.colour,
 
         scrollBackground = 0,
         scrollBar = 0,
@@ -51,18 +54,9 @@ local function Setup(gui)
         end
     end
 
-    this.OnGUIStart = function()
-        term.clear()
-
-        term.setCursorPos(2, 2)
-        term.write("GUI Example!")
-
-        term.setCursorPos(1, 4)
-
-        os.pullEvent()
-    end
-
     this.OnGUIUnload = function()
+        this.iris.logging.silent = false
+
         -- Reset palette.
         if term.setPaletteColour then
             for _, k in pairs(this.palette) do
@@ -72,7 +66,74 @@ local function Setup(gui)
             end
         end
 
+        -- Reset terminal state.
         term.clear()
+        term.setCursorPos(1, 1)
+    end
+
+    -- Main GUI actions
+
+    this._tabIndexSummary = 1
+    this._tabIndexItems = 2
+    this._tabIndexInventories = 3
+    this._tabIndexTasks = 4
+
+    this.selectedTab = this._tabIndexSummary
+    this.tabLabels = { "IRIS ", "Items", "Inventories", "Tasks" }
+
+    this.isSearching = false
+    this.searchQuery = ""
+
+    this._drawHeader = function()
+        local w, h = term.getSize()
+
+        local displayText = " " .. table.concat(this.tabLabels, "  ") .. "  "
+        if this.searchQuery == "" then
+            displayText = displayText .. "Search..."
+        else
+            displayText = displayText .. this.searchQuery
+        end
+        displayText = displayText:sub(1, w - 1)
+        displayText = displayText .. (" "):rep(w - #displayText)
+
+        local hasTableHeaderBelow = (this.selectedTab == this._tabIndexItems)
+
+        local backgroundBlit = ""
+        for i, k in pairs(this.tabLabels) do
+            if this.selectedTab == i then
+                backgroundBlit = backgroundBlit .. this.theme.selectedTabBackground.blit:rep(2 + #k)
+            else
+                backgroundBlit = backgroundBlit .. this.theme.headerBackground.blit:rep(2 + #k)
+            end
+        end
+        backgroundBlit = backgroundBlit:sub(1, w)
+        backgroundBlit = backgroundBlit .. (" "):rep(w - #backgroundBlit)
+
+        term.setCursorPos(1, 1)
+        term.blit((" "):rep(w), this.theme.headerText.blit:rep(w), backgroundBlit)
+
+        term.setCursorPos(1, 2)
+        term.blit(displayText, this.theme.headerText.blit:rep(w), backgroundBlit)
+
+        term.setCursorPos(1, 3)
+        if hasTableHeaderBelow then
+            term.blit(("\143"):rep(w), this.theme.headerText.blit:rep(w), backgroundBlit)
+        else
+            term.blit(("\143"):rep(w), this.theme.headerText.blit:rep(w), backgroundBlit)
+        end
+
+    end
+
+    this.OnGUIStart = function()
+        this.iris.logging.silent = true
+        term.clear()
+
+        this._drawHeader()
+        term.setCursorPos(1, 4)
+
+        gui.listenToEvent("mouse_click", function(x, y)
+            print(x, y)
+        end)
     end
 
     return this
