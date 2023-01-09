@@ -1,4 +1,3 @@
-local waitgroup   = require "libs.waitgroup"
 local turtle      = require "turtle"
 local utils       = require "utils"
 local inventory   = require "inventory"
@@ -453,31 +452,20 @@ local function NewIRIS(logger)
 
         func.FunctionStep("_findAllInventories")
 
-        local wg = waitgroup.NewWaitGroup()
-
         for _, inventoryName in pairs(inventoryNames) do
-            wg.Add(function()
-                this._scanInventory(wg, inventoryName)
-            end)
+            this._scanInventory(inventoryName)
         end
-
         if this.turtle then
-            wg.Add(function()
-                this._scanInventory(wg, this.turtle.getNameLocal())
-            end)
+            this._scanInventory(this.turtle.getNameLocal())
         end
-
-        wg.Wait()
 
         func.FunctionEnd("inventoryCount", #inventoryNames)
 
         return #inventoryNames
     end
 
-    this._scanInventory = function(wg, inventoryName)
+    this._scanInventory = function(inventoryName)
         local func = this.logger.FunctionStart("_scanInventory", "inventoryName", inventoryName)
-
-        utils.expectTable("_scanInventory", "waitgroup", wg, "waitgroup:waitgroup")
 
         local inventorySize
         local inventoryList
@@ -494,23 +482,6 @@ local function NewIRIS(logger)
 
         if inventorySize then
             this._registerInventory(inventoryName, inventorySize)
-
-            -- for slotNumber = 1, inventorySize, 1 do
-            --     wg.Add(function()
-            --         local item
-            --         if inventoryName == turtleNameLocal then
-            --             item = this.turtle.getItemDetail(slotNumber)
-            --         else
-            --             item = peripheral.call(inventoryName, "getItemDetail", slotNumber)
-            --         end
-            --         if item then
-            --             this._setInventoryItem(inventoryName, slotNumber,
-            --                 inventory.InventoryItem(inventoryName, slotNumber, item))
-            --         else
-            --             this._setInventoryItem(inventoryName, slotNumber, nil)
-            --         end
-            --     end)
-            -- end
 
             for slotNumber = 1, inventorySize, 1 do
                 this._setInventoryItem(inventoryName, slotNumber, nil, nil)
