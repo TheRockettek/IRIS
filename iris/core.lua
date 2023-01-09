@@ -88,7 +88,6 @@ local function NewIRIS(logger)
         local func = this.logger.FunctionStart("loadAtlas", "fileLocation", fileLocation)
 
         local err
-        local newAtlas = {}
 
         if fs.exists(fileLocation) then
             local file = fs.open(fileLocation, "rb")
@@ -99,7 +98,7 @@ local function NewIRIS(logger)
                     local eSuccess, eResult = pcall(utils.expectTable, "loadAtlas", "atlas_entry", atlasEntry,
                         "iris:atlas_entry")
                     if eSuccess then
-                        newAtlas[atlasKey] = atlasEntry
+                        this.atlas[atlasKey] = atlasEntry
                     else
                         this.logger.Warn().Err(eResult).Str("atlasKey", atlasKey).Str("entryType", atlasEntry._type).Msg("Atlas value was unexpected type. Ignoring")
                     end
@@ -113,9 +112,9 @@ local function NewIRIS(logger)
             err = "File does not exist"
         end
 
-        func.FunctionEnd("#newAtlas", newAtlas, "err", err)
+        func.FunctionEnd("err", err)
 
-        return newAtlas, err
+        return err
     end
 
     this.saveAtlas = function(fileLocation)
