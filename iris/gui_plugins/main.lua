@@ -100,7 +100,6 @@ local function Setup(gui)
             end
         end)
     this._tabIndexItems = this.addTab("Items", function(tabId) this.selectedTab = tabId; this._drawPage() end)
-    this._tabIndexInventory = this.addTab("Inv.", function(tabId) this.selectedTab = tabId; this._drawPage() end)
     this._tabIndexTasks = this.addTab("Tasks", function(tabId) this.selectedTab = tabId; this._drawPage() end)
 
     this.selectedTab = this._tabIndexItems
@@ -185,8 +184,9 @@ local function Setup(gui)
                             x <= xOffset + tabWidth).Msg("Mouse click")
                         if x >= xOffset and x <= xOffset + tabWidth then
                             tab.func(tabId)
+                            this._onSearchUnselect()
                             this._drawHeader();
-                            return
+                            break
                         end
                         xOffset = xOffset + tabWidth
                     end
@@ -195,6 +195,7 @@ local function Setup(gui)
                         this._drawHeader();
                         return
                     end
+                    --
                 end
                 this._onSearchUnselect()
                 this._drawHeader();
