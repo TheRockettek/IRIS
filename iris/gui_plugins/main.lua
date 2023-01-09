@@ -67,6 +67,7 @@ local function Setup(gui)
         end
 
         -- Reset terminal state.
+        term.setBackgroundColour(colours.black)
         term.clear()
         term.setCursorPos(1, 1)
     end
@@ -83,8 +84,6 @@ local function Setup(gui)
     this.searchQuery = ""
     this.displaySearchQuery = ""
 
-    this._tabItems = 1
-
     this.addTab = function(name, onClickFunc)
         table.insert(this.tabs, {
             name = name,
@@ -94,7 +93,12 @@ local function Setup(gui)
 
     -- Register tabs
 
-    this._tabIndexIRIS = this.addTab("IRIS", function(tabId) this.isDropdownVisible = not this.isDropdownVisible; if this.isDropdownVisible then this._drawDropdown() else this._drawPage() end end)
+    this._tabIndexIRIS = this.addTab("IRIS",
+        function(tabId) this.isDropdownVisible = not this.isDropdownVisible;
+            if this.isDropdownVisible then this._drawDropdown() else this
+                    ._drawPage()
+            end
+        end)
     this._tabIndexItems = this.addTab("Items", function(tabId) this.selectedTab = tabId; this._drawPage() end)
     this._tabIndexInventory = this.addTab("Inv.", function(tabId) this.selectedTab = tabId; this._drawPage() end)
     this._tabIndexTasks = this.addTab("Tasks", function(tabId) this.selectedTab = tabId; this._drawPage() end)
@@ -103,7 +107,7 @@ local function Setup(gui)
         local w, h = term.getSize()
 
         local displayText
-        for _, k in ipairs(this.tabs) do
+        for _, k in pairs(this.tabs) do
             displayText = displayText + " " .. k.name .. " "
         end
         if this.searchQuery == "" then
