@@ -125,7 +125,7 @@ local function Setup(gui)
     end
 
     this.OnGUIStart = function()
-        this.iris.logging.silent = true
+        this.iris.logger.silent = true
         term.clear()
 
         this._drawHeader()
