@@ -179,12 +179,12 @@ local function Setup(gui)
                 this.logger.Debug().Str("X", x).Str("Y", y).Msg("Mouse click")
                 if y >= 1 and y <= 3 then -- Heading click
                     local xOffset = 1
-                    for _, k in pairs(this.tabs) do
-                        local tabWidth = 2 + #k.name
+                    for tabId, tab in pairs(this.tabs) do
+                        local tabWidth = 2 + #tab.name
                         this.logger.Debug().Str("tw", tabWidth).Str("offset", xOffset).Str("xc", x >= xOffset).Str("xb",
                             x <= xOffset + tabWidth).Msg("Mouse click")
                         if x >= xOffset and x <= xOffset + tabWidth then
-                            k.func()
+                            tab.func(tabId)
                             this._drawHeader();
                             return
                         end
