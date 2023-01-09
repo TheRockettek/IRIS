@@ -117,9 +117,9 @@ local function Setup(gui)
 
         term.setCursorPos(1, 3)
         if hasTableHeaderBelow then
-            term.blit(("\143"):rep(w), this.theme.headerText.blit:rep(w), backgroundBlit)
+            term.blit(("\131"):rep(w), backgroundBlit, this.theme.tableHeaderBackground.blit:rep(w))
         else
-            term.blit(("\143"):rep(w), this.theme.headerText.blit:rep(w), backgroundBlit)
+            term.blit(("\131"):rep(w), backgroundBlit, this.theme.tableBodyBackground.blit:rep(w))
         end
     end
 
