@@ -5,6 +5,8 @@ local function NewTurtle()
 
         _nameLocal = nil,
 
+        reservedSlots = {},
+
         size = function() return 16 end,
         getItemDetail = function(slot) return turtle.getItemDetail(slot, true) end,
         getItemLimit = function(slot) return turtle.getItemCount(slot) + turtle.getItemSpace(slot) end,
@@ -53,6 +55,44 @@ local function NewTurtle()
     -- Pulls an item into a turtle. This cannot pull from one turtle to another.
     this.pullItems = function(fromName, fromSlot, limit, toSlot)
         return peripheral.call(fromName, "pushItems", this.getNameLocal(), fromSlot, limit, toSlot)
+    end
+
+    -- Reserved slot management
+    this.unreserveAllItems = function()
+        this.reservedSlot = {}
+    end
+
+    this.reserveItem = function(slotNumber, inventoryItem, count)
+        this.reservedSlot[tostring(slotNumber)] = { name = inventoryItem.hash(), count = count }
+    end
+
+    this.unreserveItem = function(slotNumber)
+        this.reservedSlot[tostring(slotNumber)] = nil
+    end
+
+    this.findPullable = function()
+        local candidates = {}
+
+        local items = this.list()
+        for slotNumber, item in pairs(items) do
+            local reservedSlot = this.reservedSlot[tostring(slotNumber)]
+            if not reservedSlot or reservedSlot.name ~= InventoryItem(this._getNameLocal(), slotNumber, item).hash() then
+                candidates[slotNumber] = InventoryItem(this._getNameLocal(), slotNumber, item)
+            elseif items.count > reservedSlot.count then
+                items.count = items.count - reservedSlot.count
+                candidates[slotNumber] = InventoryItem(this._getNameLocal(), slotNumber, item)
+            end
+        end
+
+        -- Remove reserved slots that do not have items in them
+        for slotNumber, _ in pairs(this.reservedSlot) do
+            local item = items[tonumber(slotNumber)]
+            if not item then
+                this.unreserveItem(slotNumber)
+            end
+        end
+
+        return candidates
     end
 
     return this
