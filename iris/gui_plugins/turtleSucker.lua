@@ -54,7 +54,7 @@ local function Setup(gui)
                         atlasEntry.maxCount, ignoreList)
 
 
-                    this.logger.Trace().Json("item", k).Json("candidates", candidates).Json("emptyspaces", emptyspaces)
+                    this.logger.Trace().Object("item", k).Json("candidates", candidates).Json("emptyspaces", emptyspaces)
                         .Send()
 
                     if k.count > 0 then
