@@ -32,10 +32,10 @@ local function Setup(gui)
         eventId = nil
     }
 
-    -- OnPluginLoad is called when IRIS GUI is starting to load your plugin.
-    -- This will be called after Setup, but before OnGUILoad.
-    this.OnPluginLoad = function()
-        this.logger.Info().Str("eventId", this.eventId).Msg("OnPluginLoad")
+    -- OnGUILoad is called when IRIS GUI is starting up.
+    -- This is also called when a user decides to enable your plugin manually.
+    this.OnGUILoad = function()
+        this.logger.Info().Str("eventId", this.eventId).Msg("OnGUILoad")
 
         if this.eventId == nil then
             this.eventId = gui.listenToEvent("turtle_inventory", function()
@@ -81,10 +81,13 @@ local function Setup(gui)
         end
     end
 
-    -- OnPluginUnload is called when a plugin is being unloaded. This
-    -- is called when a user decides to unload your plugin.
-    this.OnPluginUnload = function()
-        this.logger.Info().Str("eventId", this.eventId).Msg("OnPluginUnload")
+    -- OnGUIUnload is called when IRIS GUI is unloading the plugin.
+    -- This is not called when terminating, but will be called
+    -- if a user decides to turn off your plugin.
+    -- If you are overwriting an event, it is recommend you now
+    -- set the original event.
+    this.OnGUIUnload = function()
+        this.logger.Info().Str("eventId", this.eventId).Msg("OnGUIUnload")
 
         if this.eventId then
             gui.stopListeningToEvent("turtle_inventory", this.eventId)
