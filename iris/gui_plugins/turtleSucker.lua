@@ -46,16 +46,10 @@ local function Setup(gui)
 
                 local ignoreList = { this.iris.turtle.getNameLocal() }
 
-                this.logger.Trace().Json("pullable", pullable).Send()
-
                 for i, k in pairs(pullable) do
                     local atlasEntry = this.iris.getFromAtlas(k)
                     local candidates, _, emptyspaces, _ = this.iris.findSpot(k.hash(), k.count,
                         atlasEntry.maxCount, ignoreList)
-
-
-                    this.logger.Trace().Object("item", k).Json("candidates", candidates).Json("emptyspaces", emptyspaces)
-                        .Send()
 
                     if k.count > 0 then
                         for _, m in pairs(candidates) do
