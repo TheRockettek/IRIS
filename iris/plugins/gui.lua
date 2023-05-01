@@ -62,14 +62,20 @@ local function NewIRISGUI(iris)
             local event = this.registeredEvents["*"]
             if event then
                 for _, k in pairs(event) do
-                    pcall(k, eventType, table.unpack(pullEventRawData, 2))
+                    local success, err = pcall(k, eventType, table.unpack(pullEventRawData, 2))
+                    if not success then
+                        this.logger.Error().Str("eventType", "*").Err(err).Msg("Event asserted error")
+                    end
                 end
             end
 
             event = this.registeredEvents[eventType]
             if event then
                 for _, k in pairs(event) do
-                    pcall(k, table.unpack(pullEventRawData, 2))
+                    local success, err = pcall(k, table.unpack(pullEventRawData, 2))
+                    if not success then
+                        this.logger.Error().Str("eventType", eventType).Err(err).Msg("Event asserted error")
+                    end
                 end
             end
         end
@@ -158,7 +164,8 @@ function GUIPluginManager(gui)
     this._secureCall = function(plugin, funcName, func)
         local success, result = pcall(func)
         if not success then
-            gui.logger.Error().Str("plugin", plugin.pluginInfo.name).Err(result).Str("type", funcName).Msg("Plugin asserted error")
+            gui.logger.Error().Str("plugin", plugin.pluginInfo.name).Err(result).Str("type", funcName).Msg(
+                "Plugin asserted error")
         end
     end
 
