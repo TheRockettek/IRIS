@@ -53,7 +53,7 @@ local function Setup(gui)
 
                     if k.count > 0 then
                         for _, m in pairs(candidates) do
-                            this.iris.logger.Info().Int("current", m.count).Int("mov", k.count).Send()
+                            this.iris.logger.Info().Str("current", m.count).Str("mov", k.count).Send()
                             local transferred = this.iris.push(this.iris.turtle._type, i, m._inventoryName, m._slot,
                                 math.min(k.count, atlasEntry.maxCount - m.count))
                             k.count = k.count - transferred
