@@ -59,15 +59,15 @@ local function NewTurtle()
 
     -- Reserved slot management
     this.unreserveAllItems = function()
-        this.reservedSlot = {}
+        this.reservedSlots = {}
     end
 
     this.reserveItem = function(slotNumber, inventoryItem, count)
-        this.reservedSlot[tostring(slotNumber)] = { name = inventoryItem.hash(), count = count }
+        this.reservedSlots[tostring(slotNumber)] = { name = inventoryItem.hash(), count = count }
     end
 
     this.unreserveItem = function(slotNumber)
-        this.reservedSlot[tostring(slotNumber)] = nil
+        this.reservedSlots[tostring(slotNumber)] = nil
     end
 
     this.findPullable = function()
@@ -75,7 +75,7 @@ local function NewTurtle()
 
         local items = this.list()
         for slotNumber, item in pairs(items) do
-            local reservedSlot = this.reservedSlot[tostring(slotNumber)]
+            local reservedSlot = this.reservedSlots[tostring(slotNumber)]
             if not reservedSlot or reservedSlot.name ~= InventoryItem(this._getNameLocal(), slotNumber, item).hash() then
                 candidates[slotNumber] = InventoryItem(this._getNameLocal(), slotNumber, item)
             elseif items.count > reservedSlot.count then
@@ -85,7 +85,7 @@ local function NewTurtle()
         end
 
         -- Remove reserved slots that do not have items in them
-        for slotNumber, _ in pairs(this.reservedSlot) do
+        for slotNumber, _ in pairs(this.reservedSlots) do
             local item = items[tonumber(slotNumber)]
             if not item then
                 this.unreserveItem(slotNumber)
