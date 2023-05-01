@@ -40,7 +40,7 @@ local function NewTurtle()
         for i = 1, this.size(), 1 do
             local item = turtle.getItemDetail(i)
             if item then
-                table.insert(items, item)
+                items[i] = item
             end
         end
 
