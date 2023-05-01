@@ -1,13 +1,13 @@
-local turtle      = require "turtle"
-local utils       = require "utils"
-local inventory   = require "inventory"
-local irisPlugins = require "irisplugins"
+local turtle            = require "turtle"
+local utils             = require "utils"
+local inventory         = require "inventory"
+local irisPlugins       = require "irisplugins"
 
-local VERSION = "1.0.0"
+local VERSION           = "1.0.0"
 
 -- Atlas specific config
 local atlasFileLocation = "iris.atlas" -- Location of atlas on disk
-local atlasTTL = 86400000 -- Time (in milliseconds) that an item will persist on the atlas. This defaults to a day.
+local atlasTTL          = 86400000     -- Time (in milliseconds) that an item will persist on the atlas. This defaults to a day.
 
 local function NewIRIS(logger)
     utils.expectTable("NewIRIS", "logger", logger, "logger:logger")
@@ -100,7 +100,8 @@ local function NewIRIS(logger)
                     if eSuccess then
                         this.atlas[atlasKey] = atlasEntry
                     else
-                        this.logger.Warn().Err(eResult).Str("atlasKey", atlasKey).Str("entryType", atlasEntry._type).Msg("Atlas value was unexpected type. Ignoring")
+                        this.logger.Warn().Err(eResult).Str("atlasKey", atlasKey).Str("entryType", atlasEntry._type).Msg(
+                            "Atlas value was unexpected type. Ignoring")
                     end
                 end
             else
@@ -204,13 +205,16 @@ local function NewIRIS(logger)
         local items = this.items[inventoryItemHash]
         if items then
             for _, inventoryItem in pairs(items) do
-                if not flatPack.find(inventoryItem._inventoryName) then
-                    table.insert(candidates, inventoryItem)
+                local atlasEntry = this.getFromAtlas(inventoryItem)
 
-                    local atlasEntry = this.getFromAtlas(inventoryItem)
-                    itemsRemaining = itemsRemaining - (atlasEntry.maxCount - inventoryItem.count)
-                    if itemsRemaining <= 0 then
-                        break
+                if not flatPack.find(inventoryItem._inventoryName) then
+                    if inventoryItem.count < atlasEntry.maxCount then
+                        table.insert(candidates, inventoryItem)
+
+                        itemsRemaining = itemsRemaining - (atlasEntry.maxCount - inventoryItem.count)
+                        if itemsRemaining <= 0 then
+                            break
+                        end
                     end
                 end
             end
@@ -467,7 +471,7 @@ local function NewIRIS(logger)
             if currentSlot ~= nil then
                 assert(currentSlot.equals(inventoryItem),
                     ("Unexpected slot item. Current item in slot %d is %s, expected %s"):format(slot, currentSlot.hash()
-                        , inventoryItem.hash()))
+                    , inventoryItem.hash()))
 
                 local countChange = inventoryItem.count - currentSlot.count
                 if countChange ~= 0 then
@@ -487,7 +491,8 @@ local function NewIRIS(logger)
                     this.totalItemCount = this.totalItemCount + countChange
                 else
                     this.logger.Warn().Str("inventoryName", inventoryName).Str("slot", slot).Object("inventoryItem",
-                        inventoryItem.Table()).Object("currentSlot", currentSlot.Table()).Msg("Attempt to set an item which is already stored")
+                        inventoryItem.Table()).Object("currentSlot", currentSlot.Table()).Msg(
+                        "Attempt to set an item which is already stored")
                 end
             else
                 irisItems[inventoryItemHash] = inventoryItem
