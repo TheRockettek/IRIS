@@ -98,6 +98,10 @@ local function deepcopy(orig, copies)
     return copy
 end
 
+local function trim(s)
+    return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
 return {
     expect = expect,
     expectTable = expectTable,
@@ -110,5 +114,6 @@ return {
     flattenKeysForSearch = flattenKeysForSearch,
     flattenValuesForSearch = flattenValuesForSearch,
 
-    deepcopy = deepcopy
+    deepcopy = deepcopy,
+    trim = trim
 }

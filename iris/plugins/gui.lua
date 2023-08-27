@@ -65,6 +65,7 @@ local function NewIRISGUI(iris)
                     local success, err = pcall(k, eventType, table.unpack(pullEventRawData, 2))
                     if not success then
                         this.logger.Error().Str("eventType", "*").Err(err).Msg("Event asserted error")
+                        this._panic("*", result)
                     end
                 end
             end
@@ -75,6 +76,7 @@ local function NewIRISGUI(iris)
                     local success, err = pcall(k, table.unpack(pullEventRawData, 2))
                     if not success then
                         this.logger.Error().Str("eventType", eventType).Err(err).Msg("Event asserted error")
+                        this._panic(eventType, result)
                     end
                 end
             end
@@ -161,11 +163,26 @@ function GUIPluginManager(gui)
         end
     end
 
+    this._panic = function(name, err)
+        local w, h = term.getSize()
+
+        local window = window.create(term.current(), 1, 1, w-2, w-2, true)
+        
+        term.redirect(window)
+        print(name)
+        print(err)
+        os.pullEvent("mouse_click")
+        term.redirect(term.native())
+    
+        window.setVisible(false)
+    end
+
     this._secureCall = function(plugin, funcName, func)
         local success, result = pcall(func)
         if not success then
             gui.logger.Error().Str("plugin", plugin.pluginInfo.name).Err(result).Str("type", funcName).Msg(
                 "Plugin asserted error")
+            this._panic(funcName .. "@" .. plugin.pluginInfo.name, result)
         end
     end
 

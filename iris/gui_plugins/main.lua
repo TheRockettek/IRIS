@@ -1,3 +1,5 @@
+local utils = require "utils"
+
 local PluginInfo = {
     name = "gui.main",
     friendly = "IRIS GUI Main",
@@ -100,9 +102,13 @@ local function Setup(gui)
             end
         end)
     this._tabIndexItems = this.addTab("Items", function(tabId) this.selectedTab = tabId; this._drawPage() end)
-    this._tabIndexTasks = this.addTab("Tasks", function(tabId) this.selectedTab = tabId; this._drawPage() end)
 
     this.selectedTab = this._tabIndexItems
+
+    this._onSearchQuery = function()
+        this._drawHeader()
+        this._drawItemsPage()
+    end
 
     this._onSearchSelect = function()
         this.isSearching = true
@@ -156,6 +162,65 @@ local function Setup(gui)
     end
 
     this._drawPage = function()
+        if this.selectedTab == this._tabIndexItems then
+            this._drawItemsPage()
+        end
+    end
+
+    this._sortFunc = function(a, b)
+        return a.count > b.count
+    end
+
+    this._searchByQuery = function(query)
+        local summary = this.iris.itemSummary
+        if utils.trim(query) == "" then
+            return summary
+        else
+            local result = {}
+
+            for key, item in pairs(summary) do
+                if string.find(query, item.name) then
+                    result[key] = item
+                end
+            end
+
+            return result
+        end
+    end
+
+    this._drawItemsPage = function()
+        local w, h = term.getSize()
+
+        local displayedItems = {}
+        local longestLength = 0
+
+        local summaryDictionary = this._searchByQuery(this.searchQuery)
+        local summary = {}
+        for _, item in pairs(summaryDictionary) do
+            table.insert(summary, item)
+        end
+
+        table.sort(summary, this._sortFunc)
+
+        for i, item in ipairs(summary) do
+            table.insert(displayedItems, item)
+
+            local length = #(tostring(item.count))
+            if length > longestLength then
+                longestLength = length
+            end
+
+            if i > h-3 then
+                break
+            end
+        end
+
+        for i, k in pairs(displayedItems) do
+            term.setCursorPos(1, i+3)
+            term.write(k.name:sub(1, w-longestLength-2))
+            term.setCursorPos(w-#(tostring(k.count)), i+3)
+            term.write(k.count)
+        end
     end
 
     this._drawDropdown = function()
@@ -200,6 +265,25 @@ local function Setup(gui)
                 this._drawHeader();
             end
         end)
+
+        gui.listenToEvent("char", function(char)
+            if this.isSearching then
+                this.searchQuery = this.searchQuery .. char
+                this._onSearchQuery()
+            end
+        end)
+
+        gui.listenToEvent("key", function(code)
+            if code == 259 and #this.searchQuery > 0 then -- backspace
+                this.searchQuery = this.searchQuery:sub(1, #this.searchQuery-1)
+                this._onSearchQuery()
+            elseif code == 261 and #this.searchQuery > 0 then -- delete
+                this.searchQuery = ""
+                this._onSearchQuery()
+            end
+        end)
+
+        this._drawPage()
     end
 
     return this
