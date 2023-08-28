@@ -106,6 +106,14 @@ local function Setup(gui)
     this.selectedTab = this._tabIndexItems
 
     this._onSearchQuery = function()
+        local w, _ = term.getSize()
+        local wt = 0
+        for _, k in pairs(this.tabs) do
+            wt = wt + 2 + #k.name
+        end
+        this.displaySearchQuery = this.searchQuery:sub(math.max(#this.searchQuery-(w-2-wt), 0), #this.searchQuery)
+
+        term.clear()
         this._drawHeader()
         this._drawItemsPage()
     end
@@ -179,7 +187,7 @@ local function Setup(gui)
             local result = {}
 
             for key, item in pairs(summary) do
-                if string.find(query, item.name) then
+                if string.find(item.name, query) ~= nil then
                     result[key] = item
                 end
             end
