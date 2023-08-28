@@ -28,6 +28,18 @@ local function NewIRISGUI(iris)
 
     -- Plugin manager code is located at bottom, to ensure IRIS GUI functions are defined.
 
+    this._panic = function(name, err)
+        local w, h = term.getSize()
+
+        local window = window.create(term.current(), 1, 1, w-2, w-2, true)
+        
+        term.redirect(window)
+        os.pullEvent("mouse_click")
+        term.redirect(term.native())
+    
+        window.setVisible(false)
+    end
+
     this.listenToEvent = function(eventName, func)
         eventName = eventName:lower()
 
@@ -65,7 +77,7 @@ local function NewIRISGUI(iris)
                     local success, err = pcall(k, eventType, table.unpack(pullEventRawData, 2))
                     if not success then
                         this.logger.Error().Str("eventType", "*").Err(err).Msg("Event asserted error")
-                        this._panic("*", result)
+                        this._panic("*", err)
                     end
                 end
             end
@@ -76,7 +88,7 @@ local function NewIRISGUI(iris)
                     local success, err = pcall(k, table.unpack(pullEventRawData, 2))
                     if not success then
                         this.logger.Error().Str("eventType", eventType).Err(err).Msg("Event asserted error")
-                        this._panic(eventType, result)
+                        this._panic(eventType, err)
                     end
                 end
             end
@@ -161,20 +173,6 @@ function GUIPluginManager(gui)
 
             return false
         end
-    end
-
-    this._panic = function(name, err)
-        local w, h = term.getSize()
-
-        local window = window.create(term.current(), 1, 1, w-2, w-2, true)
-        
-        term.redirect(window)
-        print(name)
-        print(err)
-        os.pullEvent("mouse_click")
-        term.redirect(term.native())
-    
-        window.setVisible(false)
     end
 
     this._secureCall = function(plugin, funcName, func)

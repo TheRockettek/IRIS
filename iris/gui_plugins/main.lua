@@ -81,6 +81,10 @@ local function Setup(gui)
     this.isDropdownVisible = false
     this.isSearching = false
 
+    this.offset = 0
+    this.selectedItem = nil
+    this.totalResults = 0
+
     this.searchTextDefault = "Search..."
     this.searchQuery = ""
     this.displaySearchQuery = ""
@@ -105,7 +109,7 @@ local function Setup(gui)
 
     this.selectedTab = this._tabIndexItems
 
-    this._onSearchQuery = function()
+    this._onSearch = function()
         local w, _ = term.getSize()
         local wt = 0
         for _, k in pairs(this.tabs) do
@@ -181,6 +185,7 @@ local function Setup(gui)
 
     this._searchByQuery = function(query)
         local summary = this.iris.itemSummary
+
         if utils.trim(query) == "" then
             return summary
         else
@@ -223,12 +228,18 @@ local function Setup(gui)
             end
         end
 
+        for i=1, this.offset, 1 do
+            table.remove(displayedItems, 1)
+        end
+
         for i, k in pairs(displayedItems) do
             term.setCursorPos(1, i+3)
             term.write(k.name:sub(1, w-longestLength-2))
             term.setCursorPos(w-#(tostring(k.count)), i+3)
             term.write(k.count)
         end
+
+        this.totalResults = #displayedItems
     end
 
     this._drawDropdown = function()
@@ -274,20 +285,36 @@ local function Setup(gui)
             end
         end)
 
+        gui.listenToEvent("mouse_scroll", function(scroll)
+            if scroll == 1 then -- scroll down
+                local _, h = term.getSize()
+                local totalShown = h-3
+                if this.offset+totalShown-2 < this.totalResults then
+                    this.offset = this.offset + 1
+                    this._onSearch()
+                end
+            elseif scroll == -1 then -- scroll up
+                if this.offset > 0 then
+                    this.offset = this.offset - 1
+                    this._onSearch()
+                end
+            end
+        end)
+
         gui.listenToEvent("char", function(char)
             if this.isSearching then
                 this.searchQuery = this.searchQuery .. char
-                this._onSearchQuery()
+                this._onSearch()
             end
         end)
 
         gui.listenToEvent("key", function(code)
             if code == 259 and #this.searchQuery > 0 then -- backspace
                 this.searchQuery = this.searchQuery:sub(1, #this.searchQuery-1)
-                this._onSearchQuery()
+                this._onSearch()
             elseif code == 261 and #this.searchQuery > 0 then -- delete
                 this.searchQuery = ""
-                this._onSearchQuery()
+                this._onSearch()
             end
         end)
 
