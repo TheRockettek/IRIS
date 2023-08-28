@@ -84,6 +84,7 @@ local function Setup(gui)
     this.offset = 0
     this.selectedItem = nil
     this.totalResults = 0
+    this.shownResults = {}
 
     this.searchTextDefault = "Search..."
     this.searchQuery = ""
@@ -215,9 +216,9 @@ local function Setup(gui)
     this._drawItemsPage = function()
         local w, h = term.getSize()
 
-        local displayedItems = {}
+        local results = {}
         local longestLength = 0
-
+        
         local summaryDictionary = this._searchByQuery(this.searchQuery)
         local summary = {}
         for _, item in pairs(summaryDictionary) do
@@ -227,20 +228,23 @@ local function Setup(gui)
         table.sort(summary, this._sortFunc)
 
         for _, item in ipairs(summary) do
-            table.insert(displayedItems, item)
+            table.insert(results, item)
 
             local length = #(tostring(item.count))
             if length > longestLength then
                 longestLength = length
             end
         end
-        
-        this.totalResults = #displayedItems
+
+        this.totalResults = #results
+
         for i=1, this.offset, 1 do
-            table.remove(displayedItems, 1)
+            table.remove(results, 1)
         end
 
-        for i, k in pairs(displayedItems) do
+        this.shownResults = results
+
+        for i, k in pairs(this.shownResults) do
             term.setCursorPos(1, i+3)
             term.write(k.name:sub(1, w-longestLength-1))
             term.setCursorPos(w-#(tostring(k.count))+1, i+3)
@@ -268,6 +272,8 @@ local function Setup(gui)
         term.setCursorPos(1, 5)
 
         gui.listenToEvent("mouse_click", function(mouseType, x, y)
+            local _, h = term.getSize()
+
             if mouseType == 1 then
                 this.logger.Debug().Str("X", x).Str("Y", y).Msg("Mouse click")
                 if y >= 1 and y <= 3 then -- Heading click
@@ -288,7 +294,43 @@ local function Setup(gui)
                         this._drawHeader();
                         return
                     end
-                    --
+                else
+                    if y >= 4 and y <= h then
+                        local yOffset = y - 3
+                        local totalRows = #this.shownResults
+                        if yOffset <= totalRows then
+                            local selectedItem = this.shownResults[yOffset]
+                            local atlasEntry = this.iris.getFromAtlas(selectedItem)
+                            local pulledItems = math.min(selectedItem.count, atlasEntry.maxCount)
+                            local candidates, itemsRemaining = this.iris.findItem(selectedItem.hash(), pulledItems, { this.iris.turtle.getNameLocal() })
+
+                            local slotNumber = 0
+
+                            local turtleInventory = this.iris.turtle.list()
+                            for i=1, 16, 1 do
+                                if turtleInventory[i] == nil then
+                                    slotNumber = i
+                                    break
+                                end
+                            end
+
+                            if slotNumber == 0 then
+                                return
+                            end
+
+                            local total = 0
+
+                            for _, candidate in pairs(candidates) do
+                                local transferred = this.iris.push(candidate._inventoryName, candidate._slot, this.iris.turtle._type, slotNumber, candidate.count)
+                                total = total + transferred
+
+                                this.iris.turtle.reserveItem(slotNumber, selectedItem, total)
+                            end
+
+                            this._refreshDataSelect()
+                            this._drawHeader();
+                        end
+                    end
                 end
                 this._refreshDataUnselect()
                 this._drawHeader();
@@ -333,6 +375,11 @@ local function Setup(gui)
             elseif code == keys.home then
                 this._changeOffset(0)
             end
+        end)
+
+        gui.listenToEvent("iris_refresh", function()
+            this._refreshDataUnselect()
+            this._drawHeader();
         end)
 
         this._drawPage()

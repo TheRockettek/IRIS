@@ -70,6 +70,8 @@ local function Setup(gui)
                         end
                     end
                 end
+
+                os.queueEvent("iris_refresh")
             end)
 
             this.logger.Info().Str("event_id", this.eventId).Msg("Created turtle_inventory listener")
