@@ -109,7 +109,11 @@ local function Setup(gui)
 
     this.selectedTab = this._tabIndexItems
 
-    this._onSearch = function()
+    this._refreshData = function(resetOffset)
+        if resetOffset then
+            this.offset = 0
+        end
+
         local w, _ = term.getSize()
         local wt = 0
         for _, k in pairs(this.tabs) do
@@ -122,11 +126,18 @@ local function Setup(gui)
         this._drawItemsPage()
     end
 
-    this._onSearchSelect = function()
+    this._refreshDataSelect = function()
         this.isSearching = true
     end
 
-    this._onSearchUnselect = function()
+    this._changeOffset = function(newOffset)
+        if newOffset ~= this.offset then
+            this.offset = newOffset
+            this._refreshData()
+        end
+    end
+
+    this._refreshDataUnselect = function()
         this.isSearching = false
     end
 
@@ -215,31 +226,30 @@ local function Setup(gui)
 
         table.sort(summary, this._sortFunc)
 
-        for i, item in ipairs(summary) do
+        for _, item in ipairs(summary) do
             table.insert(displayedItems, item)
 
             local length = #(tostring(item.count))
             if length > longestLength then
                 longestLength = length
             end
-
-            if i > h-3 then
-                break
-            end
         end
-
+        
+        this.totalResults = #displayedItems
         for i=1, this.offset, 1 do
             table.remove(displayedItems, 1)
         end
 
         for i, k in pairs(displayedItems) do
             term.setCursorPos(1, i+3)
-            term.write(k.name:sub(1, w-longestLength-2))
-            term.setCursorPos(w-#(tostring(k.count)), i+3)
+            term.write(k.name:sub(1, w-longestLength-1))
+            term.setCursorPos(w-#(tostring(k.count))+1, i+3)
             term.write(k.count)
-        end
 
-        this.totalResults = #displayedItems
+            if i >= h-3 then
+                break
+            end
+        end
     end
 
     this._drawDropdown = function()
@@ -268,19 +278,19 @@ local function Setup(gui)
                             x <= xOffset + tabWidth).Msg("Mouse click")
                         if x >= xOffset and x <= xOffset + tabWidth then
                             tab.func(tabId)
-                            this._onSearchUnselect()
+                            this._refreshDataUnselect()
                             this._drawHeader();
                         end
                         xOffset = xOffset + tabWidth
                     end
                     if x > xOffset then
-                        this._onSearchSelect()
+                        this._refreshDataSelect()
                         this._drawHeader();
                         return
                     end
                     --
                 end
-                this._onSearchUnselect()
+                this._refreshDataUnselect()
                 this._drawHeader();
             end
         end)
@@ -289,14 +299,12 @@ local function Setup(gui)
             if scroll == 1 then -- scroll down
                 local _, h = term.getSize()
                 local totalShown = h-3
-                if this.offset+totalShown-2 < this.totalResults then
-                    this.offset = this.offset + 1
-                    this._onSearch()
+                if this.offset+totalShown-1 < this.totalResults then
+                    this._changeOffset(this.offset + 1)
                 end
             elseif scroll == -1 then -- scroll up
                 if this.offset > 0 then
-                    this.offset = this.offset - 1
-                    this._onSearch()
+                    this._changeOffset(this.offset - 1)
                 end
             end
         end)
@@ -304,17 +312,26 @@ local function Setup(gui)
         gui.listenToEvent("char", function(char)
             if this.isSearching then
                 this.searchQuery = this.searchQuery .. char
-                this._onSearch()
+                this._refreshData(true)
             end
         end)
 
         gui.listenToEvent("key", function(code)
-            if code == 259 and #this.searchQuery > 0 then -- backspace
+            local _, h = term.getSize()
+            local totalShown = h-3
+
+            if code == keys.backspace and #this.searchQuery > 0 then -- backspace
                 this.searchQuery = this.searchQuery:sub(1, #this.searchQuery-1)
-                this._onSearch()
-            elseif code == 261 and #this.searchQuery > 0 then -- delete
+                this._refreshData(true)
+            elseif code == keys.delete and #this.searchQuery > 0 then -- delete
                 this.searchQuery = ""
-                this._onSearch()
+                this._refreshData(true)
+            elseif code == keys.pageUp then -- page up
+                this._changeOffset(math.max(0, this.offset - totalShown))
+            elseif code == keys.pageDown then -- page down
+                this._changeOffset(math.min(this.totalResults - totalShown + 1, this.offset + totalShown))
+            elseif code == keys.home then
+                this._changeOffset(0)
             end
         end)
 
